@@ -11,9 +11,9 @@ BOARD_SIZE = 15
 BORDER_WIDTH = 1
 GRID_SIZE = 40
 
-background_img = pygame.image.load(os.path.join('assets', 'background.jpg'))
+background_img = pygame.image.load(os.path.join('../assets', 'background.jpg'))
 
-class RenjuBoard:
+class GomokuBoard:
     def __init__(self):
         self._board = [[EMPTY] * BOARD_SIZE for _ in range(BOARD_SIZE)]
 
@@ -34,7 +34,7 @@ class RenjuBoard:
 
         pygame.draw.rect(screen, BLACK_COLOR, [GRID_SIZE - BORDER_WIDTH, GRID_SIZE - BORDER_WIDTH, (BOARD_SIZE + 1) * GRID_SIZE, (BOARD_SIZE + 1) * GRID_SIZE], BORDER_WIDTH)
 
-        pygame.draw.circle(screen, BLACK_COLOR, [GRID_SIZE * 8, GRID_SIZE * 8], 5, 0)  # Central
+        pygame.draw.circle(screen, BLACK_COLOR, [GRID_SIZE * 8, GRID_SIZE * 8], 4, 0)  # Central
         for x in [GRID_SIZE * 4, GRID_SIZE * 12]:
             for y in [GRID_SIZE * 4, GRID_SIZE * 12]:
                 pygame.draw.circle(screen, BLACK_COLOR, [x, y], 3, 0)
@@ -53,14 +53,24 @@ def main():
     screen = pygame.display.set_mode(size)
     pygame.display.set_caption("Gomoku")
 
-    board = RenjuBoard()
+    board = GomokuBoard()
     clock = pygame.time.Clock()
+    is_black_turn = True
 
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                x, y = event.pos
+                row = round(y/GRID_SIZE) - 1
+                col = round(x/GRID_SIZE) - 1
+
+                if row >= 0 and col >= 0 and row < BOARD_SIZE and col < BOARD_SIZE:
+                    if board.move(row, col, is_black_turn):
+                        is_black_turn = not is_black_turn
 
         screen.fill([255, 255, 255])
         screen.blit(background_img, (0, 0))
