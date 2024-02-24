@@ -1,7 +1,7 @@
 import pygame
 import os
 import sys
-import cython
+import gomoku
 
 EMPTY = 0
 BLACK = 1
@@ -49,6 +49,10 @@ class GomokuBoard:
 
 
 def main():
+    p1 = gomoku.Player1()
+    p2 = gomoku.Player2()
+    game = gomoku.Gomoku(p1, p2)
+
     pygame.init()
     size = width, height = (BOARD_SIZE + 1) * GRID_SIZE, (BOARD_SIZE + 1) * GRID_SIZE
     screen = pygame.display.set_mode(size)
@@ -68,6 +72,20 @@ def main():
                 x, y = event.pos
                 row = round(y/GRID_SIZE) - 1
                 col = round(x/GRID_SIZE) - 1
+
+                if is_black_turn:
+                    p1.x = row
+                    p1.y = col
+                    p1.makeMoves(game)
+
+                else:
+                    p2.x = row
+                    p2.y = col
+                    p2.makeMoves(game)
+
+                if game.state == 1:  # We have a winner.
+                    running = False
+                    print(f"{game.current_player} wins! Exiting the game.")
 
                 if row >= 0 and col >= 0 and row < BOARD_SIZE and col < BOARD_SIZE:
                     if board.move(row, col, is_black_turn):

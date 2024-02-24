@@ -4,3 +4,4 @@ test/
 *cxx
 *.so
 gomoku.py
+__pycache__/

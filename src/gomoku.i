@@ -5,4 +5,4 @@
 %}
 
 %include "gomoku.h"
-%incldue "players.h"
+%include "players.h"
