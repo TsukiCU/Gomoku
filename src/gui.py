@@ -1,6 +1,7 @@
 import pygame
 import os
 import sys
+import cython
 
 EMPTY = 0
 BLACK = 1
