@@ -83,10 +83,6 @@ def main():
                     p2.y = col
                     p2.makeMoves(game)
 
-                if game.state == 1:  # We have a winner.
-                    running = False
-                    print(f"{game.current_player} wins! Exiting the game.")
-
                 if row >= 0 and col >= 0 and row < BOARD_SIZE and col < BOARD_SIZE:
                     if board.move(row, col, is_black_turn):
                         is_black_turn = not is_black_turn
@@ -95,6 +91,12 @@ def main():
         screen.blit(background_img, (0, 0))
         board.draw(screen)
         pygame.display.flip()
+
+        if game.state == 1:  # We have a winner.
+            running = False
+            winner = "BLACK" if game.current_player == 1 else "WHITE"
+            print(f"{winner} wins! Exiting the game.")
+            pygame.time.wait(2000)
 
         clock.tick(60)
 
