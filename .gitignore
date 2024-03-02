@@ -5,3 +5,4 @@ test/
 *.so
 gomoku.py
 __pycache__/
+.vscode/
