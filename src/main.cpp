@@ -1,5 +1,6 @@
 #include "gomoku.h"
 #include "players.h"
+#include "gomokuAI.h"
 #include <iostream>
 
 using namespace std;
@@ -16,7 +17,9 @@ int main()
 {
     Player1 black;
     Player2 white;
+
     Gomoku game(&black, &white);
+    GomokuAI ai_player(&game);
 
     for (int i=0; i<12; i++) {
         if (i%2 == 0) {
