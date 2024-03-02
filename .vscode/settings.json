@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.f": "fortran",
+        "iostream": "cpp",
+        "ostream": "cpp"
+    }
+}
