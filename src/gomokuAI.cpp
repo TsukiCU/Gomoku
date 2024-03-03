@@ -7,13 +7,13 @@ string GomokuAI::posToStr(int x, int y)
 
 void GomokuAI::initShapeMap()
 {
-    shape_map["RENJU"]              = shapesOnBoard{"RENJU",            10000, 0};
-    shape_map["OPEN_FOURS"]         = shapesOnBoard{"OPEN_FOURS",       9000,  0};
-    shape_map["HALF_OPEN_FOURS"]    = shapesOnBoard{"HALF_OPEN_FOURS",  5000,  0};
-    shape_map["OPEN_THREES"]        = shapesOnBoard{"OPEN_THREES",      3000,  0};
-    shape_map["HALF_OPEN_THREES"]   = shapesOnBoard{"HALF_OPEN_THREES", 1500,  0};
-    shape_map["OPEN_TWOS"]          = shapesOnBoard{"OPEN_TWOS",        1000,  0};
-    shape_map["HALF_OPEN_TWOS"]     = shapesOnBoard{"HALF_OPEN_TWOS",   500,   0};
+    shape_map["RENJU"]              = shapesOnBoard{"RENJU",            5000000, 0};
+    shape_map["OPEN_FOURS"]         = shapesOnBoard{"OPEN_FOURS",       100000,  0};
+    shape_map["HALF_OPEN_FOURS"]    = shapesOnBoard{"HALF_OPEN_FOURS",  10000,   0};
+    shape_map["OPEN_THREES"]        = shapesOnBoard{"OPEN_THREES",      8000,    0};
+    shape_map["HALF_OPEN_THREES"]   = shapesOnBoard{"HALF_OPEN_THREES", 7500,    0};
+    shape_map["OPEN_TWOS"]          = shapesOnBoard{"OPEN_TWOS",        50,      0};
+    shape_map["HALF_OPEN_TWOS"]     = shapesOnBoard{"HALF_OPEN_TWOS",   10,      0};
 }
 
 vector<pair<int, int>> GomokuAI::getLegalMoves()
@@ -36,12 +36,32 @@ vector<pair<int, int>> GomokuAI::getLegalMoves(int heuristic)
     return legalMoves;
 }
 
-int GomokuAI::evaluate(Gomoku &game)
+int GomokuAI::ratePos(int x, int y, int player)
 {
+    /* TODO: */
     return 0;
 }
 
-int GomokuAI::evaluate(Gomoku &game, int heuristic)
+int GomokuAI::evaluate(int player)
+{
+    /* TODO: May need rethinking */
+    int my_score = 0, op_score = 0;
+
+    for (int row = 0; row < GomokuAI::game->board_size; row++)
+        for (int col = 0; col < GomokuAI::game->board_size; col++) {
+            int state = GomokuAI::game->board[row][col];
+            if (!state || record.count(posToStr(row, col)))
+                continue;
+            else if (state == player)
+                my_score += ratePos(row, col, player);
+            else
+                op_score += ratePos(row, col, 3-player);
+        }
+
+    return my_score - op_score;
+}
+
+int GomokuAI::evaluate(int player, int heuristic)
 {
     /* TODO: Heuristic evaluation. */
     return 0;
@@ -67,16 +87,17 @@ int GomokuAI::undoMove(pair<int, int> move)
     return 0;
 }
 
-int GomokuAI::MinMax(Gomoku &game, int depth, int alpha, int beta, bool isMax)
+int GomokuAI::MinMax(int depth, int alpha, int beta, bool isMax)
 {
-    if (!depth || game.state == 1)
-        return evaluate(game);
+    if (!depth || GomokuAI::game->state == 1)
+    /* TODO: Note sure. */
+        return evaluate(GomokuAI::game->current_player);
 
     if (isMax) {
         int maxEval = INT_MIN;
         for (auto& move:getLegalMoves()) {
             makeMove(move);
-            int eval = MinMax(game, depth-1, alpha, beta, false);   // Now minimizing.
+            int eval = MinMax(depth-1, alpha, beta, false);   // Now minimizing.
             undoMove(move);
             maxEval = max(maxEval, eval);
             alpha = max(alpha, eval);   // Update alpha.
@@ -89,10 +110,10 @@ int GomokuAI::MinMax(Gomoku &game, int depth, int alpha, int beta, bool isMax)
         int minEval = INT_MAX;
         for (auto& move:getLegalMoves()) {
             makeMove(move);
-            int eval = MinMax(game, depth-1, alpha, beta, true);    // Now maximizing.
+            int eval = MinMax(depth-1, alpha, beta, true);    // Now maximizing.
             undoMove(move);
             minEval = min(minEval, eval);
-            beta = min(beta, eval);
+            beta = min(beta, eval);     // Update beta
             if (beta <= alpha)
                 break;      // Alpha prunning.
         }
