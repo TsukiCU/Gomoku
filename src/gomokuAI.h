@@ -24,7 +24,7 @@
 struct shapesOnBoard {
     string  name;                                           // Name of the shape.
     int     score;                                          // Corresponding score.
-    int     count;                                          // Times it appears the board.
+    int     count;                                          // Times it appears on the board.
 };
 
 class GomokuAI {
@@ -33,7 +33,8 @@ private:
 
 public:
     int  maxDepth;                                          // Max calculating depth per move.
-    unordered_map<string, shapesOnBoard> shape_map;         // Storing the shapes on board.
+    unordered_map<string, shapesOnBoard>    shape_map;      // Store the shapes on the board.
+    unordered_map<string, int>              record;         // Avoid repetitive counting when evaluating.
 
     GomokuAI(Gomoku *game) : game(game) {
         initShapeMap();
@@ -41,9 +42,10 @@ public:
 
     vector<pair<int, int>> getLegalMoves();                 // Get valid intersections on board.
     vector<pair<int, int>> getLegalMoves(int heuristic);    // Focus on the possible areas to reduce overhead.
-    void initShapeMap();                                    // Initializing shape maps.
-    int evaluate(Gomoku &game);                             // Evaluation of the current board.
-    int evaluate(Gomoku &game, int heuristic);              // Heuristic evaluation for optimizing.
+    void initShapeMap();                                    // Initialize shape maps.
+    string posToStr(int x, int y);                          // Turn a (x, y) pair to str for filling record.
+    int evaluate(Gomoku &game);                             // Evaluate the current board.
+    int evaluate(Gomoku &game, int heuristic);              // Heuristicly evaluate for optimizing.
     int makeMove(pair<int, int> move);                      // AI makes a move at (x, y).
     int undoMove(pair<int, int> move);                      // Undo a move at (x, y). Used when searching.
     int MinMax(Gomoku &game, int depth, int alpha,          // Alpha Beta Prunning.

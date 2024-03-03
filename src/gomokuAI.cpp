@@ -1,5 +1,10 @@
 #include "gomokuAI.h"
 
+string GomokuAI::posToStr(int x, int y)
+{
+    return to_string(x) + to_string(y);
+}
+
 void GomokuAI::initShapeMap()
 {
     shape_map["RENJU"]              = shapesOnBoard{"RENJU",            10000, 0};
