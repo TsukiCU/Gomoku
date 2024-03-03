@@ -22,11 +22,11 @@ public:
     Gomoku(Player* p1, Player* p2) : player1(p1), player2(p2), state(0), board_size(15),
     current_player(1), WIN_LENGTH(5), board(board_size, std::vector<int>(board_size, 0)) {}
 
-    bool on_board(int x, int y);             // Check if (x, y) is a valid position.
-    bool valid_move(int x, int y);           // Check if the move at (x, y) is valid.
-    int  make_move(int x, int y);            // Make a move at (x, y).
-    bool check_win(int x, int y);            // Check if the winning condition is satisfied.
-    void reset_game();                       // Reset
+    bool on_board(int x, int y);            // Check if (x, y) is a valid position.
+    bool valid_move(int x, int y);          // Check if the move at (x, y) is valid.
+    int  make_move(pair<int, int> move);    // Make a move at (x, y).
+    bool check_win(int x, int y);           // Check if the winning condition is satisfied.
+    void reset_game();                      // Reset
 
     template<int x_step, int y_step>
     bool check(int x, int y) {

@@ -16,7 +16,7 @@ public:
 
     virtual ~Player1() override {}
     int makeMoves(Gomoku& game) override {
-        if (!game.make_move(x, y)) {
+        if (!game.make_move(make_pair(x, y))) {
             // cout << "Player1 makes move at " << x << ", " << y << endl;
             return 0;
         }
@@ -32,7 +32,7 @@ public:
     int x, y;
     virtual ~Player2() override {}
     int makeMoves(Gomoku& game) {
-        if (!game.make_move(x, y)) {
+        if (!game.make_move(make_pair(x, y))) {
             // cout << "Player2 makes move at " << x << ", " << y << endl;
             return 0;
         }

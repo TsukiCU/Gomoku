@@ -12,8 +12,11 @@ bool Gomoku::valid_move(int x, int y)
     return on_board(x, y) && board[x][y] == 0;
 }
 
-int Gomoku::make_move(int x, int y)
+int Gomoku::make_move(pair<int, int> move)
 {
+    int x = move.first;
+    int y = move.second;
+
     if (!valid_move(x, y))  return 1;
     board[x][y] = current_player;
     if (check_win(x, y)) {
