@@ -6,11 +6,6 @@
 #include <unordered_map>
 
 
-enum states {
-
-};
-
-
 /*
  * TODO: Maybe need to consider more. (Nah dont think so.)
  *
@@ -31,44 +26,56 @@ enum states {
 
 // http://gomokuworld.com/gomoku/1
 struct shapesLookup {
-    const int RENJU_SCORE   = 100000;
-    const int OFOUR_SCORE   = 50000;
-    const int HFOUR_SCORE   = 5000;
-    const int OTHREE_SCORE  = 3000;
-    const int HTHREE_SCORE  = 500;
-    const int OTWO_SCORE    = 50;
-    const int HTWO_SCORE    = 10;
+    int RENJU_SCORE, OFOUR_SCORE, HFOUR_SCORE,
+    OTHREE_SCORE, HTHREE_SCORE, OTWO_SCORE, HTWO_SCORE;
 
-    const string RENJU      = "11111";
-    const string OFOUR      = "#1111#";
-    const string HFOUR_0    = "01111#";
-    const string HFOUR_1    = "#11110";
-    const string HFOUR_2    = "111#1";
-    const string HFOUR_3    = "1#111";
-    const string HFOUR_4    = "11#11";
-    const string OTHREE_0   = "#111#";
-    const string OTHREE_1   = "1#11#";
-    const string OTHREE_2   = "11#1#";
-    const string HTHREE_0   = "##1110";
-    const string HTHREE_1   = "##11#1";
-    const string HTHREE_2   = "##1110";
-    const string HTHREE_3   = "0111##";
-    const string HTHREE_4   = "1##11";
-    const string HTHREE_5   = "11##1";
-    const string HTHREE_6   = "1#1#1";
-    const string HTHREE_7   = "0#111#0";
-    const string HTHREE_8   = "#1#110";
-    const string HTHREE_9   = "01#11#";
-    const string OTWOS_0    = "##11##";
-    const string OTWOS_1    = "#1#1#";
-    const string OTWOS_2    = "1##1";
-    const string HTWOS_0    = "###110";
-    const string HTWOS_1    = "1###1";
-    const string HTWOS_2    = "011###";
-    const string HTWOS_3    = "##1#10";
-    const string HTWOS_4    = "#1##10";
-    const string HTWOS_5    = "01##1#";
-    const string HTWOS_6    = "01#1##";
+    string RENJU, OFOUR, HFOUR_0, HFOUR_1, HFOUR_2,
+    HFOUR_3, HFOUR_4, OTHREE_0, OTHREE_1, OTHREE_2,
+    HTHREE_0, HTHREE_1, HTHREE_2, HTHREE_3, HTHREE_4,
+    HTHREE_5, HTHREE_6, HTHREE_7, HTHREE_8, HTHREE_9,
+    OTWOS_0, OTWOS_1, OTWOS_2, HTWOS_0, HTWOS_1, HTWOS_2,
+    HTWOS_3, HTWOS_4, HTWOS_5, HTWOS_6;
+
+    shapesLookup() :
+        RENJU_SCORE(100000),
+        OFOUR_SCORE(50000),
+        HFOUR_SCORE(5000),
+        OTHREE_SCORE(3000),
+        HTHREE_SCORE(500),
+        OTWO_SCORE(50),
+        HTWO_SCORE(10),
+
+        RENJU("11111"),
+        OFOUR("#1111#"),
+        HFOUR_0("01111#"),
+        HFOUR_1("#11110"),
+        HFOUR_2("111#1"),
+        HFOUR_3("1#111"),
+        HFOUR_4("11#11"),
+        OTHREE_0("#111#"),
+        OTHREE_1("1#11#"),
+        OTHREE_2("11#1#"),
+        HTHREE_0("##1110"),
+        HTHREE_1("##11#1"),
+        HTHREE_2("##1110"),
+        HTHREE_3("0111##"),
+        HTHREE_4("1##11"),
+        HTHREE_5("11##1"),
+        HTHREE_6("1#1#1"),
+        HTHREE_7("0#111#0"),
+        HTHREE_8("#1#110"),
+        HTHREE_9("01#11#"),
+        OTWOS_0("##11##"),
+        OTWOS_1("#1#1#"),
+        OTWOS_2("1##1"),
+        HTWOS_0("###110"),
+        HTWOS_1("1###1"),
+        HTWOS_2("011###"),
+        HTWOS_3("##1#10"),
+        HTWOS_4("#1##10"),
+        HTWOS_5("01##1#"),
+        HTWOS_6("01#1##")
+    {}
 };
 
 
@@ -78,17 +85,17 @@ public:
     shapesLookup shapeTable;                                    // AI knows all the valid shapes for evaluating.
     int  maxDepth;                                              // Max calculating depth per move.
 
-    GomokuAI(Gomoku *game) : game(game) {}
+    GomokuAI(Gomoku *game) : game(game), maxDepth(3) {}
 
     vector<pair<int, int>> getLegalMoves();                     // Get valid intersections on board.
     vector<pair<int, int>> getLegalMoves(int heuristic);        // Focus on the possible areas to reduce overhead.
-    void initShapeMap();                                        // Initialize shape maps.
     string posToStr(int x, int y);                              // Turn a (x, y) pair to str for filling record.
     int evaluate(int player);                                   // Evaluate the current board.
     int evaluate(int player, int heuristic);                    // Heuristicly evaluate for optimizing.
     int ratePos(int x, int y, int player);                      // Rate the value of one stone in a given position.
     int makeMove(pair<int, int> move);                          // AI makes a move at (x, y).
     int undoMove(pair<int, int> move);                          // Undo a move at (x, y). Used when searching.
+    pair<int, int> findBestMove();                              // Find the best move, return a (x, y) pair.
     int MinMax(int depth, int alpha, int beta, bool isMax);     // Alpha Beta Prunning.
     int getScorefromTable(string s);                            // Look up shapesLookup table to get score.
 

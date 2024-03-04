@@ -3,6 +3,7 @@ import os
 import sys
 import gomoku
 
+
 EMPTY = 0
 BLACK = 1
 WHITE = 2
@@ -52,6 +53,7 @@ def main():
     p1 = gomoku.Player1()
     p2 = gomoku.Player2()
     game = gomoku.Gomoku(p1, p2)
+    ai = gomoku.GomokuAI(game)
 
     pygame.init()
     size = width, height = (BOARD_SIZE + 1) * GRID_SIZE, (BOARD_SIZE + 1) * GRID_SIZE
@@ -79,9 +81,9 @@ def main():
                     p1.makeMoves(game)
 
                 else:
-                    p2.x = row
-                    p2.y = col
-                    p2.makeMoves(game)
+                    clock.tick(60)
+                    best_move = ai.findBestMove()
+                    ai.makeMoves(best_move)
 
                 if row >= 0 and col >= 0 and row < BOARD_SIZE and col < BOARD_SIZE:
                     if board.move(row, col, is_black_turn):

@@ -6,7 +6,7 @@ class Gomoku;
 
 class Player {
 public:
-    virtual int makeMoves(Gomoku& game) = 0;
+    virtual int makeMove(Gomoku& game) = 0;
     virtual ~Player() {}
 };
 
@@ -15,7 +15,7 @@ public:
     int x, y;  // (x, y) is the position of the current move.
 
     virtual ~Player1() override {}
-    int makeMoves(Gomoku& game) override {
+    int makeMove(Gomoku& game) override {
         if (!game.make_move(make_pair(x, y))) {
             // cout << "Player1 makes move at " << x << ", " << y << endl;
             return 0;
@@ -31,7 +31,7 @@ class Player2 : public Player {
 public:
     int x, y;
     virtual ~Player2() override {}
-    int makeMoves(Gomoku& game) {
+    int makeMove(Gomoku& game) {
         if (!game.make_move(make_pair(x, y))) {
             // cout << "Player2 makes move at " << x << ", " << y << endl;
             return 0;

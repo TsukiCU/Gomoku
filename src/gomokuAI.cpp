@@ -49,7 +49,7 @@ int GomokuAI::getScorefromTable(string s)
     if (s.find(shapeTable.HTHREE_0) != string::npos ||
         s.find(shapeTable.HTHREE_1) != string::npos ||
         s.find(shapeTable.HTHREE_2) != string::npos)
-        {score += shapeTable.RENJU_SCORE;}
+        {score += shapeTable.OTHREE_SCORE;}
 
     // HALF_OPEN_THREES
     if (s.find(shapeTable.HTHREE_0) != string::npos||
@@ -147,6 +147,24 @@ int GomokuAI::undoMove(pair<int, int> move)
     game->board[x][y] = 0;
 
     return 0;
+}
+
+pair<int, int> GomokuAI::findBestMove()
+{
+    pair<int, int> bestMove = {-1, -1};
+    int bestScore = INT_MIN;
+
+    for(auto& move:getLegalMoves()) {
+        makeMove(move);
+        int score = MinMax(maxDepth, INT_MAX, INT_MIN, true);
+        undoMove(move);
+        if (score > bestScore) {
+            bestScore = score;
+            bestMove = move;
+        }
+    }
+
+    return bestMove;
 }
 
 int GomokuAI::MinMax(int depth, int alpha, int beta, bool isMax)

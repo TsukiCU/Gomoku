@@ -26,7 +26,7 @@ int main()
             // Black's turn
             black.x = records[i][0];
             black.y = records[i][1];
-            black.makeMoves(game);
+            black.makeMove(game);
 
             if (game.state == 1) {
                 cout << "Black wins!" << endl;
@@ -38,7 +38,7 @@ int main()
             // White's turn
             white.x = records[i][0];
             white.y = records[i][1];
-            white.makeMoves(game);
+            white.makeMove(game);
 
             if (game.state == 1) {
                 cout << "White wins!" << endl;
