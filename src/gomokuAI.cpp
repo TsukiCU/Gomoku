@@ -5,17 +5,6 @@ string GomokuAI::posToStr(int x, int y)
     return to_string(x) + to_string(y);
 }
 
-void GomokuAI::initShapeMap()
-{
-    shape_map["RENJU"]              = shapesOnBoard{"RENJU",            5000000, 0};
-    shape_map["OPEN_FOURS"]         = shapesOnBoard{"OPEN_FOURS",       100000,  0};
-    shape_map["HALF_OPEN_FOURS"]    = shapesOnBoard{"HALF_OPEN_FOURS",  10000,   0};
-    shape_map["OPEN_THREES"]        = shapesOnBoard{"OPEN_THREES",      8000,    0};
-    shape_map["HALF_OPEN_THREES"]   = shapesOnBoard{"HALF_OPEN_THREES", 7500,    0};
-    shape_map["OPEN_TWOS"]          = shapesOnBoard{"OPEN_TWOS",        50,      0};
-    shape_map["HALF_OPEN_TWOS"]     = shapesOnBoard{"HALF_OPEN_TWOS",   10,      0};
-}
-
 vector<pair<int, int>> GomokuAI::getLegalMoves()
 {
     vector<pair<int, int>> legalMoves;
@@ -36,10 +25,83 @@ vector<pair<int, int>> GomokuAI::getLegalMoves(int heuristic)
     return legalMoves;
 }
 
+int GomokuAI::getScorefromTable(string s)
+{
+    int score = 0;
+
+    // RENJU
+    if (s.find(shapeTable.RENJU) != string::npos)
+        score += shapeTable.RENJU_SCORE;
+
+    // OPEN_FOURS
+    if (s.find(shapeTable.OFOUR) != string::npos)
+        score += shapeTable.OFOUR_SCORE;
+
+    // HALF_OPEN_FOURS
+    if (s.find(shapeTable.HFOUR_0) != string::npos ||
+        s.find(shapeTable.HFOUR_1) != string::npos ||
+        s.find(shapeTable.HFOUR_2) != string::npos ||
+        s.find(shapeTable.HFOUR_3) != string::npos ||
+        s.find(shapeTable.HFOUR_4) != string::npos)
+        {score += shapeTable.HFOUR_SCORE;}
+
+    // OPEN_THREES
+    if (s.find(shapeTable.HTHREE_0) != string::npos ||
+        s.find(shapeTable.HTHREE_1) != string::npos ||
+        s.find(shapeTable.HTHREE_2) != string::npos)
+        {score += shapeTable.RENJU_SCORE;}
+
+    // HALF_OPEN_THREES
+    if (s.find(shapeTable.HTHREE_0) != string::npos||
+        s.find(shapeTable.HTHREE_1) != string::npos||
+        s.find(shapeTable.HTHREE_2) != string::npos||
+        s.find(shapeTable.HTHREE_3) != string::npos||
+        s.find(shapeTable.HTHREE_4) != string::npos||
+        s.find(shapeTable.HTHREE_5) != string::npos||
+        s.find(shapeTable.HTHREE_6) != string::npos||
+        s.find(shapeTable.HTHREE_7) != string::npos||
+        s.find(shapeTable.HTHREE_8) != string::npos||
+        s.find(shapeTable.HTHREE_9) != string::npos)
+        {score += shapeTable.HTHREE_SCORE;}
+
+
+    // OPEN_TWOS
+    if (s.find(shapeTable.OTWOS_0) != string::npos ||
+        s.find(shapeTable.OTWOS_1) != string::npos ||
+        s.find(shapeTable.OTWOS_2) != string::npos)
+        {score += shapeTable.OTWO_SCORE;}
+
+    // HALF_OPEN_TWOS
+    if (s.find(shapeTable.HTWOS_0) != string::npos ||
+        s.find(shapeTable.HTWOS_1) != string::npos ||
+        s.find(shapeTable.HTWOS_2) != string::npos ||
+        s.find(shapeTable.HTWOS_3) != string::npos ||
+        s.find(shapeTable.HTWOS_4) != string::npos ||
+        s.find(shapeTable.HTWOS_5) != string::npos ||
+        s.find(shapeTable.HTWOS_6) != string::npos)
+        {score += shapeTable.HTWO_SCORE;}
+
+    return score;
+}
+
 int GomokuAI::ratePos(int x, int y, int player)
 {
-    /* TODO: */
-    return 0;
+    // int dirs[4][4] = {{1, 0}, {0, 1}, {1, 1}, {1, -1}};
+    /* WTF? I can't even do this using loops? What kind of language is this? */
+
+    int score = 0;
+    string s;
+
+    s = getStrFromPos<1, 0>(x, y, player);
+    score += getScorefromTable(s);
+    s = getStrFromPos<0, 1>(x, y, player);
+    score += getScorefromTable(s);
+    s = getStrFromPos<1, 1>(x, y, player);
+    score += getScorefromTable(s);
+    s = getStrFromPos<1, -1>(x, y, player);
+    score += getScorefromTable(s);
+
+    return score;
 }
 
 int GomokuAI::evaluate(int player)
@@ -50,7 +112,7 @@ int GomokuAI::evaluate(int player)
     for (int row = 0; row < GomokuAI::game->board_size; row++)
         for (int col = 0; col < GomokuAI::game->board_size; col++) {
             int state = GomokuAI::game->board[row][col];
-            if (!state || record.count(posToStr(row, col)))
+            if (!state)
                 continue;
             else if (state == player)
                 my_score += ratePos(row, col, player);
