@@ -108,10 +108,11 @@ int GomokuAI::evaluate(int player)
 {
     /* TODO: May need rethinking */
     int my_score = 0, op_score = 0;
+    int state = 0;
 
-    for (int row = 0; row < GomokuAI::game->board_size; row++)
-        for (int col = 0; col < GomokuAI::game->board_size; col++) {
-            int state = GomokuAI::game->board[row][col];
+    for (int row = 0; row < game->board_size; row++)
+        for (int col = 0; col < game->board_size; col++) {
+            state = game->board[row][col];
             if (!state)
                 continue;
             else if (state == player)
@@ -146,6 +147,9 @@ int GomokuAI::undoMove(pair<int, int> move)
     int x = move.first, y = move.second;
     game->board[x][y] = 0;
 
+    if (game->state == 1)
+        game->state = 0;
+
     return 0;
 }
 
@@ -169,9 +173,9 @@ pair<int, int> GomokuAI::findBestMove()
 
 int GomokuAI::MinMax(int depth, int alpha, int beta, bool isMax)
 {
-    if (!depth || GomokuAI::game->state == 1)
+    if (!depth || game->state == 1)
     /* TODO: Note sure. */
-        return evaluate(GomokuAI::game->current_player);
+        return evaluate(game->current_player);
 
     if (isMax) {
         int maxEval = INT_MIN;

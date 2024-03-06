@@ -129,12 +129,11 @@ public:
                     ret += '1';
                 else
                     ret += '0';
-                cur_r += x_dir;
-                cur_c += y_dir;
             }
-            else {
+            else
                 ret += "I";    // Invalid place.
-            }
+            cur_r += x_dir;
+            cur_c += y_dir;
         }
 
         return ret;
