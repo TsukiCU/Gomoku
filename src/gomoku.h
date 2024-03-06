@@ -24,7 +24,7 @@ public:
     int  make_move(pair<int, int> move);    // Make a move at (x, y).    vector<pair<int, int>> getLegalMoves();                     // Get valid intersections on board.
 
     bool check_win(int x, int y);           // Check if the winning condition is satisfied.
-    void reset_game();                      // Reset
+    void switchPlayers();                   // Switch Black and white.
 
     template<int x_step, int y_step>
     bool check(int x, int y) {

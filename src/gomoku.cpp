@@ -23,7 +23,7 @@ int Gomoku::make_move(pair<int, int> move)
         state = 1;
         return 0;
     }
-    current_player = 3 - current_player; // switch players.
+    switchPlayers();
     return 0;
 }
 
@@ -48,8 +48,7 @@ bool Gomoku::check_win(int x, int y)
     return false;
 }
 
-void Gomoku::reset_game()
+void Gomoku::switchPlayers()
 {
-    board.assign(board_size, std::vector<int>(board_size, 0));
-    current_player = 1;
+    current_player = 3 - current_player;
 }
