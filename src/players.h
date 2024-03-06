@@ -2,45 +2,15 @@
 #define _PLAYERS_HH
 #include "gomoku.h"
 
-class Gomoku;
-
 class Player {
-public:
-    virtual int makeMove(Gomoku& game) = 0;
-    virtual ~Player() {}
+    public:
+    Gomoku *game;                   // Player holds reference to the game.
+    int pid;                        // Player ID :)
+
+    Player(Gomoku *game, int id) : game(game), pid(id) {}     // [cur player] is pid == 1? Black : White.
+
+    int makeMove(pair<int, int>);   // Player makes a move at (x, y).
 };
 
-class Player1 : public Player {
-public:
-    int x, y;  // (x, y) is the position of the current move.
-
-    virtual ~Player1() override {}
-    int makeMove(Gomoku& game) override {
-        if (!game.make_move(make_pair(x, y))) {
-            // cout << "Player1 makes move at " << x << ", " << y << endl;
-            return 0;
-        }
-        else {
-            cout << "Invalid move at " << x << ", " << y << endl;
-            return 1;
-        }
-    }
-};
-
-class Player2 : public Player {
-public:
-    int x, y;
-    virtual ~Player2() override {}
-    int makeMove(Gomoku& game) {
-        if (!game.make_move(make_pair(x, y))) {
-            // cout << "Player2 makes move at " << x << ", " << y << endl;
-            return 0;
-        }
-        else {
-            cout << "Invalid move at " << x << ", " << y << endl;
-            return 1;
-        }
-    }
-};
 
 #endif

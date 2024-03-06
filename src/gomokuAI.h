@@ -26,15 +26,22 @@
 
 // http://gomokuworld.com/gomoku/1
 struct shapesLookup {
-    int RENJU_SCORE, OFOUR_SCORE, HFOUR_SCORE,
-    OTHREE_SCORE, HTHREE_SCORE, OTWO_SCORE, HTWO_SCORE;
+    int RENJU_SCORE,
+        OFOUR_SCORE,
+        HFOUR_SCORE,
+        OTHREE_SCORE,
+        HTHREE_SCORE,
+        OTWO_SCORE,
+        HTWO_SCORE;
 
-    string RENJU, OFOUR, HFOUR_0, HFOUR_1, HFOUR_2,
-    HFOUR_3, HFOUR_4, OTHREE_0, OTHREE_1, OTHREE_2,
-    HTHREE_0, HTHREE_1, HTHREE_2, HTHREE_3, HTHREE_4,
-    HTHREE_5, HTHREE_6, HTHREE_7, HTHREE_8, HTHREE_9,
-    OTWOS_0, OTWOS_1, OTWOS_2, HTWOS_0, HTWOS_1, HTWOS_2,
-    HTWOS_3, HTWOS_4, HTWOS_5, HTWOS_6;
+    string  RENJU,
+            OFOUR,
+            HFOUR_0, HFOUR_1, HFOUR_2, HFOUR_3, HFOUR_4,
+            OTHREE_0, OTHREE_1, OTHREE_2,
+            HTHREE_0, HTHREE_1, HTHREE_2, HTHREE_3, HTHREE_4,
+            HTHREE_5, HTHREE_6, HTHREE_7, HTHREE_8, HTHREE_9,
+            OTWOS_0, OTWOS_1, OTWOS_2,
+            HTWOS_0, HTWOS_1, HTWOS_2, HTWOS_3, HTWOS_4, HTWOS_5, HTWOS_6;
 
     shapesLookup() :
         RENJU_SCORE(100000),
@@ -112,9 +119,10 @@ public:
         int r_begin = x - x_dir*4, c_begin = y - y_dir*4;
         int r_end   = x + x_dir*4, c_end   = y + y_dir*4;
         int cur_r = r_begin, cur_c = c_begin;
+        //cout << "begin: " << r_begin <<" end: "<<r_end<<" cbegin: "<<c_begin<<" cend: "<<c_end<< endl;
 
-        while (cur_r != r_end || cur_c != c_end) {
-            if (game->valid_move(cur_r, cur_c)) {
+        while (cur_r <= r_end && cur_c <= c_end) {
+            if (game->on_board(cur_r, cur_c)) {
                 if (game->board[cur_r][cur_c] == 0)
                     ret += '#';
                 else if (game->board[cur_r][cur_c] == player)
@@ -124,8 +132,9 @@ public:
                 cur_r += x_dir;
                 cur_c += y_dir;
             }
-            else
+            else {
                 ret += "I";    // Invalid place.
+            }
         }
 
         return ret;

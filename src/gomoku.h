@@ -8,9 +8,6 @@ class Player;
 using namespace std;
 
 class Gomoku {
-private:
-    Player *player1;
-    Player *player2;
 
 public:
     int state;                              // 0 for ongoing, 1 for we have a winner already.
@@ -19,12 +16,13 @@ public:
     const int WIN_LENGTH;                   // Ending condition: Form an unbroken line of five stones.
     std::vector<std::vector<int>> board;    // The board.
 
-    Gomoku(Player* p1, Player* p2) : player1(p1), player2(p2), state(0), board_size(15),
+    Gomoku() : state(0), board_size(15),
     current_player(1), WIN_LENGTH(5), board(board_size, std::vector<int>(board_size, 0)) {}
 
     bool on_board(int x, int y);            // Check if (x, y) is a valid position.
     bool valid_move(int x, int y);          // Check if the move at (x, y) is valid.
-    int  make_move(pair<int, int> move);    // Make a move at (x, y).
+    int  make_move(pair<int, int> move);    // Make a move at (x, y).    vector<pair<int, int>> getLegalMoves();                     // Get valid intersections on board.
+
     bool check_win(int x, int y);           // Check if the winning condition is satisfied.
     void reset_game();                      // Reset
 

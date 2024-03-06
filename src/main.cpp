@@ -15,18 +15,14 @@ vector<vector<int>> records = {
 
 int main()
 {
-    Player1 black;
-    Player2 white;
-
-    Gomoku game(&black, &white);
-    GomokuAI ai_player(&game);
+    Gomoku game;
+    Player black(&game, 1);
+    Player white(&game, 2);
 
     for (int i=0; i<12; i++) {
         if (i%2 == 0) {
             // Black's turn
-            black.x = records[i][0];
-            black.y = records[i][1];
-            black.makeMove(game);
+            black.makeMove(make_pair(records[i][0], records[i][1]));
 
             if (game.state == 1) {
                 cout << "Black wins!" << endl;
@@ -36,9 +32,7 @@ int main()
 
         else {
             // White's turn
-            white.x = records[i][0];
-            white.y = records[i][1];
-            white.makeMove(game);
+            white.makeMove(make_pair(records[i][0], records[i][1]));
 
             if (game.state == 1) {
                 cout << "White wins!" << endl;

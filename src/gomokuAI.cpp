@@ -132,11 +132,11 @@ int GomokuAI::evaluate(int player, int heuristic)
 int GomokuAI::makeMove(pair<int, int> move)
 {
     if (!game->make_move(move)) {
-        cout << "AI makes move at " << move.first << ", " << move.second << endl;
+        // cout << "AI makes move at " << move.first << ", " << move.second << endl;
         return 0;
     }
     else {
-        cout << "Invalid move at " << move.first << ", " << move.second << endl;
+        // cout << "Invalid move at " << move.first << ", " << move.second << endl;
         return 1;
     }
 }
