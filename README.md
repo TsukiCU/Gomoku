@@ -1,6 +1,10 @@
 # Gomoku
 This is the project for CSEE 4840, Spring 2024.
 
+## Note :
+
+**The gui.py is broken. No GUI for now. And since we are probably not able to use pygame so meh, forget about it.**
+
 ## How to run
 
 tested on Linux, x86.
