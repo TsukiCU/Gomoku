@@ -1,0 +1,9 @@
+test/
+*.o
+*.exe
+*cxx
+*.so
+gomoku.py
+__pycache__/
+.vscode/
+gomoku
