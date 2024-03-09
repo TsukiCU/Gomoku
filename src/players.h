@@ -7,7 +7,7 @@ class Player {
     Gomoku *game;                   // Player holds reference to the game.
     int pid;                        // Player ID :)
 
-    Player(Gomoku *game, int id) : game(game), pid(id) {}     // [cur player] is pid == 1? Black : White.
+    Player(Gomoku *game, int id) : game(game), pid(id) {}     // the current player is pid == 1? Black : White.
 
     int makeMove(pair<int, int>);   // Player makes a move at (x, y).
 };

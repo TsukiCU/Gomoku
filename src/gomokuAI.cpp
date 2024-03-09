@@ -90,6 +90,7 @@ int GomokuAI::ratePos(int x, int y, int player)
     /* WTF? I can't even do this using loops? What kind of language is this? */
 
     int score = 0;
+    int weight = posWeights[x][y];
     string s;
 
     s = getStrFromPos<1, 0>(x, y, player);
@@ -101,7 +102,7 @@ int GomokuAI::ratePos(int x, int y, int player)
     s = getStrFromPos<1, -1>(x, y, player);
     score += getScorefromTable(s);
 
-    return score;
+    return weight * score;
 }
 
 int GomokuAI::evaluate(int player)

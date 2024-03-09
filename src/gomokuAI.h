@@ -6,6 +6,27 @@
 #include <unordered_map>
 
 
+// https://github.com/jxtxzzw/gobang_ai/tree/main
+// Weights for each position. Closer to the center, higher the weight.
+const int posWeights[15][15] =
+{
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+    {0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0},
+    {0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 1, 0},
+    {0, 1, 2, 3, 4, 4, 4, 4, 4, 4, 4, 3, 2, 1, 0},
+    {0, 1, 2, 3, 4, 5, 5, 5, 5, 5, 4, 3, 2, 1, 0},
+    {0, 1, 2, 3, 4, 5, 6, 6, 6, 5, 4, 3, 2, 1, 0},
+    {0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1, 0},
+    {0, 1, 2, 3, 4, 5, 6, 6, 6, 5, 4, 3, 2, 1, 0},
+    {0, 1, 2, 3, 4, 5, 5, 5, 5, 5, 4, 3, 2, 1, 0},
+    {0, 1, 2, 3, 4, 4, 4, 4, 4, 4, 4, 3, 2, 1, 0},
+    {0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 1, 0},
+    {0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0},
+    {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+};
+
 /*
  * TODO: Maybe need to consider more. (Nah dont think so.)
  *
@@ -21,6 +42,7 @@
  * 1 for stone in our color.
  * 0 for stone in opponent's color.
  * # for blank intersection.
+ * I for invalid places (out of board).
  */
 
 
@@ -35,13 +57,13 @@ struct shapesLookup {
         HTWO_SCORE;
 
     string  RENJU,
-            OFOUR,
-            HFOUR_0, HFOUR_1, HFOUR_2, HFOUR_3, HFOUR_4,
-            OTHREE_0, OTHREE_1, OTHREE_2,
-            HTHREE_0, HTHREE_1, HTHREE_2, HTHREE_3, HTHREE_4,
-            HTHREE_5, HTHREE_6, HTHREE_7, HTHREE_8, HTHREE_9,
-            OTWOS_0, OTWOS_1, OTWOS_2,
-            HTWOS_0, HTWOS_1, HTWOS_2, HTWOS_3, HTWOS_4, HTWOS_5, HTWOS_6;
+        OFOUR,
+        HFOUR_0, HFOUR_1, HFOUR_2, HFOUR_3, HFOUR_4,
+        OTHREE_0, OTHREE_1, OTHREE_2,
+        HTHREE_0, HTHREE_1, HTHREE_2, HTHREE_3, HTHREE_4,
+        HTHREE_5, HTHREE_6, HTHREE_7, HTHREE_8, HTHREE_9,
+        OTWOS_0, OTWOS_1, OTWOS_2,
+        HTWOS_0, HTWOS_1, HTWOS_2, HTWOS_3, HTWOS_4, HTWOS_5, HTWOS_6;
 
     shapesLookup() :
         RENJU_SCORE(100000),
@@ -92,7 +114,7 @@ public:
     shapesLookup shapeTable;                                    // AI knows all the valid shapes for evaluating.
     int  maxDepth;                                              // Max calculating depth per move.
 
-    GomokuAI(Gomoku *game) : game(game), maxDepth(3) {}
+    GomokuAI(Gomoku *game) : game(game), maxDepth(5) {}
 
     vector<pair<int, int>> getLegalMoves();                     // Get valid intersections on board.
     vector<pair<int, int>> getLegalMoves(int heuristic);        // Focus on the possible areas to reduce overhead.
