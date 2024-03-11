@@ -25,6 +25,7 @@ public:
 
     bool check_win(int x, int y);           // Check if the winning condition is satisfied.
     void switchPlayers();                   // Switch Black and white.
+    void displayBoard();                    // Display board in terminal.
 
     template<int x_step, int y_step>
     bool check(int x, int y) {

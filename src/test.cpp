@@ -8,21 +8,34 @@ int main() {
     GomokuAI ai(&game);
 
     cout << "\n\nGame started. " << endl;
+    game.displayBoard();
     while (1) {
         int x, y;
         std::cin >> x >> y;
         
         // User makes a move.
-        p1.makeMove(make_pair(x, y));
-        cout << "You made a move at " << x << ", " << y << endl;
+        if (p1.makeMove(make_pair(x - 1, y - 1))) {
+            cout << "Invalid move!" << '\n' << endl;
+            continue;
+        }
+
+        if (game.state == 1) {
+            game.displayBoard();
+            cout << "You win!" << endl;
+            break;
+        }
         
         // AI makes a move.
         pair<int, int> bestMove= ai.findBestMove();
         ai.makeMove(bestMove);
-        cout << "AI made a move at " << bestMove.first << ", " << bestMove.second << "\n" << endl;
+
+        cout << "You made a move at " << x << ", " << y << ", " << "AI made a move at " 
+        << bestMove.first + 1 << ", " << bestMove.second + 1 << "\n" << endl;
+
+        game.displayBoard();
 
         if (game.state == 1) {
-            cout << "Good Game!" << endl;
+            cout << "You lose!" << endl;
             break;
         }
     }
