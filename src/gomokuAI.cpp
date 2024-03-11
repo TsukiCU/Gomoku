@@ -46,9 +46,9 @@ int GomokuAI::getScorefromTable(string s)
         {score += shapeTable.HFOUR_SCORE;}
 
     // OPEN_THREES
-    if (s.find(shapeTable.HTHREE_0) != string::npos ||
-        s.find(shapeTable.HTHREE_1) != string::npos ||
-        s.find(shapeTable.HTHREE_2) != string::npos)
+    if (s.find(shapeTable.OTHREE_0) != string::npos ||
+        s.find(shapeTable.OTHREE_1) != string::npos ||
+        s.find(shapeTable.OTHREE_2) != string::npos)
         {score += shapeTable.OTHREE_SCORE;}
 
     // HALF_OPEN_THREES
@@ -122,7 +122,7 @@ int GomokuAI::evaluate(int player)
                 op_score += ratePos(row, col, 3-player);
         }
 
-    return my_score - op_score;
+    return  my_score - op_score;
 }
 
 int GomokuAI::evaluate(int player, int heuristic)

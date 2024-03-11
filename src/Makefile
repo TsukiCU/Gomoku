@@ -4,7 +4,7 @@ CXXFLAGS = -Wall -std=c++11
 
 TARGET = gomoku
 
-SOURCES = gomoku.cpp players.cpp gomokuAI.cpp test.cpp
+SOURCES = gomoku.cpp players.cpp gomokuAI.cpp pve.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
 

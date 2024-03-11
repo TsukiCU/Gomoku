@@ -66,10 +66,10 @@ struct shapesLookup {
         HTWOS_0, HTWOS_1, HTWOS_2, HTWOS_3, HTWOS_4, HTWOS_5, HTWOS_6;
 
     shapesLookup() :
-        RENJU_SCORE(100000),
-        OFOUR_SCORE(50000),
-        HFOUR_SCORE(5000),
-        OTHREE_SCORE(3000),
+        RENJU_SCORE(1000000),
+        OFOUR_SCORE(200000),
+        HFOUR_SCORE(10000),
+        OTHREE_SCORE(8000),
         HTHREE_SCORE(500),
         OTWO_SCORE(50),
         HTWO_SCORE(10),
@@ -114,7 +114,7 @@ public:
     shapesLookup shapeTable;                                    // AI knows all the valid shapes for evaluating.
     int  maxDepth;                                              // Max calculating depth per move.
 
-    GomokuAI(Gomoku *game) : game(game), maxDepth(5) {}
+    GomokuAI(Gomoku *game) : game(game), maxDepth(7) {}
 
     vector<pair<int, int>> getLegalMoves();                     // Get valid intersections on board.
     vector<pair<int, int>> getLegalMoves(int heuristic);        // Focus on the possible areas to reduce overhead.
@@ -137,14 +137,14 @@ public:
     template<int x_dir, int y_dir>
     string getStrFromPos(int x, int y, int player)              // Get a string consisted of 9 char as (x, y) in the middle.
     {
-        string ret = "";
+        string ret  = "";
         int r_begin = x - x_dir*4, c_begin = y - y_dir*4;
         int r_end   = x + x_dir*4, c_end   = y + y_dir*4;
-        int cur_r = r_begin, cur_c = c_begin;
-        //cout << "begin: " << r_begin <<" end: "<<r_end<<" cbegin: "<<c_begin<<" cend: "<<c_end<< endl;
+        int cur_r   = r_begin, cur_c = c_begin;
+        // cout << "begin: " << r_begin <<" end: "<<r_end<<" cbegin: "<<c_begin<<" cend: "<<c_end<< endl;
 
-        while (cur_r <= r_end && cur_c <= c_end) {
-            if (game->on_board(cur_r, cur_c)) {
+        while (cur_r != r_end + x_dir && cur_c != c_end + y_dir) {
+            if (game->on_board(cur_r, cur_c)) {        
                 if (game->board[cur_r][cur_c] == 0)
                     ret += '#';
                 else if (game->board[cur_r][cur_c] == player)
