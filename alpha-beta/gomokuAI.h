@@ -1,7 +1,7 @@
 #ifndef __GOMOKUAI_HH
 #define __GOMOKUAI_HH
 
-#include "gomoku.h"
+#include "../src/gomoku.h"
 #include <climits>
 #include <unordered_map>
 
