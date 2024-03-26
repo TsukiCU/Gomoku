@@ -1,6 +1,6 @@
-#include "gomoku.h"
+#include "../src/gomoku.h"
 #include "gomokuAI.h"
-#include "players.h"
+#include "../src/players.h"
 
 void applyEndgame(Gomoku *game)
 {
