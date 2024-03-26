@@ -8,11 +8,11 @@ class Player;
 using namespace std;
 
 class Gomoku {
-
 public:
     int state;                              // 0 for ongoing, 1 for we have a winner already.
     int board_size;                         // The standard Gomoku board is 15x15.
     int current_player;                     // 1 for black's turn, 2 for white's turn.
+    int winner;                             // It's useful to know who wins in MCTS. Same as current_player.
     const int WIN_LENGTH;                   // Ending condition: Form an unbroken line of five stones.
     std::vector<std::vector<int>> board;    // The board.
 
@@ -24,6 +24,7 @@ public:
     int  make_move(pair<int, int> move);    // Make a move at (x, y).    vector<pair<int, int>> getLegalMoves();                     // Get valid intersections on board.
 
     bool check_win(int x, int y);           // Check if the winning condition is satisfied.
+    bool is_draw();                         // Check if players draw.
     void switchPlayers();                   // Switch Black and white.
     void displayBoard();                    // Display board in terminal.
 

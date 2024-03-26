@@ -20,6 +20,7 @@ int Gomoku::make_move(pair<int, int> move)
     if (!valid_move(x, y))  return 1;
     board[x][y] = current_player;
     if (check_win(x, y)) {
+        winner = current_player;
         state = 1;
         return 0;
     }
@@ -46,6 +47,21 @@ bool Gomoku::check_win(int x, int y)
         return true;
 
     return false;
+}
+
+bool Gomoku::is_draw()
+{
+    if (state == 1) {
+        // Shouldn't reach here.
+        cout << "The winning condition is satisfied already." << endl;
+        return false;
+    }
+
+    for (int i=0; i<board_size; i++)
+        for (int j=0; j<board_size; j++)
+            if (board[i][j] == 0) return false;
+
+    return true;
 }
 
 void Gomoku::switchPlayers()

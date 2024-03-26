@@ -1,7 +1,7 @@
 #ifndef __GOMOKUAI_HH
 #define __GOMOKUAI_HH
 
-#include "gomoku.h"
+#include "../src/gomoku.h"
 #include <climits>
 #include <unordered_map>
 
@@ -66,8 +66,8 @@ struct shapesLookup {
         HTWOS_0, HTWOS_1, HTWOS_2, HTWOS_3, HTWOS_4, HTWOS_5, HTWOS_6;
 
     shapesLookup() :
-        RENJU_SCORE(1000000),
-        OFOUR_SCORE(200000),
+        RENJU_SCORE(5000000),
+        OFOUR_SCORE(1000000),
         HFOUR_SCORE(10000),
         OTHREE_SCORE(8000),
         HTHREE_SCORE(500),
@@ -141,9 +141,9 @@ public:
         int r_begin = x - x_dir*4, c_begin = y - y_dir*4;
         int r_end   = x + x_dir*4, c_end   = y + y_dir*4;
         int cur_r   = r_begin, cur_c = c_begin;
-        // cout << "begin: " << r_begin <<" end: "<<r_end<<" cbegin: "<<c_begin<<" cend: "<<c_end<< endl;
+        // cout << "r_begin: " << r_begin <<" c_begin: "<<c_begin<<" r_end: "<< r_end <<" c_end: "<<c_end<< endl;
 
-        while (cur_r != r_end + x_dir && cur_c != c_end + y_dir) {
+        while (cur_r != r_end + x_dir || cur_c != c_end + y_dir) {
             if (game->on_board(cur_r, cur_c)) {        
                 if (game->board[cur_r][cur_c] == 0)
                     ret += '#';
