@@ -20,7 +20,7 @@ int main() {
 
     cout << "\n\nGame started. " << endl;
 
-    applyEndgame(&game);
+    //applyEndgame(&game);
     
     game.displayBoard();
     while (1) {

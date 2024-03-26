@@ -122,7 +122,7 @@ int GomokuAI::evaluate(int player)
                 op_score += ratePos(row, col, 3-player);
         }
 
-    return  my_score - op_score;
+    return  my_score - 5*op_score;
 }
 
 int GomokuAI::evaluate(int player, int heuristic)

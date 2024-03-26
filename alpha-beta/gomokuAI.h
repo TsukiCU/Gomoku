@@ -6,7 +6,6 @@
 #include <unordered_map>
 
 
-// https://github.com/jxtxzzw/gobang_ai/tree/main
 // Weights for each position. Closer to the center, higher the weight.
 const int posWeights[15][15] =
 {
