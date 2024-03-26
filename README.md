@@ -1,17 +1,16 @@
 # Gomoku
 This is the project for CSEE 4840, Spring 2024.
 
-## Note :
+check mcts branch for the latest version.
 
-**The gui.py is broken. No GUI for now. And since we are probably not able to use pygame so meh, forget about it.**
+### decision tree with alpha-beta prunning
 
-## How to run
+```
+git branch mcts
+cd alpha-beta
+./run.sh
+```
 
-tested on Linux, x86.
+### MCTS (Monte Carlo Tree Search)
 
-+ Install SWIG on your machine
-
-**Enter src**
-+ `swig -python -c++ gomoku.i`
-+ `python3 setup.py build_ext --inplace`
-+ `python3 gui.py`
+mcts is under developed, and it is actually not that necessary. So let's focus on the important first. 
