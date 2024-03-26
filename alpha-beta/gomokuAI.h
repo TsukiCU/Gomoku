@@ -112,8 +112,10 @@ public:
     Gomoku *game;                                               // AI holds reference to the game instance.
     shapesLookup shapeTable;                                    // AI knows all the valid shapes for evaluating.
     int  maxDepth;                                              // Max calculating depth per move.
+    int  strategy;                                              // The aggresive degree of AI. (1->3)
 
-    GomokuAI(Gomoku *game) : game(game), maxDepth(7) {}
+    GomokuAI(Gomoku *game, int strategy):
+    game(game), maxDepth(13), strategy(strategy) {}
 
     vector<pair<int, int>> getLegalMoves();                     // Get valid intersections on board.
     vector<pair<int, int>> getLegalMoves(int heuristic);        // Focus on the possible areas to reduce overhead.
@@ -124,7 +126,8 @@ public:
     int makeMove(pair<int, int> move);                          // AI makes a move at (x, y).
     int undoMove(pair<int, int> move);                          // Undo a move at (x, y). Used when searching.
     pair<int, int> findBestMove();                              // Find the best move, return a (x, y) pair.
-    int MinMax(int depth, int alpha, int beta, bool isMax);     // Alpha Beta Prunning.
+    int MiniMax(int depth, int alpha, int beta,                 // Alpha Beta Prunning.
+    bool isMax, int player);     
     int getScorefromTable(string s);                            // Look up shapesLookup table to get score.
 
     /*

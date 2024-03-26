@@ -6,8 +6,8 @@ void applyEndgame(Gomoku *game)
 {
     game->board[7][7] = 1;
     game->board[8][8] = 2;
-    game->board[8][9] = 1;
-    game->board[7][8] = 2;
+    // game->board[8][9] = 1;
+    // game->board[7][8] = 2;
     // game->board[9][7] = 1;
     // game->board[8][8] = 1;
     // game->board[7][9] = 1;
@@ -16,7 +16,7 @@ void applyEndgame(Gomoku *game)
 int main() {
     Gomoku game;
     Player p1(&game, 1);
-    GomokuAI ai(&game);
+    GomokuAI ai(&game, 3);
 
     cout << "\n\nGame started. " << endl;
 
