@@ -13,7 +13,7 @@ public:
     int board_size;                         // The standard Gomoku board is 15x15.
     int current_player;                     // 1 for black's turn, 2 for white's turn.
     int winner;                             // It's useful to know who wins in MCTS. Same as current_player.
-    const int WIN_LENGTH;                   // Ending condition: Form an unbroken line of five stones.
+    int WIN_LENGTH;                   		// Ending condition: Form an unbroken line of five stones.
     std::vector<std::vector<int>> board;    // The board.
 
     Gomoku() : state(0), board_size(15),
@@ -27,6 +27,7 @@ public:
     bool is_draw();                         // Check if players draw.
     void switchPlayers();                   // Switch Black and white.
     void displayBoard();                    // Display board in terminal.
+	void clearBoard();						// Clear board
 
     template<int x_step, int y_step>
     bool check(int x, int y) {

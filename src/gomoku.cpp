@@ -103,3 +103,8 @@ void Gomoku::displayBoard()
     }
     cout << endl;
 }
+
+void Gomoku::clearBoard()
+{
+	board = vector<vector<int>>(board_size, std::vector<int>(board_size, 0));
+}

@@ -26,3 +26,6 @@ cd alpha-beta
 switch to mcts branch. 
 
 mcts is under developed, and it is actually not necessary. So let's focus on the important first and possibly some day we'll get back to that.
+
+### References
+https://www.geeksforgeeks.org/tcp-server-client-implementation-in-c/
