@@ -62,9 +62,7 @@ struct vga_gomoku_dev {
  */
 static void write_piece(vga_gomoku_arg_t *arg)
 {
-	iowrite8(arg->param[0], dev.virtbase);
-	iowrite8(arg->param[1], dev.virtbase+1);
-	iowrite8(arg->param[2], dev.virtbase+2);
+
 }
 
 /*
@@ -81,6 +79,8 @@ static long vga_gomoku_ioctl(struct file *f, unsigned int cmd, unsigned long arg
 		if (copy_from_user(&vla, (vga_gomoku_arg_t *) arg,
 				   sizeof(vga_gomoku_arg_t)))
 			return -EACCES;
+		for(int i=0;i<8;++i)
+			iowrite8(vla.param[i], dev.virtbase+i);
 		// write_circle_color(&vla.c_color);
 		// write_circle(&vla.circle);
 		// write_bg_color(&vla.bg_color);
@@ -120,7 +120,6 @@ static struct miscdevice vga_gomoku_misc_device = {
  */
 static int __init vga_gomoku_probe(struct platform_device *pdev)
 {
-        vga_gomoku_color_t beige = { 0xf9, 0xe4, 0xb7 };
 	int ret;
 
 	/* Register ourselves as a misc device: creates /dev/vga_gomoku */
@@ -146,9 +145,6 @@ static int __init vga_gomoku_probe(struct platform_device *pdev)
 		ret = -ENOMEM;
 		goto out_release_mem_region;
 	}
-        
-	/* Set an initial color */
-        write_circle_color(&beige);
 
 	return 0;
 
