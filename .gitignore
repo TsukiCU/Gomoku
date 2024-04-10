@@ -10,3 +10,6 @@ gomoku
 1.cpp
 record.txt
 alphaBetaGomoku
+asset/log.txt
+store
+load
