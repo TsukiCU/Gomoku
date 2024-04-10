@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include "gomoku.h"
+#include "../kmod/vga_gomoku.h"
 
 bool Gomoku::on_board(int x, int y)
 {
@@ -24,6 +25,16 @@ int Gomoku::make_move(pair<int, int> move)
         state = 1;
         return 0;
     }
+
+	vga_gomoku_arg_t arg;
+	arg.param[0] = 1;
+	arg.param[1] = (unsigned char)x;
+	arg.param[2] = (unsigned char)y;
+	arg.param[3] = (unsigned char)current_player;
+	if (ioctl(vga_gomoku_fd, VGA_GOMOKU_WRITE, arg)){
+		perror("ioctl(VGA_GOMOKU_WRITE) failed");
+		return 0;
+	}
     switchPlayers();
     return 0;
 }
@@ -75,36 +86,48 @@ void Gomoku::displayBoard()
     // n is row index, '-' refers to there's no stone on this intercection.
     // 'X' refers to there is a black stone, 'O' refers to white.
 
-    string filler = "   ";
+    // string filler = "   ";
 
-    cout << '\n' << filler << "  ";
-    for (int i = 0; i < board_size; i++) {
-        if (i < 9)
-            cout << i + 1 << filler;
-        else
-            cout << i + 1 << "  ";
-    }
-    cout << '\n';
+    // cout << '\n' << filler << "  ";
+    // for (int i = 0; i < board_size; i++) {
+    //     if (i < 9)
+    //         cout << i + 1 << filler;
+    //     else
+    //         cout << i + 1 << "  ";
+    // }
+    // cout << '\n';
 
-    for (int i = 0; i < board_size; i++) {
-        if (i < 9)
-            cout << ' ' << i + 1 << filler;
-        else
-            cout << i + 1 << filler;
+    // for (int i = 0; i < board_size; i++) {
+    //     if (i < 9)
+    //         cout << ' ' << i + 1 << filler;
+    //     else
+    //         cout << i + 1 << filler;
 
-        for (int j = 0; j < board_size; j++) {
-            switch (board[i][j]) {
-                case 0: {cout << '-' << filler; break;}
-                case 1: {cout << 'X' << filler; break;}
-                case 2: {cout << 'O' << filler; break;}
-            }
-        }
-        cout << "\n\n";
-    }
-    cout << endl;
+    //     for (int j = 0; j < board_size; j++) {
+    //         switch (board[i][j]) {
+    //             case 0: {cout << '-' << filler; break;}
+    //             case 1: {cout << 'X' << filler; break;}
+    //             case 2: {cout << 'O' << filler; break;}
+    //         }
+    //     }
+    //     cout << "\n\n";
+    // }
+    // cout << endl;
+	if(vga_gomoku_fd!=-1)
+		return;
+	if ((vga_gomoku_fd = open(filename, O_RDWR)) == -1) {
+		fprintf(stderr, "could not open %s\n", filename);
+		exit(-1);
+	}
 }
 
 void Gomoku::clearBoard()
 {
 	board = vector<vector<int>>(board_size, std::vector<int>(board_size, 0));
+	vga_gomoku_arg_t arg;
+	arg.param[0] = 255;
+	if (ioctl(vga_gomoku_fd, VGA_GOMOKU_WRITE, arg)){
+		perror("ioctl(VGA_GOMOKU_WRITE) failed");
+		return;
+	}
 }

@@ -15,6 +15,7 @@ public:
     int winner;                             // It's useful to know who wins in MCTS. Same as current_player.
     int WIN_LENGTH;                   		// Ending condition: Form an unbroken line of five stones.
     std::vector<std::vector<int>> board;    // The board.
+	int vga_gomoku_fd=-1;					// vga fd
 
     Gomoku() : state(0), board_size(15),
     current_player(1), WIN_LENGTH(5), board(board_size, std::vector<int>(board_size, 0)) {}
