@@ -42,11 +42,11 @@ void vecToMat(const vector<vector<vector<int>>>& vec) {
 
 int main()
 {
-    int stone_or_board = BOARD;
+    int stone_or_board = STONE;
 
-    if (stone_or_board == 1) {
+    if (stone_or_board == STONE) {
         vector<vector<vector<int>>> image(29, vector<vector<int>>(29, vector<int>(4, 0)));
-        loadVector(image, "result/black.txt");
+        loadVector(image, "result/white.txt");
         vecToMat(image);
     }
 
