@@ -3,6 +3,7 @@ test/
 *.exe
 *cxx
 *.so
+*.txt
 gomoku.py
 __pycache__/
 .vscode/
@@ -12,4 +13,3 @@ record.txt
 alphaBetaGomoku
 asset/log.txt
 store
-load
