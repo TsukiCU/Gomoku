@@ -1,4 +1,7 @@
 #include <iostream>
+#include <sys/ioctl.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <vector>
 #include "gomoku.h"
 #include "../kmod/vga_gomoku.h"
@@ -31,7 +34,7 @@ int Gomoku::make_move(pair<int, int> move)
 	arg.param[1] = (unsigned char)x;
 	arg.param[2] = (unsigned char)y;
 	arg.param[3] = (unsigned char)current_player;
-	if (ioctl(vga_gomoku_fd, VGA_GOMOKU_WRITE, arg)){
+	if (ioctl(vga_gomoku_fd, VGA_GOMOKU_WRITE, &arg)){
 		perror("ioctl(VGA_GOMOKU_WRITE) failed");
 		return 0;
 	}
@@ -115,6 +118,7 @@ void Gomoku::displayBoard()
     // cout << endl;
 	if(vga_gomoku_fd!=-1)
 		return;
+	const char *filename = VGA_DRIVER_FILENAME;
 	if ((vga_gomoku_fd = open(filename, O_RDWR)) == -1) {
 		fprintf(stderr, "could not open %s\n", filename);
 		exit(-1);
@@ -126,7 +130,7 @@ void Gomoku::clearBoard()
 	board = vector<vector<int>>(board_size, std::vector<int>(board_size, 0));
 	vga_gomoku_arg_t arg;
 	arg.param[0] = 255;
-	if (ioctl(vga_gomoku_fd, VGA_GOMOKU_WRITE, arg)){
+	if (ioctl(vga_gomoku_fd, VGA_GOMOKU_WRITE, &arg)){
 		perror("ioctl(VGA_GOMOKU_WRITE) failed");
 		return;
 	}

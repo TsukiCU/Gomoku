@@ -33,7 +33,7 @@
 #include <linux/uaccess.h>
 #include "vga_gomoku.h"
 
-#define DRIVER_NAME "vga_gomoku"
+#define DRIVER_NAME "vga_ball"
 
 /* Device registers */
 // #define CIR_RED(x) (x)
@@ -62,8 +62,9 @@ struct vga_gomoku_dev {
  */
 static void write_data(vga_gomoku_arg_t *arg)
 {
-	for(int i=0;i<8;++i)
-		iowrite8(vla.param[i], dev.virtbase+i);
+	int i;
+	for(i=0;i<8;++i)
+		iowrite8(arg->param[i], dev.virtbase+i);
 }
 
 /*
@@ -167,7 +168,7 @@ static int vga_gomoku_remove(struct platform_device *pdev)
 /* Which "compatible" string(s) to search for in the Device Tree */
 #ifdef CONFIG_OF
 static const struct of_device_id vga_gomoku_of_match[] = {
-	{ .compatible = "csee4840,vga_gomoku-1.0" },
+	{ .compatible = "csee4840,vga_ball-1.0" },
 	{},
 };
 MODULE_DEVICE_TABLE(of, vga_gomoku_of_match);
