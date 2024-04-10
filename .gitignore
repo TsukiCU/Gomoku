@@ -9,3 +9,4 @@ __pycache__/
 gomoku
 1.cpp
 record.txt
+alphaBetaGomoku
