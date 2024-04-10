@@ -1,4 +1,4 @@
-/* g++ resize.cpp -o resize `pkg-config --cflags --libs opencv4` */
+/* g++ store.cpp -o store `pkg-config --cflags --libs opencv4` */
 
 #include <opencv2/opencv.hpp>
 #include <iostream>
@@ -20,9 +20,9 @@ vector<vector<vector<int>>> matToVec(cv::Mat image, int rows, int cols)
         for (int j = 0; j < cols; j++) {
             if (i < image.rows && j < image.cols) {
                 cv::Vec3b pixel = image.at<cv::Vec3b>(i, j);
-                result[i][j][2] = pixel[0]; // B
+                result[i][j][0] = pixel[0]; // B
                 result[i][j][1] = pixel[1]; // G
-                result[i][j][0] = pixel[2]; // R
+                result[i][j][2] = pixel[2]; // R
             }
         }
     }
