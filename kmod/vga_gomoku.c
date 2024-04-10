@@ -60,9 +60,10 @@ struct vga_gomoku_dev {
  * Write segments of a single digit
  * Assumes digit is in range and the device information has been set up
  */
-static void write_piece(vga_gomoku_arg_t *arg)
+static void write_data(vga_gomoku_arg_t *arg)
 {
-
+	for(int i=0;i<8;++i)
+		iowrite8(vla.param[i], dev.virtbase+i);
 }
 
 /*
@@ -79,8 +80,7 @@ static long vga_gomoku_ioctl(struct file *f, unsigned int cmd, unsigned long arg
 		if (copy_from_user(&vla, (vga_gomoku_arg_t *) arg,
 				   sizeof(vga_gomoku_arg_t)))
 			return -EACCES;
-		for(int i=0;i<8;++i)
-			iowrite8(vla.param[i], dev.virtbase+i);
+		write_data(&vla);
 		// write_circle_color(&vla.c_color);
 		// write_circle(&vla.circle);
 		// write_bg_color(&vla.bg_color);
