@@ -37,7 +37,7 @@ else:
     print("Image does not have a palette.")
     
 quantized_image.save(filename+"_quantized.png")
-
+b1 = 0
 with open(filename+".mif","w") as file:
 	file.write('''WIDTH = 8;
 DEPTH = %s;
@@ -45,5 +45,8 @@ ADDRESS_RADIX = DEC;
 DATA_RADIX = HEX;
 CONTENT BEGIN\n\n'''%depth)
 	for idx,byte in enumerate(quantized_image.getdata()):
-			file.write("%x : %x;\n"%(idx,byte))
+			if idx%2==0:
+				b1 = byte<<4
+			else:
+				file.write("%x : %x;\n"%(int(idx/2),b1|byte))
 	file.write("\n\nEND;")
