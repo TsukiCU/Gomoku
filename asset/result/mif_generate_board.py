@@ -1,7 +1,7 @@
 from PIL import Image
 
 filename = "board_0"
-depth = "240000"
+depth = "120000"
 
 img = Image.open(filename+".png")
 
@@ -41,7 +41,7 @@ b1 = 0
 with open(filename+".mif","w") as file:
 	file.write('''WIDTH = 8;
 DEPTH = %s;
-ADDRESS_RADIX = DEC;
+ADDRESS_RADIX = HEX;
 DATA_RADIX = HEX;
 CONTENT BEGIN\n\n'''%depth)
 	for idx,byte in enumerate(quantized_image.getdata()):
@@ -49,4 +49,4 @@ CONTENT BEGIN\n\n'''%depth)
 				b1 = byte<<4
 			else:
 				file.write("%x : %x;\n"%(int(idx/2),b1|byte))
-	file.write("\n\nEND;")
+	file.write("\nEND;")

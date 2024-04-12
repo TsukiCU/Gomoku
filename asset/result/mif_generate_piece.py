@@ -33,11 +33,11 @@ with open(filename+".plt",'w') as file:
 with open(filename+".mif","w") as file:
 	file.write('''WIDTH = 8;
 DEPTH = %s;
-ADDRESS_RADIX = DEC;
+ADDRESS_RADIX = HEX;
 DATA_RADIX = HEX;
 CONTENT BEGIN\n\n'''%depth)
 	for idx,byte in enumerate(vals):
 		file.write("%x : %x;\n"%(idx,byte))
-	file.write("\n\nEND;")
+	file.write("\nEND;")
 
 img.save(filename+"_modified.png")
