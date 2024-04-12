@@ -126,8 +126,7 @@ public:
     int makeMove(pair<int, int> move);                          // AI makes a move at (x, y).
     int undoMove(pair<int, int> move);                          // Undo a move at (x, y). Used when searching.
     pair<int, int> findBestMove();                              // Find the best move, return a (x, y) pair.
-    int MiniMax(int depth, int alpha, int beta,                 // Alpha Beta Prunning.
-    bool isMax, int player);     
+    int MiniMax(int depth, int alpha, int beta, bool isMax);    // Alpha Beta Prunning.    
     int getScorefromTable(string s);                            // Look up shapesLookup table to get score.
 
     /*

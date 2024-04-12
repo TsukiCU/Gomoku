@@ -29,15 +29,15 @@ int Gomoku::make_move(pair<int, int> move)
         return 0;
     }
 
-	vga_gomoku_arg_t arg;
-	arg.param[0] = 1;
-	arg.param[1] = (unsigned char)x;
-	arg.param[2] = (unsigned char)y;
-	arg.param[3] = (unsigned char)current_player;
-	if (ioctl(vga_gomoku_fd, VGA_GOMOKU_WRITE, &arg)){
-		perror("ioctl(VGA_GOMOKU_WRITE) failed");
-		return 0;
-	}
+	// vga_gomoku_arg_t arg;
+	// arg.param[0] = 1;
+	// arg.param[1] = (unsigned char)x;
+	// arg.param[2] = (unsigned char)y;
+	// arg.param[3] = (unsigned char)current_player;
+	// if (ioctl(vga_gomoku_fd, VGA_GOMOKU_WRITE, &arg)){
+	// 	perror("ioctl(VGA_GOMOKU_WRITE) failed");
+	// 	return 0;
+	// }
     switchPlayers();
     return 0;
 }
