@@ -198,7 +198,6 @@ pair<int, int> GomokuAI::findBestMove()
 int GomokuAI::MiniMax(int depth, int alpha, int beta, bool isMax, int player)
 {
     if (!depth || game->state == 1) {
-    /* TODO: Not sure. */
         return evaluate(player);
     }
 
@@ -209,7 +208,7 @@ int GomokuAI::MiniMax(int depth, int alpha, int beta, bool isMax, int player)
             int eval = MiniMax(depth-1, alpha, beta, false, player);   // Now minimizing.
             undoMove(move);
             maxEval = max(maxEval, eval);
-            alpha = max(alpha, eval);   // Update alpha.
+            alpha = max(alpha, maxEval);   // Update alpha.
             if (beta <= alpha)
                 break;      // Beta prunning.
         }
@@ -222,7 +221,7 @@ int GomokuAI::MiniMax(int depth, int alpha, int beta, bool isMax, int player)
             int eval = MiniMax(depth-1, alpha, beta, true, player);    // Now maximizing.
             undoMove(move);
             minEval = min(minEval, eval);
-            beta = min(beta, eval);     // Update beta
+            beta = min(beta, minEval);     // Update beta
             if (beta <= alpha)
                 break;      // Alpha prunning.
         }

@@ -115,7 +115,7 @@ public:
     int  strategy;                                              // The aggresive degree of AI. (1->3)
 
     GomokuAI(Gomoku *game, int strategy):
-    game(game), maxDepth(13), strategy(strategy) {}
+    game(game), maxDepth(15), strategy(strategy) {}
 
     vector<pair<int, int>> getLegalMoves();                     // Get valid intersections on board.
     vector<pair<int, int>> getLegalMoves(int heuristic);        // Focus on the possible areas to reduce overhead.

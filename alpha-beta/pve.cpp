@@ -16,7 +16,7 @@ void applyEndgame(Gomoku *game)
 int main() {
     Gomoku game;
     Player p1(&game, 1);
-    GomokuAI ai(&game, 3);
+    GomokuAI ai(&game, 2);
 
     cout << "\n\nGame started. " << endl;
 
