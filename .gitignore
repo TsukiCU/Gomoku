@@ -13,3 +13,4 @@ record.txt
 alphaBetaGomoku
 asset/log.txt
 store
+asset/result/check_result.py
