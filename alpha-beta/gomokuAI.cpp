@@ -7,11 +7,17 @@ string GomokuAI::posToStr(int x, int y)
 
 vector<pair<int, int>> GomokuAI::getLegalMoves()
 {
+    // FIXME: Put valid moves that are closer to the middle of the board first,
+    // because they are more likely to be good moves.
     vector<pair<int, int>> legalMoves;
     for (int row=0; row<game->board_size; row++)
         for (int col=0; col<game->board_size; col++)
-            if (!game->board[row][col])
-                legalMoves.push_back(make_pair(row, col));
+            if (!game->board[row][col]) {
+                if (row > 4 && row < 10 && col > 4 && col < 10)
+                    legalMoves.insert(legalMoves.begin(), make_pair(row, col));
+                else
+                    legalMoves.push_back(make_pair(row, col));
+            }
 
     return legalMoves;
 }

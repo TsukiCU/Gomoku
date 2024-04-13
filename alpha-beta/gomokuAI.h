@@ -49,8 +49,8 @@ const int posWeights[15][15] =
 struct shapesLookup {
     int RENJU_SCORE,
         OFOUR_SCORE,
-        HFOUR_SCORE,
         OTHREE_SCORE,
+        HFOUR_SCORE,
         HTHREE_SCORE,
         OTWO_SCORE,
         HTWO_SCORE;
@@ -65,13 +65,13 @@ struct shapesLookup {
         HTWOS_0, HTWOS_1, HTWOS_2, HTWOS_3, HTWOS_4, HTWOS_5, HTWOS_6;
 
     shapesLookup() :
-        RENJU_SCORE(5000000),
+        RENJU_SCORE(10000000),
         OFOUR_SCORE(1000000),
-        HFOUR_SCORE(10000),
-        OTHREE_SCORE(8000),
-        HTHREE_SCORE(500),
-        OTWO_SCORE(50),
-        HTWO_SCORE(10),
+        OTHREE_SCORE(10000),
+        HFOUR_SCORE(8000),
+        HTHREE_SCORE(1000),
+        OTWO_SCORE(800),
+        HTWO_SCORE(50),
 
         RENJU("11111"),
         OFOUR("#1111#"),
@@ -115,7 +115,7 @@ public:
     int  strategy;                                              // The aggresive degree of AI. (1->3)
 
     GomokuAI(Gomoku *game, int strategy):
-    game(game), maxDepth(15), strategy(strategy) {}
+    game(game), maxDepth(5), strategy(strategy) {}
 
     vector<pair<int, int>> getLegalMoves();                     // Get valid intersections on board.
     vector<pair<int, int>> getLegalMoves(int heuristic);        // Focus on the possible areas to reduce overhead.

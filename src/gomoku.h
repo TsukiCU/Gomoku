@@ -14,6 +14,7 @@ public:
     int current_player;                     // 1 for black's turn, 2 for white's turn.
     int winner;                             // It's useful to know who wins in MCTS. Same as current_player.
     int WIN_LENGTH;                   		// Ending condition: Form an unbroken line of five stones.
+    int stones;                             // Number of stones on board for hardcoding opening.
     std::vector<std::vector<int>> board;    // The board.
 	int vga_gomoku_fd=-1;					// vga fd
 
