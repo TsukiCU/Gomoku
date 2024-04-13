@@ -118,7 +118,7 @@ public:
     game(game), maxDepth(5), strategy(strategy) {}
 
     vector<pair<int, int>> getLegalMoves();                     // Get valid intersections on board.
-    vector<pair<int, int>> getLegalMoves(int heuristic);        // Focus on the possible areas to reduce overhead.
+    vector<pair<int, int>> getLegalMoves(bool heuristic);       // Focus on the possible areas to reduce overhead.
     string posToStr(int x, int y);                              // Turn a (x, y) pair to str for filling record.
     int evaluate(int player);                                   // Evaluate the current board.
     int evaluate(int player, int heuristic);                    // Heuristicly evaluate for optimizing.

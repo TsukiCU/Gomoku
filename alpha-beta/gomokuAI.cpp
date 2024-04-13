@@ -7,27 +7,59 @@ string GomokuAI::posToStr(int x, int y)
 
 vector<pair<int, int>> GomokuAI::getLegalMoves()
 {
-    // FIXME: Put valid moves that are closer to the middle of the board first,
-    // because they are more likely to be good moves.
     vector<pair<int, int>> legalMoves;
     for (int row=0; row<game->board_size; row++)
         for (int col=0; col<game->board_size; col++)
-            if (!game->board[row][col]) {
-                if (row > 4 && row < 10 && col > 4 && col < 10)
-                    legalMoves.insert(legalMoves.begin(), make_pair(row, col));
-                else
+            if (!game->board[row][col])
                     legalMoves.push_back(make_pair(row, col));
-            }
 
     return legalMoves;
 }
 
-vector<pair<int, int>> GomokuAI::getLegalMoves(int heuristic)
+vector<pair<int, int>> GomokuAI::getLegalMoves(bool heuristic)
 {
-    /* TODO: Heuristic searching.
-     * Probably no need to store every possible move on the board.
+    /* So traverse the board in a spiral way from inside out.
+     * 
+     * This is basically https://leetcode.cn/problems/spiral-matrix/ in reversing direction.
      */
+
     vector<pair<int, int>> legalMoves;
+    int row = game->board_size, col = game->board_size;
+    int x = int((row-1)/2), y = int((col-1)/2);
+    int steps = 1;   // Initial step size
+    int di = 0;     // Start direction index, begin with moving right
+    std::vector<std::pair<int, int>> directions = {
+    {0, 1},  // Right
+    {1, 0},  // Down
+    {0, -1}, // Left
+    {-1, 0}  // Up
+    };
+    int moves = 1;  // Number of handled places.
+
+    if(!game->board[x][y])
+        legalMoves.push_back(make_pair(x, y));
+
+    while (moves < row*col) {
+        for (int i=0; i<2; i++) {
+            for (int j=0; j<steps; j++) {
+                int nx = x + directions[di].first;
+                int ny = y + directions[di].second;
+                if (game->on_board(nx, ny)) {
+                    if (!game->board[nx][ny])
+                        legalMoves.push_back(make_pair(nx, ny));
+                    moves ++;
+                    x = nx;
+                    y = ny;
+                }
+            }
+            if (moves >= row*col) {
+                return legalMoves;
+            }
+            di = (di+1) % 4;
+        }
+        steps += 1;
+    }
+
     return legalMoves;
 }
 
