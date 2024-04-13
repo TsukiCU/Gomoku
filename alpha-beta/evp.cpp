@@ -10,7 +10,6 @@ int main() {
 
     cout << "\n\nGame started. " << endl;
     
-    game.displayBoard();
     while (1) {
         // AI makes a move.
         pair<int, int> bestMove= ai.findBestMove();

@@ -208,14 +208,19 @@ int GomokuAI::undoMove(pair<int, int> move)
     int x = move.first, y = move.second;
     game->board[x][y] = 0;
 
-    if (game->state == 1)
+    if (game->state == 1) {
+        game->stoneNumber--;
         game->state = 0;
+    }
 
     return 0;
 }
 
 pair<int, int> GomokuAI::findBestMove()
 {
+    cout << "enter here" <<endl;
+    if (game->stoneNumber == 0)
+        return make_pair(7, 7);
     pair<int, int> bestMove = {-1, -1};
     int bestScore = INT_MIN;
 
