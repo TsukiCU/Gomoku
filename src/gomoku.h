@@ -15,11 +15,12 @@ public:
     int winner;                             // It's useful to know who wins in MCTS. Same as current_player.
     int WIN_LENGTH;                   		// Ending condition: Form an unbroken line of five stones.
     int stoneNumber;                        // Number of stones on board for hardcoding opening.
-    std::vector<std::vector<int>> board;    // The board.
+    vector<vector<int>> board;              // The board.
+    vector<pair<int, int>> record;          // Game record.
 	int vga_gomoku_fd=-1;					// vga fd
 
     Gomoku() : state(0), board_size(15), current_player(1),
-    WIN_LENGTH(5), stoneNumber(0), board(board_size, std::vector<int>(board_size, 0)) {}
+    WIN_LENGTH(5), stoneNumber(0), board(board_size, vector<int>(board_size, 0)) {}
 
     bool on_board(int x, int y);            // Check if (x, y) is a valid position.
     bool valid_move(int x, int y);          // Check if the move at (x, y) is valid.

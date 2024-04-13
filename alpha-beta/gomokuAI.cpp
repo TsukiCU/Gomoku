@@ -1,5 +1,6 @@
 #include "gomokuAI.h"
 
+
 string GomokuAI::posToStr(int x, int y)
 {
     return to_string(x) + to_string(y);
@@ -218,9 +219,23 @@ int GomokuAI::undoMove(pair<int, int> move)
 
 pair<int, int> GomokuAI::findBestMove()
 {
-    cout << "enter here" <<endl;
+    /* Hard code. */
+
+    // The best move for the first move is always (7, 7)
     if (game->stoneNumber == 0)
         return make_pair(7, 7);
+
+    if (game->stoneNumber == 1) {
+        assert(game->current_player == 2);
+        pair<int, int> firstMove = game->record.back();
+        int x = firstMove.first, y = firstMove.second;
+        if (x == 7 && y == 7)
+        // TODO: Add several opening choices to make it more flexible.
+            return make_pair(6, 8);
+        else
+            return make_pair(7, 7);
+    }
+    
     pair<int, int> bestMove = {-1, -1};
     int bestScore = INT_MIN;
 

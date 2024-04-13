@@ -4,6 +4,7 @@
 #include "../src/gomoku.h"
 #include <climits>
 #include <unordered_map>
+#include <cassert>
 
 
 // Weights for each position. Closer to the center, higher the weight.
