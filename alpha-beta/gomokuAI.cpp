@@ -245,22 +245,37 @@ pair<int, int> GomokuAI::decideThirdMove()
     }
 }
 
-// int GomokuAI::isDirectFour()
-// {
-//     pair<int, int> firstMove = game->record[0];
-//     pair<int, int> secondMove = game->record[1];
-//     pair<int, int> thirdMove = game->record[2];
+pair<int, int> GomokuAI::decideFourthMove()
+{
+    // XXX: for now only hard code the "Direct4" since it's the only odd one.
+    pair<int, int> bestMove = make_pair(-1, -1);
 
-//     if (firstMove != make_pair(7, 7))
-//         return 0;
+    pair<int, int> firstMove = game->record[0];
+    pair<int, int> secondMove = game->record[1];
+    pair<int, int> thirdMove = game->record[2];
+
+    if (firstMove != make_pair(7, 7))
+        goto out;
     
-//     else if (secondMove != make_pair(7, 8) && thirdMove == make_pair())
-// }
+    else if ((secondMove == make_pair(7, 8) && thirdMove == make_pair(6, 8))||
+    (secondMove == make_pair(8, 7) && thirdMove == make_pair(8, 6)))   { bestMove = make_pair(6, 6);}
+    
+    else if ((secondMove == make_pair(6, 7) && thirdMove == make_pair(6, 8))||
+    (secondMove == make_pair(7, 6) && thirdMove == make_pair(8, 6)))   { bestMove = make_pair(8, 8);}
+
+    else if ((secondMove == make_pair(8, 7) && thirdMove == make_pair(8, 8))||
+    (secondMove == make_pair(7, 6) && thirdMove == make_pair(6, 6)))   { bestMove = make_pair(6, 8);}
+
+    else if ((secondMove == make_pair(7, 8) && thirdMove == make_pair(8, 8))||
+    (secondMove == make_pair(6, 7) && thirdMove == make_pair(6, 6)))   { bestMove = make_pair(8, 6);}
+
+out:
+    return bestMove;
+}
 
 pair<int, int> GomokuAI::findBestMove()
 {
     /* Hard code. */
-    cout << "number: " << game->record.size()<<endl;
 
     // Hard code for the first move. The best move for the first move is always (7, 7)
     if (game->record.size() == 0)
@@ -268,11 +283,10 @@ pair<int, int> GomokuAI::findBestMove()
 
     // Hard code for the second move.
     if (game->record.size() == 1) {
-        cout << "second"<<endl;
         pair<int, int> firstMove = game->record.back();
         int x = firstMove.first, y = firstMove.second;
         if (x == 7 && y == 7) {
-        // TODO: Several opening choices. Randomly choose one.
+        // Several opening choices. Randomly choose one.
             vector<pair<int, int>> reponse = {make_pair(6, 8), make_pair(8, 6), make_pair(8, 8), make_pair(6, 6),
                                               make_pair(6, 7), make_pair(7, 6), make_pair(8, 7), make_pair(7, 8)};
             srand(time(NULL));
@@ -283,10 +297,15 @@ pair<int, int> GomokuAI::findBestMove()
     }
 
     // Hard code for the third move.
-    if (game->record.size() == 2)
+    if (game->record.size() == 2) 
         return decideThirdMove();
 
     // Hard code for the fourth move.
+    if (game->record.size() == 3) {
+        pair<int, int> move = decideFourthMove();
+        if (move.first != -1)
+            return move;
+    }
     
     pair<int, int> bestMove = {-1, -1};
     int bestScore = INT_MIN;

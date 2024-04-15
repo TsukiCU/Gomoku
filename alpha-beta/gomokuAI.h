@@ -133,7 +133,7 @@ public:
 
     // Beginnings.
     pair<int, int> decideThirdMove();   // AI plays black and it's the third move.
-    int isDirectFour();                 // 花月, Kagetsu
+    pair<int, int> decideFourthMove();      // 花月, Kagetsu
 
     /*
      * (1, 0)   vertical line.
