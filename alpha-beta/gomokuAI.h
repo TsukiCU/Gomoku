@@ -3,7 +3,7 @@
 
 #include "../src/gomoku.h"
 #include <climits>
-#include <unordered_map>
+#include <map>
 #include <cassert>
 
 
@@ -26,6 +26,7 @@ const int posWeights[15][15] =
     {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 };
+
 
 /*
  * TODO: Maybe need to consider more. (Nah dont think so.)
@@ -129,6 +130,10 @@ public:
     pair<int, int> findBestMove();                              // Find the best move, return a (x, y) pair.
     int MiniMax(int depth, int alpha, int beta, bool isMax);    // Alpha Beta Prunning.    
     int getScorefromTable(string s);                            // Look up shapesLookup table to get score.
+
+    // Beginnings.
+    pair<int, int> decideThirdMove();   // AI plays black and it's the third move.
+    int isDirectFour();                 // 花月, Kagetsu
 
     /*
      * (1, 0)   vertical line.

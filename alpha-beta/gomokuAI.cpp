@@ -12,7 +12,7 @@ vector<pair<int, int>> GomokuAI::getLegalMoves()
     for (int row=0; row<game->board_size; row++)
         for (int col=0; col<game->board_size; col++)
             if (!game->board[row][col])
-                    legalMoves.push_back(make_pair(row, col));
+                legalMoves.push_back(make_pair(row, col));
 
     return legalMoves;
 }
@@ -28,7 +28,7 @@ vector<pair<int, int>> GomokuAI::getLegalMoves(bool heuristic)
     int row = game->board_size, col = game->board_size;
     int x = int((row-1)/2), y = int((col-1)/2);
     int steps = 1;   // Initial step size
-    int di = 0;     // Start direction index, begin with moving right
+    int di = 0;      // Start direction index, begin with moving right
     std::vector<std::pair<int, int>> directions = {
     {0, 1},  // Right
     {1, 0},  // Down
@@ -210,31 +210,83 @@ int GomokuAI::undoMove(pair<int, int> move)
     game->board[x][y] = 0;
 
     if (game->state == 1) {
-        game->stoneNumber--;
         game->state = 0;
     }
 
     return 0;
 }
 
+pair<int, int> GomokuAI::decideThirdMove()
+{
+    // The first move is fixed as (7, 7).
+    pair<int, int> secondMove = game->record[1];
+
+    // Out of touch
+    if (secondMove.first >= 9 || secondMove.first <= 5 || secondMove.second >= 9 || secondMove.second <= 5) {
+        vector<pair<int, int>> reponse = {make_pair(6, 8), make_pair(8, 6), make_pair(8, 8), make_pair(6, 6)};
+        srand(time(NULL));
+        return reponse[rand() % 4];
+    }
+
+    // Direct4
+    else if (secondMove.first + secondMove.second == 15)
+        return make_pair(8, 8);
+
+    else if (secondMove.first + secondMove.second == 15)
+        return make_pair(6, 6);
+
+    else {
+        int x = secondMove.first - 7;
+        int y = secondMove.second - 7;
+        vector<pair<int, int>> response = {make_pair(secondMove.first - 2*x, secondMove.second),
+                                           make_pair(secondMove.first, secondMove.second - 2*y)};
+        srand(time(NULL));
+        return response[rand() % 2];
+    }
+}
+
+// int GomokuAI::isDirectFour()
+// {
+//     pair<int, int> firstMove = game->record[0];
+//     pair<int, int> secondMove = game->record[1];
+//     pair<int, int> thirdMove = game->record[2];
+
+//     if (firstMove != make_pair(7, 7))
+//         return 0;
+    
+//     else if (secondMove != make_pair(7, 8) && thirdMove == make_pair())
+// }
+
 pair<int, int> GomokuAI::findBestMove()
 {
     /* Hard code. */
+    cout << "number: " << game->record.size()<<endl;
 
-    // The best move for the first move is always (7, 7)
-    if (game->stoneNumber == 0)
+    // Hard code for the first move. The best move for the first move is always (7, 7)
+    if (game->record.size() == 0)
         return make_pair(7, 7);
 
-    if (game->stoneNumber == 1) {
-        assert(game->current_player == 2);
+    // Hard code for the second move.
+    if (game->record.size() == 1) {
+        cout << "second"<<endl;
         pair<int, int> firstMove = game->record.back();
         int x = firstMove.first, y = firstMove.second;
-        if (x == 7 && y == 7)
-        // TODO: Add several opening choices to make it more flexible.
-            return make_pair(6, 8);
+        if (x == 7 && y == 7) {
+        // TODO: Several opening choices. Randomly choose one.
+            vector<pair<int, int>> reponse = {make_pair(6, 8), make_pair(8, 6), make_pair(8, 8), make_pair(6, 6),
+                                              make_pair(6, 7), make_pair(7, 6), make_pair(8, 7), make_pair(7, 8)};
+            srand(time(NULL));
+            return reponse[rand() % 8];
+        }
         else
             return make_pair(7, 7);
     }
+
+    // Hard code for the third move.
+    if (game->record.size() == 2)
+        return decideThirdMove();
+
+    // Hard code for the fourth move.
     
     pair<int, int> bestMove = {-1, -1};
     int bestScore = INT_MIN;

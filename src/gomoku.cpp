@@ -28,7 +28,6 @@ int Gomoku::make_move(pair<int, int> move)
         state = 1;
         return 0;
     }
-    stoneNumber++;
 
 	// vga_gomoku_arg_t arg;
 	// arg.param[0] = 1;
