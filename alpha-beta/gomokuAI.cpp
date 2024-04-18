@@ -1,5 +1,6 @@
 #include "gomokuAI.h"
 
+
 string GomokuAI::posToStr(int x, int y)
 {
     return to_string(x) + to_string(y);
@@ -16,12 +17,50 @@ vector<pair<int, int>> GomokuAI::getLegalMoves()
     return legalMoves;
 }
 
-vector<pair<int, int>> GomokuAI::getLegalMoves(int heuristic)
+vector<pair<int, int>> GomokuAI::getLegalMoves(bool heuristic)
 {
-    /* TODO: Heuristic searching.
-     * Probably no need to store every possible move on the board.
+    /* So traverse the board in a spiral way from inside out.
+     * 
+     * This is basically https://leetcode.cn/problems/spiral-matrix/ in reversing direction.
      */
+
     vector<pair<int, int>> legalMoves;
+    int row = game->board_size, col = game->board_size;
+    int x = int((row-1)/2), y = int((col-1)/2);
+    int steps = 1;   // Initial step size
+    int di = 0;      // Start direction index, begin with moving right
+    std::vector<std::pair<int, int>> directions = {
+    {0, 1},  // Right
+    {1, 0},  // Down
+    {0, -1}, // Left
+    {-1, 0}  // Up
+    };
+    int moves = 1;  // Number of handled places.
+
+    if(!game->board[x][y])
+        legalMoves.push_back(make_pair(x, y));
+
+    while (moves < row*col) {
+        for (int i=0; i<2; i++) {
+            for (int j=0; j<steps; j++) {
+                int nx = x + directions[di].first;
+                int ny = y + directions[di].second;
+                if (game->on_board(nx, ny)) {
+                    if (!game->board[nx][ny])
+                        legalMoves.push_back(make_pair(nx, ny));
+                    moves ++;
+                    x = nx;
+                    y = ny;
+                }
+            }
+            if (moves >= row*col) {
+                return legalMoves;
+            }
+            di = (di+1) % 4;
+        }
+        steps += 1;
+    }
+
     return legalMoves;
 }
 
@@ -170,21 +209,110 @@ int GomokuAI::undoMove(pair<int, int> move)
     int x = move.first, y = move.second;
     game->board[x][y] = 0;
 
-    if (game->state == 1)
+    if (game->state == 1) {
         game->state = 0;
+    }
 
     return 0;
 }
 
+pair<int, int> GomokuAI::decideThirdMove()
+{
+    // The first move is fixed as (7, 7).
+    pair<int, int> secondMove = game->record[1];
+
+    // Out of touch
+    if (secondMove.first >= 9 || secondMove.first <= 5 || secondMove.second >= 9 || secondMove.second <= 5) {
+        vector<pair<int, int>> reponse = {make_pair(6, 8), make_pair(8, 6), make_pair(8, 8), make_pair(6, 6)};
+        srand(time(NULL));
+        return reponse[rand() % 4];
+    }
+
+    // Direct4
+    else if (secondMove.first + secondMove.second == 15)
+        return make_pair(8, 8);
+
+    else if (secondMove.first + secondMove.second == 15)
+        return make_pair(6, 6);
+
+    else {
+        int x = secondMove.first - 7;
+        int y = secondMove.second - 7;
+        vector<pair<int, int>> response = {make_pair(secondMove.first - 2*x, secondMove.second),
+                                           make_pair(secondMove.first, secondMove.second - 2*y)};
+        srand(time(NULL));
+        return response[rand() % 2];
+    }
+}
+
+pair<int, int> GomokuAI::decideFourthMove()
+{
+    // XXX: for now only hard code the "Direct4" since it's the only odd one.
+    pair<int, int> bestMove = make_pair(-1, -1);
+
+    pair<int, int> firstMove = game->record[0];
+    pair<int, int> secondMove = game->record[1];
+    pair<int, int> thirdMove = game->record[2];
+
+    if (firstMove != make_pair(7, 7))
+        goto out;
+    
+    else if ((secondMove == make_pair(7, 8) && thirdMove == make_pair(6, 8))||
+    (secondMove == make_pair(8, 7) && thirdMove == make_pair(8, 6)))   { bestMove = make_pair(6, 6);}
+    
+    else if ((secondMove == make_pair(6, 7) && thirdMove == make_pair(6, 8))||
+    (secondMove == make_pair(7, 6) && thirdMove == make_pair(8, 6)))   { bestMove = make_pair(8, 8);}
+
+    else if ((secondMove == make_pair(8, 7) && thirdMove == make_pair(8, 8))||
+    (secondMove == make_pair(7, 6) && thirdMove == make_pair(6, 6)))   { bestMove = make_pair(6, 8);}
+
+    else if ((secondMove == make_pair(7, 8) && thirdMove == make_pair(8, 8))||
+    (secondMove == make_pair(6, 7) && thirdMove == make_pair(6, 6)))   { bestMove = make_pair(8, 6);}
+
+out:
+    return bestMove;
+}
+
 pair<int, int> GomokuAI::findBestMove()
 {
+    /* Hard code. */
+
+    // Hard code for the first move. The best move for the first move is always (7, 7)
+    if (game->record.size() == 0)
+        return make_pair(7, 7);
+
+    // Hard code for the second move.
+    if (game->record.size() == 1) {
+        pair<int, int> firstMove = game->record.back();
+        int x = firstMove.first, y = firstMove.second;
+        if (x == 7 && y == 7) {
+        // Several opening choices. Randomly choose one.
+            vector<pair<int, int>> reponse = {make_pair(6, 8), make_pair(8, 6), make_pair(8, 8), make_pair(6, 6),
+                                              make_pair(6, 7), make_pair(7, 6), make_pair(8, 7), make_pair(7, 8)};
+            srand(time(NULL));
+            return reponse[rand() % 8];
+        }
+        else
+            return make_pair(7, 7);
+    }
+
+    // Hard code for the third move.
+    if (game->record.size() == 2) 
+        return decideThirdMove();
+
+    // Hard code for the fourth move.
+    if (game->record.size() == 3) {
+        pair<int, int> move = decideFourthMove();
+        if (move.first != -1)
+            return move;
+    }
+    
     pair<int, int> bestMove = {-1, -1};
-    int player = game->current_player;
     int bestScore = INT_MIN;
 
     for(auto& move:getLegalMoves()) {
         makeMove(move);
-        int score = MiniMax(maxDepth, INT_MAX, INT_MIN, true, player);
+        int score = MiniMax(maxDepth, INT_MAX, INT_MIN, true);
         undoMove(move);
         if (score > bestScore) {
             bestScore = score;
@@ -195,21 +323,20 @@ pair<int, int> GomokuAI::findBestMove()
     return bestMove;
 }
 
-int GomokuAI::MiniMax(int depth, int alpha, int beta, bool isMax, int player)
+int GomokuAI::MiniMax(int depth, int alpha, int beta, bool isMax)
 {
     if (!depth || game->state == 1) {
-    /* TODO: Not sure. */
-        return evaluate(player);
+        return evaluate(game->current_player);
     }
 
     if (isMax) {
         int maxEval = INT_MIN;
         for (auto& move:getLegalMoves()) {
             makeMove(move);
-            int eval = MiniMax(depth-1, alpha, beta, false, player);   // Now minimizing.
+            int eval = MiniMax(depth-1, alpha, beta, false);   // Now minimizing.
             undoMove(move);
             maxEval = max(maxEval, eval);
-            alpha = max(alpha, eval);   // Update alpha.
+            alpha = max(alpha, maxEval);   // Update alpha.
             if (beta <= alpha)
                 break;      // Beta prunning.
         }
@@ -219,10 +346,10 @@ int GomokuAI::MiniMax(int depth, int alpha, int beta, bool isMax, int player)
         int minEval = INT_MAX;
         for (auto& move:getLegalMoves()) {
             makeMove(move);
-            int eval = MiniMax(depth-1, alpha, beta, true, player);    // Now maximizing.
+            int eval = MiniMax(depth-1, alpha, beta, true);    // Now maximizing.
             undoMove(move);
             minEval = min(minEval, eval);
-            beta = min(beta, eval);     // Update beta
+            beta = min(beta, minEval);     // Update beta
             if (beta <= alpha)
                 break;      // Alpha prunning.
         }

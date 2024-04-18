@@ -3,7 +3,8 @@
 
 #include "../src/gomoku.h"
 #include <climits>
-#include <unordered_map>
+#include <map>
+#include <cassert>
 
 
 // Weights for each position. Closer to the center, higher the weight.
@@ -25,6 +26,7 @@ const int posWeights[15][15] =
     {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 };
+
 
 /*
  * TODO: Maybe need to consider more. (Nah dont think so.)
@@ -49,8 +51,8 @@ const int posWeights[15][15] =
 struct shapesLookup {
     int RENJU_SCORE,
         OFOUR_SCORE,
-        HFOUR_SCORE,
         OTHREE_SCORE,
+        HFOUR_SCORE,
         HTHREE_SCORE,
         OTWO_SCORE,
         HTWO_SCORE;
@@ -65,13 +67,13 @@ struct shapesLookup {
         HTWOS_0, HTWOS_1, HTWOS_2, HTWOS_3, HTWOS_4, HTWOS_5, HTWOS_6;
 
     shapesLookup() :
-        RENJU_SCORE(5000000),
+        RENJU_SCORE(10000000),
         OFOUR_SCORE(1000000),
-        HFOUR_SCORE(10000),
-        OTHREE_SCORE(8000),
-        HTHREE_SCORE(500),
-        OTWO_SCORE(50),
-        HTWO_SCORE(10),
+        OTHREE_SCORE(10000),
+        HFOUR_SCORE(8000),
+        HTHREE_SCORE(1000),
+        OTWO_SCORE(800),
+        HTWO_SCORE(50),
 
         RENJU("11111"),
         OFOUR("#1111#"),
@@ -115,10 +117,10 @@ public:
     int  strategy;                                              // The aggresive degree of AI. (1->3)
 
     GomokuAI(Gomoku *game, int strategy):
-    game(game), maxDepth(13), strategy(strategy) {}
+    game(game), maxDepth(5), strategy(strategy) {}
 
     vector<pair<int, int>> getLegalMoves();                     // Get valid intersections on board.
-    vector<pair<int, int>> getLegalMoves(int heuristic);        // Focus on the possible areas to reduce overhead.
+    vector<pair<int, int>> getLegalMoves(bool heuristic);       // Focus on the possible areas to reduce overhead.
     string posToStr(int x, int y);                              // Turn a (x, y) pair to str for filling record.
     int evaluate(int player);                                   // Evaluate the current board.
     int evaluate(int player, int heuristic);                    // Heuristicly evaluate for optimizing.
@@ -126,9 +128,12 @@ public:
     int makeMove(pair<int, int> move);                          // AI makes a move at (x, y).
     int undoMove(pair<int, int> move);                          // Undo a move at (x, y). Used when searching.
     pair<int, int> findBestMove();                              // Find the best move, return a (x, y) pair.
-    int MiniMax(int depth, int alpha, int beta,                 // Alpha Beta Prunning.
-    bool isMax, int player);     
+    int MiniMax(int depth, int alpha, int beta, bool isMax);    // Alpha Beta Prunning.    
     int getScorefromTable(string s);                            // Look up shapesLookup table to get score.
+
+    // Beginnings.
+    pair<int, int> decideThirdMove();   // AI plays black and it's the third move.
+    pair<int, int> decideFourthMove();      // 花月, Kagetsu
 
     /*
      * (1, 0)   vertical line.
