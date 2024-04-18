@@ -10,6 +10,7 @@ class GMKDisplay{
 		// piece 0:No piece, 1:white piece, 2:black piece
 		bool update_piece_info(int x,int y,int piece, int current=1);
 		bool update_select(int x,int y);
+		bool clear_board();
 		bool sync();
 		bool open_display();
 	protected:

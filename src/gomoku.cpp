@@ -128,10 +128,4 @@ void Gomoku::displayBoard()
 void Gomoku::clearBoard()
 {
 	board = vector<vector<int>>(board_size, std::vector<int>(board_size, 0));
-	vga_gomoku_arg_t arg;
-	arg.param[0] = 255;
-	if (ioctl(vga_gomoku_fd, VGA_GOMOKU_WRITE, &arg)){
-		perror("ioctl(VGA_GOMOKU_WRITE) failed");
-		return;
-	}
 }

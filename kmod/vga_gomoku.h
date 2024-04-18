@@ -3,7 +3,7 @@
 
 #include <linux/ioctl.h>
 #include <stddef.h>
-#include <stdint.h>
+#include <linux/types.h>
 
 typedef struct {
 	uint16_t params[8];

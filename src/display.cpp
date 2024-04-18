@@ -19,7 +19,7 @@ bool GMKDisplay::update_piece_info(int x,int y, int piece, int current=1)
 	reg|=x;
 	reg|=(y<<4);
 	arg_[1] = reg;
-	this->sync();
+	return this->sync();
 }
 
 bool GMKDisplay::update_select(int x,int y)
@@ -27,7 +27,13 @@ bool GMKDisplay::update_select(int x,int y)
 	uint16_t reg=0;
 	reg|=(x|(y<<4));
 	arg_[2] = reg;
-	this->sync();
+	return this->sync();
+}
+
+bool GMKDisplay::clear_board()
+{
+	arg_[0] = 0;
+	return this->sync();
 }
 
 bool GMKDisplay::sync()

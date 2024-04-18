@@ -6,7 +6,7 @@ TARGET = alphaBetaGomoku
 
 # SOURCES = ../src/gomoku.cpp ../src/players.cpp ../src/tcp.cpp tcp_main.cpp
 # SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp selfplay.cpp
-SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp pve.cpp
+SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp pve.cpp ../src/display.cpp
 
 # OBJECTS = $(SOURCES:.cpp=.o)
 OBJECTS = $(notdir $(SOURCES:.cpp=.o))

@@ -64,7 +64,7 @@ static void write_data(vga_gomoku_arg_t *arg)
 {
 	int i;
 	for(i=0;i<8;++i)
-		iowrite16(arg->param[i], dev.virtbase+i);
+		iowrite16(arg->params[i], dev.virtbase+i);
 }
 
 /*
