@@ -2,6 +2,7 @@
 #include "gomokuAI.h"
 #include "../src/players.h"
 #include "../src/display.h"
+#include "../kmod/vga_gomoku.h"
 
 void applyEndgame(Gomoku *game)
 {
@@ -57,7 +58,7 @@ int main() {
         pair<int, int> bestMove= ai.findBestMove();
         ai.makeMove(bestMove);
         game.record.push_back(bestMove);
-		display.update_piece_info(bestMove.first,bestMove.second);
+		display.update_piece_info(bestMove.first,bestMove.second,1,1);
 
         cout << "You made a move at " << x << ", " << y << ", " << "AI made a move at " 
         << bestMove.first + 1 << ", " << bestMove.second + 1 << "\n" << endl;

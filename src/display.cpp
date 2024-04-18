@@ -5,6 +5,8 @@
 #include <iostream>
 #include <stdint.h>
 
+#include "../kmod/vga_gomoku.h"
+
 bool GMKDisplay::open_display()
 {
 	for(int i=0;i<8;++i)
@@ -45,7 +47,7 @@ bool GMKDisplay::clear_board()
 
 bool GMKDisplay::sync()
 {
-	if (ioctl(vga_gomoku_fd_, VGA_GOMOKU_WRITE, &arg_)){
+	if (ioctl(vga_gomoku_fd_, VGA_GOMOKU_WRITE, params_)){
 		perror("ioctl(VGA_GOMOKU_WRITE) failed");
 		return false;
 	}
