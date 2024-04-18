@@ -14,3 +14,7 @@ alphaBetaGomoku
 asset/log.txt
 store
 asset/result/check_result.py
+asset/fonts/generate_png.py
+asset/upsample.py
+asset/gomoku.png
+asset/gomoku (自定义).jpeg
