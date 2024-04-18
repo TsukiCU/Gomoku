@@ -2,6 +2,8 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <iostream>
+#include <stdint.h>
 
 bool GMKDisplay::open_display()
 {
@@ -12,7 +14,7 @@ bool GMKDisplay::open_display()
 	return true;
 }
 
-bool GMKDisplay::update_piece_info(int x,int y, int piece, int current=1)
+bool GMKDisplay::update_piece_info(int x,int y, int piece, int current)
 {
 	uint16_t reg=0;
 	reg|=piece;
