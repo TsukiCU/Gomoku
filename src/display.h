@@ -14,9 +14,9 @@ class GMKDisplay{
 		bool sync();
 		bool open_display();
 	protected:
-		vga_gomoku_arg_t arg_={0};
+		vga_gomoku_arg_t arg_=;
 		int vga_gomoku_fd_=-1;
-		const char *dev_name;
+		const char *dev_name_;
 };
 
 #endif
