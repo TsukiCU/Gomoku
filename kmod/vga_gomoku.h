@@ -3,10 +3,12 @@
 
 #include <linux/ioctl.h>
 #include <stddef.h>
+#include <stdint.h>
 
 typedef struct {
-	unsigned char param[8];
+	uint16_t params[8];
 } vga_gomoku_arg_t;
+
 
 #define VGA_GOMOKU_MAGIC 'q'
 #define VGA_DRIVER_FILENAME "/dev/vga_ball"

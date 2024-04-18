@@ -16,7 +16,6 @@ public:
     int WIN_LENGTH;                   		// Ending condition: Form an unbroken line of five stones.
     vector<vector<int>> board;              // The board.
     vector<pair<int, int>> record;          // Game record.
-	int vga_gomoku_fd=-1;					// vga fd
 
     Gomoku() : state(0), board_size(15), current_player(1),
     WIN_LENGTH(5), board(board_size, vector<int>(board_size, 0)) {}
