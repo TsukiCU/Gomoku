@@ -1,4 +1,7 @@
 #include "display.h"
+#include <sys/ioctl.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 bool GMKDisplay::open_display()
 {
@@ -18,7 +21,7 @@ bool GMKDisplay::update_piece_info(int x,int y, int piece, int current=1)
 	reg>>=1;
 	reg|=x;
 	reg|=(y<<4);
-	arg_[1] = reg;
+	arg_.params[1] = reg;
 	return this->sync();
 }
 
@@ -26,13 +29,13 @@ bool GMKDisplay::update_select(int x,int y)
 {
 	uint16_t reg=0;
 	reg|=(x|(y<<4));
-	arg_[2] = reg;
+	arg_.params[2] = reg;
 	return this->sync();
 }
 
 bool GMKDisplay::clear_board()
 {
-	arg_[0] = 0;
+	arg_.params[0] = 0;
 	return this->sync();
 }
 
@@ -40,6 +43,7 @@ bool GMKDisplay::sync()
 {
 	if (ioctl(vga_gomoku_fd_, VGA_GOMOKU_WRITE, &arg_)){
 		perror("ioctl(VGA_GOMOKU_WRITE) failed");
-		return;
+		return false;
 	}
+	return true;
 }
