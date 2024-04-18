@@ -1,7 +1,7 @@
 #ifndef _DISPLAY_HH
 #define _DISPLAY_HH
 
-#include "../kmod/vga_gomoku.h"
+#include <stdint.h>
 
 class GMKDisplay{
 	public:
@@ -14,7 +14,7 @@ class GMKDisplay{
 		bool sync();
 		bool open_display();
 	protected:
-		vga_gomoku_arg_t arg_;
+		uint16_t params_[8];
 		int vga_gomoku_fd_=-1;
 		const char *dev_name_;
 };

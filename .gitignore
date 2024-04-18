@@ -18,3 +18,5 @@ asset/fonts/generate_png.py
 asset/upsample.py
 asset/gomoku.png
 asset/gomoku (自定义).jpeg
+asset/title_gen.py
+asset/result/white_gen_modified.png

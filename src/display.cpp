@@ -7,6 +7,8 @@
 
 bool GMKDisplay::open_display()
 {
+	for(int i=0;i<8;++i)
+		params_[i]=0;
 	if ((vga_gomoku_fd_= open(this->dev_name_, O_RDWR)) == -1) {
 		fprintf(stderr, "could not open %s\n", this->dev_name_);
 		return false;
@@ -23,7 +25,7 @@ bool GMKDisplay::update_piece_info(int x,int y, int piece, int current)
 	reg>>=1;
 	reg|=x;
 	reg|=(y<<4);
-	arg_.params[1] = reg;
+	params_[1] = reg;
 	return this->sync();
 }
 
@@ -31,13 +33,13 @@ bool GMKDisplay::update_select(int x,int y)
 {
 	uint16_t reg=0;
 	reg|=(x|(y<<4));
-	arg_.params[2] = reg;
+	params_[2] = reg;
 	return this->sync();
 }
 
 bool GMKDisplay::clear_board()
 {
-	arg_.params[0] = 0;
+	params_[0] = 0;
 	return this->sync();
 }
 
