@@ -131,6 +131,49 @@ void Gomoku::clearBoard()
 	board = vector<vector<int>>(board_size, vector<int>(board_size, 0));
 }
 
+int Gomoku::regret_move()
+{
+    // PvP
+    if (mode == 0) {
+        if (record.size() == 0) {
+            cerr << "Cannot regret a move. " << endl;
+            return 1;
+        }
+        auto rit = record.rbegin();
+        pair<int, int> lastMove = *rit;
+        board[lastMove.first][lastMove.second] = 0;
+
+        // clear the record.
+        record.erase(record.end());
+
+        /* FIXME: Online gaming mode and Local pvp mode should be handled differently? */
+    }
+
+    // PvE
+    else {
+        if (record.size() < 2) {
+            cerr << "Cannot regret a move. " << endl;
+            return 1;
+        }
+        auto rit = record.rbegin();
+        pair<int, int> lastMove = *rit;
+        pair<int, int> secondLastMove = *(rit + 1);
+        board[lastMove.first][lastMove.second] = 0;
+        board[secondLastMove.first][secondLastMove.second] = 0;
+
+        // clear the record.
+        record.erase(record.end()-2, record.end());
+        regretTimes++;
+
+        if (regretTimes >= 3) {
+            cout << "Think before you make a move!" << endl;
+        }
+
+        /* TODO: We might disable regret function if a certain number of regrets are made. */
+    }
+
+    return 0;
+
 void Gomoku::recordGame()
 {
     string filename = "record.txt";

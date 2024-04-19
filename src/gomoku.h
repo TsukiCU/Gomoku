@@ -14,15 +14,18 @@ public:
     int current_player;                     // 1 for black's turn, 2 for white's turn.
     int winner;                             // It's useful to know who wins in MCTS. Same as current_player.
     int WIN_LENGTH;                   		// Ending condition: Form an unbroken line of five stones.
+    int mode;                               // 0 for pvp, 1 for pve. This is useful when we regret a move. 
+    int regretTimes;                        // Times user has regreted. Used only when online gaming and playing with AI.
     vector<vector<int>> board;              // The board.
     vector<pair<int, int>> record;          // Game record.
 
-    Gomoku() : state(0), board_size(15), current_player(1),
-    WIN_LENGTH(5), board(board_size, vector<int>(board_size, 0)) {}
+    Gomoku(int mode) : state(0), board_size(15), current_player(1),
+    WIN_LENGTH(5), mode(mode), board(board_size, vector<int>(board_size, 0)) {}
 
     bool on_board(int x, int y);            // Check if (x, y) is a valid position.
     bool valid_move(int x, int y);          // Check if the move at (x, y) is valid.
-    int  make_move(pair<int, int> move);    // Make a move at (x, y).    vector<pair<int, int>> getLegalMoves();                     // Get valid intersections on board.
+    int make_move(pair<int, int> move);     // Make a move at (x, y).    vector<pair<int, int>> getLegalMoves();
+    int regret_move();                      // Regret a move. If it's pvp, dial back one move. If it's pve, dial back 2 moves.
 
     bool check_win(int x, int y);           // Check if the winning condition is satisfied.
     bool is_draw();                         // Check if players draw.
