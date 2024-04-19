@@ -28,7 +28,8 @@ bool GMKDisplay::open_display()
 
 bool GMKDisplay::update_piece_info(int x,int y, int piece, int current)
 {
-	params_[1] = x|(y<<4)|(current<<8)|(piece<<9);
+	params_[1] = x|(y<<4)|(piece<<9);
+	params_[2] |= ((x<<4)|y)<<8;
 	printf("piece_info3:0x%04x\n",params_[1]);
 	return this->sync();
 }
@@ -45,7 +46,7 @@ bool GMKDisplay::clear_board()
 {
 	params_[0] = 0xffff;
 	bool ret = this->sync();
-	params_[0] = 0;
+	params_[2] = 0xffff;
 	return ret;
 }
 
