@@ -133,7 +133,13 @@ public:
 
     // Beginnings.
     pair<int, int> decideThirdMove();   // AI plays black and it's the third move.
-    pair<int, int> decideFourthMove();  // 花月, Kagetsu
+
+    // The fourth move. Apply the strongest known defense.
+    // https://zhuanlan.zhihu.com/p/549399379
+    // [花月, Kagetsu], [雨月, Ugetsu]
+    pair<int, int> decideFourthMove();
+    pair<int, int> isKagestu(pair<int, int> bestMove);
+    pair<int, int> isUgetsu(pair<int, int> bestMove);
 
     /*
      * (1, 0)   vertical line.

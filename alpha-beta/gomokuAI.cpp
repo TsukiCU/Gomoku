@@ -245,17 +245,23 @@ pair<int, int> GomokuAI::decideThirdMove()
     }
 }
 
-pair<int, int> GomokuAI::decideFourthMove()
+/*
+ * XXX: May need to revise the logic.
+ */
+pair<int, int> GomokuAI::isKagestu(pair<int, int> bestMove)
 {
-    // XXX: for now only hard code the "Direct4" since it's the only odd one.
-    pair<int, int> bestMove = make_pair(-1, -1);
+    if (game->record.size() != 3) {
+        cerr << "Incorrectly entered function isKagestu. " << endl;
+        return bestMove;
+    }
 
+    // 花月 e.g. (7,7) -> (7,8) -> (8,7) 
     pair<int, int> firstMove = game->record[0];
     pair<int, int> secondMove = game->record[1];
     pair<int, int> thirdMove = game->record[2];
 
     if (firstMove != make_pair(7, 7))
-        goto out;
+        return bestMove;
     
     else if ((secondMove == make_pair(7, 8) && thirdMove == make_pair(6, 8))||
     (secondMove == make_pair(8, 7) && thirdMove == make_pair(8, 6)))   { bestMove = make_pair(6, 6);}
@@ -269,13 +275,57 @@ pair<int, int> GomokuAI::decideFourthMove()
     else if ((secondMove == make_pair(7, 8) && thirdMove == make_pair(8, 8))||
     (secondMove == make_pair(6, 7) && thirdMove == make_pair(6, 6)))   { bestMove = make_pair(8, 6);}
 
-out:
+    return bestMove;
+}
+
+pair<int, int> GomokuAI::isUgetsu(pair<int, int> bestMove)
+{
+    if (game->record.size() != 3) {
+        cerr << "Incorrectly entered function isUgetsu. " << endl;
+        return bestMove;
+    }
+
+    // 花月 e.g. (7,7) -> (7,6) -> (6,7)
+    pair<int, int> firstMove = game->record[0];
+    pair<int, int> secondMove = game->record[1];
+    pair<int, int> thirdMove = game->record[2];
+
+    if (firstMove != make_pair(7, 7))
+        return bestMove;
+
+    else if ((secondMove == make_pair(7, 6) && thirdMove == make_pair(6, 7))||
+    (secondMove == make_pair(7, 8) && thirdMove == make_pair(6, 7)))   { bestMove = make_pair(5, 7);}
+    
+    else if ((secondMove == make_pair(7, 8) && thirdMove == make_pair(8, 7))||
+    (secondMove == make_pair(7, 6) && thirdMove == make_pair(8, 7)))   { bestMove = make_pair(9, 7);}
+
+    else if ((secondMove == make_pair(6, 7) && thirdMove == make_pair(7, 6))||
+    (secondMove == make_pair(8, 7) && thirdMove == make_pair(7, 6)))   { bestMove = make_pair(7, 5);}
+
+    else if ((secondMove == make_pair(6, 7) && thirdMove == make_pair(7, 8))||
+    (secondMove == make_pair(8, 7) && thirdMove == make_pair(7, 8)))   { bestMove = make_pair(7, 9);}
+
+    return bestMove;
+}
+
+pair<int, int> GomokuAI::decideFourthMove()
+{
+    pair<int, int> bestMove = make_pair(-1, -1);
+
+    bestMove = isKagestu(bestMove);
+    if (bestMove.first != -1)
+        return bestMove;
+    
+    bestMove = isUgetsu(bestMove);
+    if (bestMove.first != -1)
+        return bestMove;
+
     return bestMove;
 }
 
 pair<int, int> GomokuAI::findBestMove()
 {
-    /* Hard code. */
+    /* Hard code for the first several moves. */
 
     // Hard code for the first move. The best move for the first move is always (7, 7)
     if (game->record.size() == 0)
