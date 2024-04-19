@@ -149,7 +149,7 @@ void GMKTCPBase::HandleRemoteMove(const GMKMoveInfo &info)
 	remote_player_.makeMove(make_pair(info.x - 1, info.y - 1));
 	++piece_count;
 	if(display){
-		display->update_piece_info(x-1,y-1,remote_player_.black?1:2,1);
+		display->update_piece_info(info.x-1,info.y-1,remote_player_.black?1:2,1);
 	}
 	printf("%d:%s take a move at (%d,%d)\n", piece_count,
 		remote_player_.black?"Black":"White",

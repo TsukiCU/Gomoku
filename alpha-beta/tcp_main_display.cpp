@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <string>
 #include "../src/display.h"
+#include "../kmod/vga_gomoku.h"
 
 int main(int argc, char **argv)
 {
