@@ -18,7 +18,6 @@ public:
     int regretTimes;                        // Times user has regreted. Used only when online gaming and playing with AI.
     vector<vector<int>> board;              // The board.
     vector<pair<int, int>> record;          // Game record.
-	int vga_gomoku_fd=-1;					// vga fd
 
     Gomoku(int mode) : state(0), board_size(15), current_player(1),
     WIN_LENGTH(5), mode(mode), board(board_size, vector<int>(board_size, 0)) {}
@@ -33,6 +32,7 @@ public:
     void switchPlayers();                   // Switch Black and white.
     void displayBoard();                    // Display board in terminal.
 	void clearBoard();						// Clear board
+    void recordGame();                      // Record game in a record/
 
     template<int x_step, int y_step>
     bool check(int x, int y) {

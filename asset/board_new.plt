@@ -1,0 +1,15 @@
+4'h0 : {VGA_R, VGA_G, VGA_B} = 24'h816951;
+4'h1 : {VGA_R, VGA_G, VGA_B} = 24'ha0866d;
+4'h2 : {VGA_R, VGA_G, VGA_B} = 24'hc9a081;
+4'h3 : {VGA_R, VGA_G, VGA_B} = 24'hc6ab91;
+4'h4 : {VGA_R, VGA_G, VGA_B} = 24'hd3b69a;
+4'h5 : {VGA_R, VGA_G, VGA_B} = 24'hd9bb9d;
+4'h6 : {VGA_R, VGA_G, VGA_B} = 24'hdcc0a5;
+4'h7 : {VGA_R, VGA_G, VGA_B} = 24'hd7b694;
+4'h8 : {VGA_R, VGA_G, VGA_B} = 24'h513f29;
+4'h9 : {VGA_R, VGA_G, VGA_B} = 24'hd4b191;
+4'ha : {VGA_R, VGA_G, VGA_B} = 24'hd1ac89;
+4'hb : {VGA_R, VGA_G, VGA_B} = 24'hd0a988;
+4'hc : {VGA_R, VGA_G, VGA_B} = 24'hd2ae8b;
+4'hd : {VGA_R, VGA_G, VGA_B} = 24'hcca383;
+4'he : {VGA_R, VGA_G, VGA_B} = 24'hcfa585;

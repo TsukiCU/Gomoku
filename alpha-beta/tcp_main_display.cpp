@@ -1,6 +1,8 @@
 #include "../src/tcp.h"
 #include <cstdio>
 #include <string>
+#include "../src/display.h"
+#include "../kmod/vga_gomoku.h"
 
 int main(int argc, char **argv)
 {
@@ -17,6 +19,11 @@ int main(int argc, char **argv)
 		// 4. use CheckGameResult() to see if game ends
 		// 5. use MakeMove to place a piece
 		GMKServer server;
+		GMKDisplay display(VGA_DRIVER_FILENAME);
+		if(!display.open_display())
+			return -1;
+		display.clear_board();
+		server.SetDisplay(&display);
 		if(!server.Create())
 			return -1;
 		if(!server.WaitForPlayer()){

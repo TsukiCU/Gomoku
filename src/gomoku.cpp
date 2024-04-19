@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -127,13 +128,7 @@ void Gomoku::displayBoard()
 
 void Gomoku::clearBoard()
 {
-	board = vector<vector<int>>(board_size, std::vector<int>(board_size, 0));
-	vga_gomoku_arg_t arg;
-	arg.param[0] = 255;
-	if (ioctl(vga_gomoku_fd, VGA_GOMOKU_WRITE, &arg)){
-		perror("ioctl(VGA_GOMOKU_WRITE) failed");
-		return;
-	}
+	board = vector<vector<int>>(board_size, vector<int>(board_size, 0));
 }
 
 int Gomoku::regret_move()
@@ -178,4 +173,35 @@ int Gomoku::regret_move()
     }
 
     return 0;
+
+void Gomoku::recordGame()
+{
+    string filename = "record.txt";
+    ofstream file(filename, ios::out | ios::app);
+    if (!file) {
+        cerr << "Error opening file: " << filename << endl;
+        return;
+    }
+
+    // Record game into the record.txt (append mode)
+    file << "\n\n\n";
+
+    for (auto move:record) {
+        int first = move.first;
+        int second = move.second;
+
+        file << first;
+        file << ",";
+        file << second;
+        file << "  ";
+    }
+
+    file.close();
+
+    // Should it fail
+    if (file.fail()) {
+        cerr << "Error while closing record.tx." << endl;
+    } else {
+        cout << "Written to record.txt." << endl;
+    }
 }
