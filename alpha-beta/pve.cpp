@@ -21,7 +21,7 @@ void applyEndgame(Gomoku *game)
 // }
 
 int main() {
-    Gomoku game;
+    Gomoku game(1);
     Player p1(&game, 1);
     GomokuAI ai(&game, 1);  // Use strategy 1 for best performance.
 
@@ -34,8 +34,17 @@ int main() {
         int x, y;
         std::cin >> x >> y;
         
-        // User makes a move.
-        if (p1.makeMove(make_pair(x - 1, y - 1))) {
+        // User makes a move. Assume (-1, -1) means want to regret.
+        if (x == -1 && y == -1) {
+            if (!game.regret_move()) {
+                game.displayBoard();
+                cout << "regret a move, please continue" << endl;
+            }
+            
+            continue;
+        }
+
+        else if (p1.makeMove(make_pair(x - 1, y - 1))) {
             cout << "Invalid move!" << '\n' << endl;
             continue;
         }
