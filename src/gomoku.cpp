@@ -145,6 +145,7 @@ int Gomoku::regret_move()
 
         // clear the record.
         record.erase(record.end());
+        current_player = 3 - current_player;
 
         /* FIXME: Online gaming mode and Local pvp mode should be handled differently? */
     }
