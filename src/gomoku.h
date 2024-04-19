@@ -20,7 +20,7 @@ public:
     vector<pair<int, int>> record;          // Game record.
 
     Gomoku(int mode) : state(0), board_size(15), current_player(1),
-    WIN_LENGTH(5), mode(mode), board(board_size, vector<int>(board_size, 0)) {}
+    WIN_LENGTH(5), mode(mode), regretTimes(0), board(board_size, vector<int>(board_size, 0)) {}
 
     bool on_board(int x, int y);            // Check if (x, y) is a valid position.
     bool valid_move(int x, int y);          // Check if the move at (x, y) is valid.

@@ -5,7 +5,7 @@
 
 int main() {
     int ai_turn = 1;
-    Gomoku game;
+    Gomoku game(1);
     Player p1(&game, 1);
     GomokuAI ai(&game, 1);  // Use strategy 1 for best performance.
 
