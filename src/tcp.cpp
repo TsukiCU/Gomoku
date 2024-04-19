@@ -111,6 +111,10 @@ bool GMKTCPBase::MakeMove(int x, int y)
 	// Local player takes move
 	local_player_.makeMove(make_pair(x - 1, y - 1));
 	++piece_count;
+	if(display){
+		display->update_piece_info(x-1,y-1,local_player_.black?2:1,1);
+		display->update_select(x-1,y-1);
+	}
 	// Send move message
 	GMKTCPMessage msg;
 	msg.magic = 0x474D4B4D;
@@ -144,6 +148,10 @@ void GMKTCPBase::HandleRemoteMove(const GMKMoveInfo &info)
 	// Remote player takes move
 	remote_player_.makeMove(make_pair(info.x - 1, info.y - 1));
 	++piece_count;
+	if(display){
+		display->update_piece_info(x-1,y-1,remote_player_.black?2:1,1);
+		display->update_select(x-1,y-1);
+	}
 	printf("%d:%s take a move at (%d,%d)\n", piece_count,
 		remote_player_.black?"Black":"White",
 		info.x,info.y
