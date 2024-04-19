@@ -48,6 +48,7 @@ public:
 	bool MakeMove(int x, int y);
 	int CheckGameResult();
 	void ResetBoard();
+	void SetDisplay(GMKDisplay *display) {display_=display;}
 protected:
 	bool SendPlayerInfo(const PlayerInfo &info);
 	void CreateReceiveThread();
@@ -62,7 +63,7 @@ protected:
 	Gomoku game_;
 	Player local_player_, remote_player_;
 	uint32_t piece_count;
-	GMKDisplay *display=nullptr;
+	GMKDisplay *display_=nullptr;
 
 	bool connected_ = false;
 };

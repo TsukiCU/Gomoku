@@ -23,6 +23,7 @@ int main(int argc, char **argv)
 		if(!display.open_display())
 			return -1;
 		display.clear_board();
+		server.SetDisplay(&display);
 		if(!server.Create())
 			return -1;
 		if(!server.WaitForPlayer()){
