@@ -173,6 +173,7 @@ int Gomoku::regret_move()
     }
 
     return 0;
+}
 
 void Gomoku::recordGame()
 {

@@ -126,7 +126,6 @@ int GomokuAI::getScorefromTable(string s)
 int GomokuAI::ratePos(int x, int y, int player)
 {
     // int dirs[4][4] = {{1, 0}, {0, 1}, {1, 1}, {1, -1}};
-    /* WTF? I can't even do this using loops? What kind of language is this? */
 
     int score = 0;
     int weight = posWeights[x][y];
