@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <thread>
+#include "display.h"
 
 #define GMK_SERVER_PORT 18253
 #define GMK_SERVER_PORT_MAX_OFFSET 100
@@ -47,6 +48,7 @@ public:
 	bool MakeMove(int x, int y);
 	int CheckGameResult();
 	void ResetBoard();
+	void SetDisplay(GMKDisplay *display) {display_=display;}
 protected:
 	bool SendPlayerInfo(const PlayerInfo &info);
 	void CreateReceiveThread();
@@ -61,6 +63,8 @@ protected:
 	Gomoku game_;
 	Player local_player_, remote_player_;
 	uint32_t piece_count;
+	GMKDisplay *display_=nullptr;
+
 	bool connected_ = false;
 };
 
