@@ -3,6 +3,7 @@
 #include "../src/players.h"
 #include "../src/display.h"
 #include "../kmod/vga_gomoku.h"
+#include <unistd.h>
 
 void applyEndgame(Gomoku *game)
 {
@@ -29,12 +30,12 @@ int main() {
 	GMKDisplay display(VGA_DRIVER_FILENAME);
 	if(!display.open_display())
 		return -1;
-
     cout << "\n\nGame started. " << endl;
 
     //applyEndgame(&game);
     
     game.displayBoard();
+	display.clear_board();
     while (1) {
         int x, y;
         std::cin >> x >> y;
