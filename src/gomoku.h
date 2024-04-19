@@ -29,6 +29,7 @@ public:
     void switchPlayers();                   // Switch Black and white.
     void displayBoard();                    // Display board in terminal.
 	void clearBoard();						// Clear board
+    void recordGame();                      // Record game in a record/
 
     template<int x_step, int y_step>
     bool check(int x, int y) {
