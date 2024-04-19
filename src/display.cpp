@@ -29,16 +29,15 @@ bool GMKDisplay::open_display()
 bool GMKDisplay::update_piece_info(int x,int y, int piece, int current)
 {
 	params_[1] = x|(y<<4)|(piece<<9);
-	params_[2] |= ((x<<4)|y)<<8;
+	if(current)
+		params_[2] = ((x<<4)|y)<<8|(params_[2]&0x00ff);
 	printf("piece_info3:0x%04x\n",params_[1]);
 	return this->sync();
 }
 
 bool GMKDisplay::update_select(int x,int y)
 {
-	uint16_t reg=0;
-	reg|=((x<<4)|y);
-	params_[2] = reg;
+	params_[2] = (params_[2]&0xff00)|((x<<4)|y);
 	return this->sync();
 }
 
