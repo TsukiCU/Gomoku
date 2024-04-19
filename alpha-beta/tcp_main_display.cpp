@@ -37,8 +37,6 @@ int main(int argc, char **argv)
 				std::cin.clear();
 				std::cin >> x >> y;
 				server.MakeMove(x, y);
-				display.update_piece_info(x-1,y-1,2,1);
-				display.update_select(x-1,y-1);
 			}
 			// Connection closed
 			if(server.CheckGameResult()==3){
