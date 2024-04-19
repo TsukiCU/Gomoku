@@ -46,7 +46,7 @@ int main() {
             continue;
         }
         game.record.push_back(make_pair(x - 1, y - 1));
-		display.update_piece_info(x-1,y-1,2,1);
+		display.update_piece_info(x-1,y-1,1,1);
 		display.update_select(x-1,y-1);
 
         if (game.state == 1) {
@@ -59,7 +59,7 @@ int main() {
         pair<int, int> bestMove= ai.findBestMove();
         ai.makeMove(bestMove);
         game.record.push_back(bestMove);
-		display.update_piece_info(bestMove.first,bestMove.second,1,1);
+		display.update_piece_info(bestMove.first,bestMove.second,2,1);
 
         cout << "You made a move at " << x << ", " << y << ", " << "AI made a move at " 
         << bestMove.first + 1 << ", " << bestMove.second + 1 << "\n" << endl;
