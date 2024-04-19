@@ -1,17 +1,16 @@
 test/
+.vscode/
+
 *.o
 *.exe
 *cxx
 *.so
 *.txt
-gomoku.py
-__pycache__/
-.vscode/
-gomoku
+*.mif
+*.plt
+
 1.cpp
-record.txt
 alphaBetaGomoku
-asset/log.txt
 store
 asset/result/check_result.py
 asset/fonts/generate_png.py
@@ -20,5 +19,3 @@ asset/gomoku.png
 asset/gomoku (自定义).jpeg
 asset/title_gen.py
 asset/result/white_gen_modified.png
-*.mif
-*.plt
