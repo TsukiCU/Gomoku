@@ -33,6 +33,16 @@ int main() {
         int x, y;
         std::cin >> x >> y;
 
+        // User makes a move. Assume (-1, -1) means want to regret.
+        if (x == -1 && y == -1) {
+            if (!game.regret_move()) {
+                game.displayBoard();
+                cout << "regret a move, please continue" << endl;
+            }
+            
+            continue;
+        }
+
         if (p1.makeMove(make_pair(x - 1, y - 1))) {
             cout << "Invalid move!" << '\n' << endl;
             continue;

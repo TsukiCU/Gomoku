@@ -1,11 +1,8 @@
 #include <iostream>
 #include <fstream>
-#include <sys/ioctl.h>
-#include <fcntl.h>
 #include <unistd.h>
 #include <vector>
 #include "gomoku.h"
-#include "../kmod/vga_gomoku.h"
 
 bool Gomoku::on_board(int x, int y)
 {
@@ -30,15 +27,6 @@ int Gomoku::make_move(pair<int, int> move)
         return 0;
     }
 
-	// vga_gomoku_arg_t arg;
-	// arg.param[0] = 1;
-	// arg.param[1] = (unsigned char)x;
-	// arg.param[2] = (unsigned char)y;
-	// arg.param[3] = (unsigned char)current_player;
-	// if (ioctl(vga_gomoku_fd, VGA_GOMOKU_WRITE, &arg)){
-	// 	perror("ioctl(VGA_GOMOKU_WRITE) failed");
-	// 	return 0;
-	// }
     switchPlayers();
     return 0;
 }
@@ -116,14 +104,6 @@ void Gomoku::displayBoard()
         }
         cout << "\n\n";
     }
-    // cout << endl;
-	// if(vga_gomoku_fd!=-1)
-	// 	return;
-	// const char *filename = VGA_DRIVER_FILENAME;
-	// if ((vga_gomoku_fd = open(filename, O_RDWR)) == -1) {
-	// 	fprintf(stderr, "could not open %s\n", filename);
-	// 	exit(-1);
-	// }
 }
 
 void Gomoku::clearBoard()
@@ -145,6 +125,7 @@ int Gomoku::regret_move()
 
         // clear the record.
         record.erase(record.end());
+        current_player = 3-current_player;
 
         /* FIXME: Online gaming mode and Local pvp mode should be handled differently? */
     }

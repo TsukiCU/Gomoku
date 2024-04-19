@@ -2,32 +2,12 @@
 #include "gomokuAI.h"
 #include "../src/players.h"
 
-void applyEndgame(Gomoku *game)
-{
-    game->board[7][7] = 1;
-    game->board[8][8] = 2;
-    game->board[8][9] = 1;
-    game->board[7][8] = 2;
-    game->board[9][7] = 1;
-    game->board[8][7] = 2;
-}
-
-// void applyEndgame(Gomoku *game)
-// {
-//     game->board[2][2] = 1;
-//     game->board[2][3] = 2;
-//     game->board[3][2] = 1;
-//     game->board[3][3] = 2;
-// }
-
 int main() {
     Gomoku game(1);
     Player p1(&game, 1);
     GomokuAI ai(&game, 1);  // Use strategy 1 for best performance.
 
     cout << "\n\nGame started. " << endl;
-
-    //applyEndgame(&game);
     
     game.displayBoard();
     while (1) {

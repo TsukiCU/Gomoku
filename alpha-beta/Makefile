@@ -1,13 +1,11 @@
 CXX = g++
 
-CXXFLAGS = -Wall -std=c++11 -pthread
+CXXFLAGS = -Wall -std=c++11
 
 TARGET = alphaBetaGomoku
 
-SOURCES = ../src/gomoku.cpp ../src/players.cpp ../src/tcp.cpp tcp_main.cpp ../src/pve.cpp
-# SOURCES = ../src/gomoku.cpp ../src/players.cpp ../src/tcp.cpp tcp_main_display.cpp ../src/display.cpp
-# SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp selfplay.cpp
-# SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp pve_display.cpp ../src/display.cpp
+# pve, evp, pvp
+SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp evp.cpp
 
 # OBJECTS = $(SOURCES:.cpp=.o)
 OBJECTS = $(notdir $(SOURCES:.cpp=.o))
@@ -24,4 +22,7 @@ $(TARGET): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(TARGET) $(OBJECTS)
+# rm -f $(TARGET) $(OBJECTS)
+	rm -f *.o
+	rm alphaBetaGomoku
+
