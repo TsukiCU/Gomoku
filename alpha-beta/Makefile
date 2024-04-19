@@ -24,4 +24,6 @@ $(TARGET): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(TARGET) $(OBJECTS)
+# rm -f $(TARGET) $(OBJECTS)
+	rm -f *.o
+	rm -f alphaBetaGomoku
