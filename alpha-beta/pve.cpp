@@ -2,6 +2,10 @@
 #include "gomokuAI.h"
 #include "../src/players.h"
 
+#include "../src/xboxcont.c"
+#include <libusb-1.0/libusb.h>
+#define SLEEP 1
+
 void applyEndgame(Gomoku *game)
 {
     game->board[7][7] = 1;
@@ -25,6 +29,16 @@ int main() {
     Player p1(&game, 1);
     GomokuAI ai(&game, 1);  // Use strategy 1 for best performance.
 
+
+    //controller
+    libusb_device **devs;
+    libusb_context *ctx = NULL;
+    libusb_device_handle *handle = NULL;
+    int success;
+    
+    success = open_controller(&devs, &ctx, &handle);
+    //finished opening
+
     cout << "\n\nGame started. " << endl;
 
     //applyEndgame(&game);
@@ -32,7 +46,9 @@ int main() {
     game.displayBoard();
     while (1) {
         int x, y;
-        std::cin >> x >> y;
+        //std::cin >> x >> y;
+
+        getCommandXb(&handle,x,y);
         
         // User makes a move. Assume (-1, -1) means want to regret.
         if (x == -1 && y == -1) {
@@ -71,6 +87,9 @@ int main() {
             break;
         }
     }
+
+    close_controller(&devs, &ctx);
+
 
     return 0;
 }
