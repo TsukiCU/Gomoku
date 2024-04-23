@@ -6,6 +6,12 @@
 #include <libusb-1.0/libusb.h>
 #define SLEEP 1
 
+
+libusb_device **devs; //
+libusb_context *ctx = NULL; //
+libusb_device_handle *handle = NULL;
+
+
 void applyEndgame(Gomoku *game)
 {
     game->board[7][7] = 1;
@@ -31,12 +37,8 @@ int main() {
 
 
     //controller
-    libusb_device **devs;
-    libusb_context *ctx = NULL;
-    libusb_device_handle *handle = NULL;
-    int success;
     
-    success = open_controller(&devs, &ctx, &handle);
+    int result = find_xbox_controller();
     //finished opening
 
     cout << "\n\nGame started. " << endl;

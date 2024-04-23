@@ -11,6 +11,10 @@
 
 int eraseDouble=1;
 
+extern libusb_device **devs;
+extern libusb_context *ctx;
+extern libusb_device_handle *handle;
+
 
 void processDirection(unsigned char data,int &a,int &b) {
 
@@ -121,7 +125,7 @@ char printInput(unsigned char arr[], int size,int &a,int &b) {
     }
     return action;
 }
-
+/*
 int open_controller(libusb_device ***devs, libusb_context **ctx, libusb_device_handle **handle){
     int r; // 
     ssize_t cnt; // 
@@ -181,6 +185,54 @@ int open_controller(libusb_device ***devs, libusb_context **ctx, libusb_device_h
 
 
 
+}
+*/
+int find_xbox_controller() {
+    int r;
+    ssize_t cnt;
+
+    r = libusb_init(&ctx);
+    if (r < 0) {
+        fprintf(stderr, "fail to init libusb: %d\n", r);
+        return 1;
+    }
+    libusb_set_debug(ctx, 3);
+
+    cnt = libusb_get_device_list(ctx, &devs);
+    if (cnt < 0) {
+        fprintf(stderr, "fail to get device list\n");
+        return 1;
+    }
+    printf("find %zd devices\n", cnt);
+
+    libusb_device *device;
+    for (ssize_t i = 0; i < cnt; i++) {
+        device = devs[i];
+        struct libusb_device_descriptor desc;
+        libusb_get_device_descriptor(device, &desc);
+
+        if (desc.idVendor == 0x045e && desc.idProduct == 0x028e) {
+            printf("find Xbox ：VID 0x%04x, PID 0x%04x\n", desc.idVendor, desc.idProduct);
+            r = libusb_open(devs[i], &handle);
+            if (r != LIBUSB_SUCCESS) {
+                fprintf(stderr, "fail to open xbox\n");
+                continue;
+            } else {
+                printf("success open xbox controller\n");
+                if (libusb_kernel_driver_active(handle, 0) == 1) {
+                    r = libusb_detach_kernel_driver(handle, 0);
+                    if (r == 0) {
+                        printf("Kernel Driver Detached\n");
+                    } else {
+                        fprintf(stderr, "Error detaching kernel driver: %d\n", r);
+                    }
+                }
+                return 0;
+            }
+        }
+    }
+
+    return 1;
 }
 
 
