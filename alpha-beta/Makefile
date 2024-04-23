@@ -1,7 +1,7 @@
 CXX = g++
 
 CXXFLAGS = -Wall -std=c++11 -pthread
-LDFLAGS = -lusb
+LDFLAGS = -lusb-1.0
 
 TARGET = alphaBetaGomoku
 
@@ -18,7 +18,7 @@ OBJECTS = $(notdir $(SOURCES:.cpp=.o))
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	$(CXX) $(CXXFLAGS) -o $@ $^
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS)
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $<
