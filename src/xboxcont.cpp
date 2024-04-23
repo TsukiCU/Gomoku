@@ -1,3 +1,6 @@
+#ifndef HEADER_NAME_H
+#define HEADER_NAME_H
+
 #include <stdio.h>
 #include <libusb-1.0/libusb.h>
 #include <time.h> 
@@ -219,3 +222,5 @@ void close_controller(libusb_device ***devs, libusb_context **ctx){
     libusb_exit(*ctx); // 
 
 }
+
+#endif // HEADER_NAME_H
