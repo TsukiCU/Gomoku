@@ -152,8 +152,11 @@ int open_controller(libusb_device ***devs, libusb_context **ctx, libusb_device_h
         if (desc.idVendor == 0x045e && desc.idProduct == 0x028e) {
             printf("find Xbox ：VID 0x%04x, PID 0x%04x\n", desc.idVendor, desc.idProduct);
             //
-            r = libusb_open(*devs[i], handle);
-            if (r != LIBUSB_SUCCESS) {
+            int rr;
+            rr = libusb_open(*devs[i], handle);
+            printf("success use libusb_open");
+            
+            if (rr != LIBUSB_SUCCESS) {
                 fprintf(stderr, "fail to open xbox\n");
                 continue;
             } else{
@@ -161,11 +164,12 @@ int open_controller(libusb_device ***devs, libusb_context **ctx, libusb_device_h
 
                 //try to detatch kernel driver
                 if (libusb_kernel_driver_active(*handle, 0) == 1) { 
-                    r = libusb_detach_kernel_driver(*handle, 0);
-                    if (r == 0) {
+                    int rrr;
+                    rrr = libusb_detach_kernel_driver(*handle, 0);
+                    if (rrr == 0) {
                         printf("Kernel Driver Detached\n");
                     } else {
-                        fprintf(stderr, "Error detaching kernel driver: %d\n", r);
+                        fprintf(stderr, "Error detaching kernel driver: %d\n", rrr);
                     }
                 }
 
