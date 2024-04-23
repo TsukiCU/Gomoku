@@ -54,7 +54,7 @@ void processDirection(unsigned char data,int &a,int &b) {
     }
 }
 
-char processFunction(unsigned char data){
+char processFunction(unsigned char data,int &a,int &b){
     //data[3]: Y:80 B:20 A:10 X:40 LB:01 RB:02
         char letter;
         if (eraseDouble==1){
@@ -108,11 +108,11 @@ char printInput(unsigned char arr[], int size,int &a,int &b) {
 
     char action = 'N';      //代表无事发生
     if (arr[2] != 0x00) {
-        processDirection(arr[2]);
+        processDirection(arr[2],a,b);
         action ='C';    //代表改变坐标
     }
     if (arr[3] != 0x00){
-        action = processFunction(arr[3]);
+        action = processFunction(arr[3], a,b);
         //如果是'A'代表发送坐标，结束循环
     }
     return action;
@@ -123,7 +123,7 @@ int open_controller(libusb_device ***devs, libusb_context **ctx, libusb_device_h
     ssize_t cnt; // 
     int rr;
 
-    r = libusb_init(&ctx); // 
+    r = libusb_init(ctx); // 
     if (r < 0) {
         fprintf(stderr, "fail to init libusb: %d\n", r);
         return 1;
