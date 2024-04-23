@@ -19,12 +19,12 @@ all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
 #$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS)
-	$(CXX) $(OBJECTS) -o $@ $(LDFLAGS)
+	$(CXX) $(OBJECTS) $(CXXFLAGS) $(LDFLAGS) -o $@
 
 %.o: %.cpp
 #$(CXX) $(CXXFLAGS) -c $<
 
-	$(CXX) $(CXXFLAGS) -c $< $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 %.o: ../src/%.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
