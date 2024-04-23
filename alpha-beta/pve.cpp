@@ -2,7 +2,7 @@
 #include "gomokuAI.h"
 #include "../src/players.h"
 
-#include "../src/xboxcont.cpp"
+#include "../src/xboxcont.h"
 #include <libusb-1.0/libusb.h>
 #define SLEEP 1
 

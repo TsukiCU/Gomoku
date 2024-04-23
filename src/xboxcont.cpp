@@ -1,10 +1,11 @@
-#ifndef HEADER_NAME_H
-#define HEADER_NAME_H
+
 
 #include <stdio.h>
 #include <libusb-1.0/libusb.h>
 #include <time.h> 
 #include <unistd.h>
+
+#include "xboxcont.h"
 
 #define SLEEP 1
 
@@ -223,4 +224,3 @@ void close_controller(libusb_device ***devs, libusb_context **ctx){
 
 }
 
-#endif // HEADER_NAME_H
