@@ -121,16 +121,16 @@ char printInput(unsigned char arr[], int size,int &a,int &b) {
 int open_controller(libusb_device ***devs, libusb_context **ctx, libusb_device_handle **handle){
     int r; // 
     ssize_t cnt; // 
-    int rr;
+    
 
     r = libusb_init(ctx); // 
     if (r < 0) {
         fprintf(stderr, "fail to init libusb: %d\n", r);
         return 1;
     }
-    libusb_set_debug(ctx, 3); // 
+    libusb_set_debug(*ctx, 3); // 
 
-    cnt = libusb_get_device_list(ctx, &devs); // 
+    cnt = libusb_get_device_list(*ctx, &devs); // 
     if (cnt < 0) {
         fprintf(stderr, "fail to get device list\n");
         return 1;
@@ -139,7 +139,7 @@ int open_controller(libusb_device ***devs, libusb_context **ctx, libusb_device_h
 
     libusb_device *device;
     for (ssize_t i = 0; i < cnt; i++) {
-        device = devs[i];
+        device = *devs[i];
         struct libusb_device_descriptor desc;
         libusb_get_device_descriptor(device, &desc);
 
@@ -148,7 +148,7 @@ int open_controller(libusb_device ***devs, libusb_context **ctx, libusb_device_h
         if (desc.idVendor == 0x045e && desc.idProduct == 0x028e) {
             printf("find Xbox ：VID 0x%04x, PID 0x%04x\n", desc.idVendor, desc.idProduct);
             //
-            r = libusb_open(devs[i], &handle);
+            r = libusb_open(*devs[i], &handle);
             if (r != LIBUSB_SUCCESS) {
                 fprintf(stderr, "fail to open xbox\n");
                 continue;
@@ -156,7 +156,7 @@ int open_controller(libusb_device ***devs, libusb_context **ctx, libusb_device_h
                 printf("success open xbox controller");
 
                 //try to detatch kernel driver
-                if (libusb_kernel_driver_active(handle, 0) == 1) { 
+                if (libusb_kernel_driver_active(*handle, 0) == 1) { 
                     r = libusb_detach_kernel_driver(handle, 0);
                     if (r == 0) {
                         printf("Kernel Driver Detached\n");
@@ -184,6 +184,8 @@ void getCommandXb(libusb_device_handle **handle,int &x,int &y){
     unsigned char data[20]; // 数据缓冲区
     int actual_length; // 实际读取的数据长度
     int timeout = 5000; // 超时时间，以毫秒为单位
+
+    int rr;
     
     
     
@@ -191,28 +193,28 @@ void getCommandXb(libusb_device_handle **handle,int &x,int &y){
         // 使用libusb_bulk_transfer读取数据
         // actually we keep reading this even if we have no input
         // 
-        rr = libusb_interrupt_transfer(handle, endpoint_address, data, sizeof(data), &actual_length, timeout);
+        rr = libusb_interrupt_transfer(*handle, endpoint_address, data, sizeof(data), &actual_length, timeout);
         if (rr == 0) {
             //so we will keep use printInput
 
             char done =printInput(data,actual_length,x,y);
-            if done == 'A':
+            if (done == 'A'):
                 break;              //直接break，代表参数修改完成,也就是指一个一个落子完成
         } else {
-            fprintf(stderr, "fail to read: %d\n", r);
+            fprintf(stderr, "fail to read" );
             break; //�
         }
     }
     
 
-    return 0;
+    //return 0;
 
 
 
 }
 
 void close_controller(libusb_device ***devs, libusb_context **ctx){
-    libusb_free_device_list(devs, 1); // 
-    libusb_exit(ctx); // 
+    libusb_free_device_list(*devs, 1); // 
+    libusb_exit(*ctx); // 
 
 }
