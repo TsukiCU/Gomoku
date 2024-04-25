@@ -1,6 +1,9 @@
+# folder
 test/
 .vscode/
 
+# build
+1.cpp
 *.o
 *.exe
 *cxx
@@ -9,7 +12,7 @@ test/
 *.mif
 *.plt
 
-1.cpp
+# asset
 alphaBetaGomoku
 store
 asset/result/check_result.py
@@ -19,3 +22,11 @@ asset/gomoku.png
 asset/gomoku (自定义).jpeg
 asset/title_gen.py
 asset/result/white_gen_modified.png
+
+# kmod
+*.cmd
+*.mod
+*.symvers
+*.ko
+*.order
+vga_gomoku*
