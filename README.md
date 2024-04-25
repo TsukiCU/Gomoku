@@ -1,16 +1,16 @@
 # Gomoku
 This is the project for CSEE 4840, Spring 2024.
 
-The project is to develop a Gomoku Game, as well as user-friendly interfaces, and display it combining with the hardware.
+This project is to develop a Gomoku game as well as a user-friendly interface and develop nice user interface in conjunction with hardware.
 
 ## Main features
 - ### Basic Game Logic
 - ### AI Algorithm
 
 ## How to Run
-To test the software function, switch to branch tsuki
+To test the game logic and AI function, switch to branch tsuki
 
-If you want to play with AI, change Makefile to:
+To play with AI, change Makefile to:
 ```
 SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp pve.cpp
 
@@ -19,13 +19,13 @@ SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp evp.cpp
 ```
 
 
-If you want to play with PVP mode, change Makefile to:
+To play the PVP mode, change Makefile to:
 ```
 SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp pve.cpp
 ```
 
 
-Then enter /alpha-beta, run
+cd /alpha-beta, run
 ```
 ./run.sh
 ```
