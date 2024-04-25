@@ -1,1 +1,0 @@
-cmd_/root/Gomoku/kmod/vga_gomoku.ko := ld -r  -EL -T ./scripts/module-common.lds -T ./arch/arm/kernel/module.lds  --build-id  -o /root/Gomoku/kmod/vga_gomoku.ko /root/Gomoku/kmod/vga_gomoku.o /root/Gomoku/kmod/vga_gomoku.mod.o ;  true
