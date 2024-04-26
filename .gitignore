@@ -13,8 +13,6 @@ test/
 *.plt
 
 # asset
-alphaBetaGomoku
-store
 asset/result/check_result.py
 asset/fonts/generate_png.py
 asset/upsample.py
@@ -30,3 +28,8 @@ asset/result/white_gen_modified.png
 *.ko
 *.order
 vga_gomoku*
+
+# executable
+alphaBetaGomoku
+store
+tcp
