@@ -42,9 +42,10 @@ void broadcastPresence(int &role, string &myTimestamp, bool &gameStart) {
     int sockfd;
     struct sockaddr_in broadcastAddr;
     char sendString[64];
-    long long myTime = getCurTimeStamp();
-    sprintf(sendString, "TIMESTAMP: %lld", myTime); // Timestamp to be sent
-    myTimestamp = sendString;  // Save for comparison
+    // long long myTime = getCurTimeStamp();
+    // sprintf(sendString, "TIMESTAMP: %lld", myTime); // Timestamp to be sent
+    //myTimestamp = sendString;  // Save for comparison
+    strcpy(sendString, myTimestamp.c_str()); // Timestamp to be sent
 
     int broadcastPermission = 1;
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
