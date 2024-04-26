@@ -1,31 +1,39 @@
 # Gomoku
 This is the project for CSEE 4840, Spring 2024.
 
+This project is to develop a Gomoku game as well as a user-friendly interface and develop nice user interface in conjunction with hardware.
 
-### **decision tree with alpha-beta prunning**
+## Main features
+- ### Basic Game Logic
+- ### AI Algorithm
 
-**to play with AI**
-change makefile to:
+## How to Run
+To test the game logic and AI function, switch to branch tsuki
+
+To play with AI, change Makefile to:
+```
+SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp pve.cpp
+
+# or
+SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp evp.cpp
+```
+
+
+To play the PVP mode, change Makefile to:
 ```
 SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp pve.cpp
 ```
 
-**to test AI functions by letting it play against itself**
-```
-SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp selfplay.cpp
-```
 
-### How to run
+cd /alpha-beta, run
 ```
-cd alpha-beta
 ./run.sh
 ```
 
-### MCTS (Monte Carlo Tree Search) 
+And begin to have fun.
 
-switch to mcts branch. 
+<img width="476" alt="image" src="https://github.com/TsukiCU/Gomoku/assets/155032275/b638a8c5-c991-4cd4-8120-b756b60f8494">
 
-mcts is under developed, and it is actually not necessary. So let's focus on the important first and possibly some day we'll get back to that.
 
 ### References
 https://www.geeksforgeeks.org/tcp-server-client-implementation-in-c/
