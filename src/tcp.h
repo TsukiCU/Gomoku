@@ -40,6 +40,7 @@ struct GMKMoveInfo{
 class GMKTCPBase{
 public:
 	GMKTCPBase() :
+	game_(0),
 	local_player_(&game_, 0),
 	remote_player_(&game_, 1)
 	{
