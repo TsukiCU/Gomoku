@@ -3,6 +3,7 @@
 #include <string>
 
 #define LOBBY_PORT 12345
+#define WAIT_CAP 20
 using namespace std;
 
 // get local ip. pretty much like socket.gethostbyname(socket.gethostname()) in Python.
@@ -38,7 +39,7 @@ long long getTimeFromStamp(string msg) {
     return stoll(msg.substr(11));
 }
 
-void broadcastPresence(int &role, string &myTimestamp, bool &gameStart) {
+void broadcastPresence(int &role, string &myTimestamp, bool &gameStart, bool &noPlayersFound) {
     int sockfd;
     struct sockaddr_in broadcastAddr;
     char sendString[64];
@@ -61,7 +62,7 @@ void broadcastPresence(int &role, string &myTimestamp, bool &gameStart) {
     broadcastAddr.sin_addr.s_addr = htonl(INADDR_BROADCAST);
     broadcastAddr.sin_port = htons(LOBBY_PORT);
 
-    while (!gameStart) {
+    while (!gameStart && !noPlayersFound) {
         sendto(sockfd, sendString, strlen(sendString), 0, (struct sockaddr *)&broadcastAddr, sizeof(broadcastAddr));
         //sleep(1);
         this_thread::sleep_for(chrono::seconds(1));
@@ -99,7 +100,7 @@ void sendConfirm(long long otherTime) {
 }
 
 // Listen for UDP broadcasts
-void listenForBroadcast(int &role, string &myTimestamp, bool &gameStart, string &server_ip) {
+void listenForBroadcast(int &role, string &myTimestamp, bool &gameStart, string &server_ip, bool &noPlayersFound) {
     /*
      * Two types of messages can be received:
      * 1. TIMESTAMP message from others with their timestamps.
@@ -112,6 +113,7 @@ void listenForBroadcast(int &role, string &myTimestamp, bool &gameStart, string 
     char recvString[100];
     long long myTime = getTimeFromStamp(myTimestamp);
     long long otherTime;
+    long long curTime;
     socklen_t addrLen = sizeof(myAddr);
 
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
@@ -137,6 +139,13 @@ void listenForBroadcast(int &role, string &myTimestamp, bool &gameStart, string 
             continue;
         }
         recvString[recvStringLen] = '\0';
+
+        // Countdown mechanism
+        curTime = getCurTimeStamp();
+        if (curTime - myTime > 15000) {
+            noPlayersFound = true;
+            break;
+        }
 
         // TIMESTAMP message
         if (strncmp(recvString, "TIMESTAMP: ", 11) == 0) {
@@ -180,6 +189,7 @@ int main()
     // UDP broadcast logic to find opponent in the local network.
     int role = -1;  // -1 for unknown, 0 for server, 1 for client;
     bool gameStart = false; // If game starts, stop listening and broadcasting threads.
+    bool noPlayersFound = false; // If waiting too long(more than 15 seconds), set this to true and report this message.
     string server_ip = "";
     string myTimestamp =  "TIMESTAMP: " + to_string(getCurTimeStamp());
 
@@ -187,11 +197,16 @@ int main()
     printf("My IP: %s | My Timestamp: %lld\n\n", getLocalIP().c_str(), getTimeFromStamp(myTimestamp));
     printf("Welcome to Gomoku, actively looking for opponents...\n"); 
 
-    thread broadcaster(broadcastPresence, ref(role), ref(myTimestamp), ref(gameStart));
-    thread listener(listenForBroadcast, ref(role), ref(myTimestamp), ref(gameStart), ref(server_ip));
+    thread broadcaster(broadcastPresence, ref(role), ref(myTimestamp), ref(gameStart), ref(noPlayersFound));
+    thread listener(listenForBroadcast, ref(role), ref(myTimestamp), ref(gameStart), ref(server_ip), ref(noPlayersFound));
 
     broadcaster.join();
     listener.join();
+
+    if (noPlayersFound) {
+        printf("You know the game is too highbrow. Nobody's around here for now. But you can always start later.\n");
+        return 1;
+    }
 
     // If received broadcast from others who started later than us, we are the server.
     // Otherwise, we are the client.
