@@ -54,7 +54,7 @@ int main(int argc, char **argv)
 		// 2. use CheckGameResult() to see if game ends
 		// 3. use MakeMove to place a piece
 		GMKClient client;
-		if(!client.Connect("128.59.65.82"))
+		if(!client.Connect("10.206.99.5"))
 			return -1;
 		while(true){
 			while(client.CheckGameResult()<0){
