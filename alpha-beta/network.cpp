@@ -34,7 +34,7 @@ long long getCurTimeStamp() {
 }
 
 long long getTimeFromStamp(string msg) {
-    // Current message format: "Created at: <Created time>"
+    // Current message format: "TIMESTAMP: <Created time>"
     return stoll(msg.substr(11));
 }
 
@@ -63,14 +63,12 @@ void broadcastPresence(int &role, string &myTimestamp, bool &gameStart) {
     broadcastAddr.sin_addr.s_addr = htonl(INADDR_BROADCAST);
     broadcastAddr.sin_port = htons(LOBBY_PORT);
 
-    printf("broadcast thread starts\n");
     //sendto(sockfd, sendString, strlen(sendString), 0, (struct sockaddr *)&broadcastAddr, sizeof(broadcastAddr));
     while (!gameStart) {
         sendto(sockfd, sendString, strlen(sendString), 0, (struct sockaddr *)&broadcastAddr, sizeof(broadcastAddr));
         //sleep(1);
         this_thread::sleep_for(chrono::seconds(1));
     }
-    printf("broadcast thread ends\n");
     close(sockfd);
 }
 
@@ -96,7 +94,6 @@ void sendConfirm(long long otherTime) {
     broadcastAddr.sin_addr.s_addr = htonl(INADDR_BROADCAST);
     broadcastAddr.sin_port = htons(LOBBY_PORT);
 
-    // format ‘%s’ expects argument of type ‘char*’, but argument 4 has type ‘std::string’
     sprintf(sendString, "CONFIRM: %lld | Server_IP: %s", otherTime, serverIp.c_str());
     sendto(sockfd, sendString, strlen(sendString), 0, (struct sockaddr *)&broadcastAddr, sizeof(broadcastAddr));
 
@@ -107,11 +104,16 @@ void sendConfirm(long long otherTime) {
 void listenForBroadcast(int &role, string &myTimestamp, bool &gameStart, string &server_ip) {
     /*
      * Two types of messages can be received:
-     * 1. TIMESTAMP message from others with their timestamps.
-     * 2. CONFIRM message from server (who starts to broadcast before us), 
-     *    indicating the game is ready to start and that we are the client.
-     *    In this case, we should stop listening and start the game.
+     *
+     * 1. TIMESTAMP: <Created time>
+     *      - TIMESTAMP message from others with their timestamps.
+     * 
+     * 2. CONFIRM: <Timestamp> | Server_IP: <Server Ip> 
+     *      - CONFIRM message from server (who starts to broadcast before us), 
+     *  indicating the game is ready to start and that we are the client. In
+     *  this case, stop listening, connect to the server ip and start the game.
      */
+
     int sockfd;
     struct sockaddr_in myAddr;
     char recvString[100];
@@ -134,7 +136,6 @@ void listenForBroadcast(int &role, string &myTimestamp, bool &gameStart, string 
         close(sockfd);
         return;
     }
-    printf("listen thread starts\n");
     while (!gameStart) {
         int recvStringLen = recvfrom(sockfd, recvString, 100, 0, (struct sockaddr *)&myAddr, &addrLen);
         if (recvStringLen < 0) {
@@ -149,19 +150,19 @@ void listenForBroadcast(int &role, string &myTimestamp, bool &gameStart, string 
 
             // Compare timestamps to decide role
             if (otherTime > myTime) {
-                printf("My time is %lld, Other time is %lld\n", myTime, otherTime);
-                printf("Received: %s\n", recvString);
+                //printf("Received: %s\n", recvString);
                 role = 0;  // Server
                 gameStart = true;
                 sendConfirm(otherTime);
             } else if (otherTime < myTime) {
-                // XXX: This is actually unreachable. Because we will
-                // always receive our own broadcast first. So I put a XXX here.
+                // XXX: This is actually unreachable. Because once the server starts,
+                // we will no longer receive broadcast from it. So I put a XXX here.
                 role = 1;  // Client
                 gameStart = true;
             } else
-                // Consider this only happens when receiving broadcast sent
-                // by ourselves. This could happen in UDP, so just ignore.
+                // Almost impossible that two devices have the same timestamp.
+                // So consider this only happens when receiving broadcast sent
+                // by ourselves. This could happen in UDP, simply ignore it.
                 continue;
         }
 
@@ -169,7 +170,6 @@ void listenForBroadcast(int &role, string &myTimestamp, bool &gameStart, string 
         else if (strncmp(recvString, "CONFIRM", 7) == 0) {
             // Confirm message format: "CONFIRM: <Timestamp> | Server_IP: <Server Ip>"
             long long time = stoll(string(recvString).substr(9));
-            printf("Received: %s\n", recvString);
             if (time == myTime) {
                 role = 1;  // Client
                 gameStart = true;
@@ -178,14 +178,12 @@ void listenForBroadcast(int &role, string &myTimestamp, bool &gameStart, string 
             server_ip = getIPfromMsg(recvString);
         }
     }
-    printf("listen thread ends\n");
 
     close(sockfd);
 }
 
 int main()
 {
-    // UDP broadcast logic to find opponent in the local network.
     int role = -1;  // -1 for unknown, 0 for server, 1 for client;
     bool gameStart = false; // If game starts, stop listening and broadcasting threads.
     string server_ip = "";
@@ -199,10 +197,7 @@ int main()
 
     // If received broadcast from others who started later than us, we are the server.
     // Otherwise, we are the client.
-    printf("Role: %d\n", role);
-
     if (!role) {
-        printf("Running as server\n");
 		GMKServer server;
 		if(!server.Create())
 			return -1;
@@ -237,7 +232,6 @@ int main()
     }
 
     else if (role == 1) {
-        printf("Running as client\n");
 		GMKClient client;
 		if(!client.Connect(server_ip.c_str()))
 			return -1;
@@ -262,7 +256,7 @@ int main()
 
     else {
         // Shouldn't reach here.
-        fprintf(stderr, "Unknown role\n");
+        fprintf(stderr, "Roles Undetermined Error.\n");
         return 1;
     }
 }
