@@ -153,7 +153,7 @@ void listenForBroadcast(int &role, string &myTimestamp, bool &gameStart, string 
             } else if (otherTime < myTime) {
                 // XXX: This is actually unreachable. Because we will
                 // always receive our own broadcast first. So I put a XXX here.
-                printf("My time is %lld, Other time is %lld\n", myTime, otherTime);
+                printf("111My time is %lld, Other time is %lld\n", myTime, otherTime);
                 role = 1;  // Client
                 gameStart = true;
             } else
