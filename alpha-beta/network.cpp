@@ -42,9 +42,6 @@ void broadcastPresence(int &role, string &myTimestamp, bool &gameStart) {
     int sockfd;
     struct sockaddr_in broadcastAddr;
     char sendString[64];
-    // long long myTime = getCurTimeStamp();
-    // sprintf(sendString, "TIMESTAMP: %lld", myTime); // Timestamp to be sent
-    //myTimestamp = sendString;  // Save for comparison
     strcpy(sendString, myTimestamp.c_str()); // Timestamp to be sent
 
     int broadcastPermission = 1;
@@ -64,14 +61,12 @@ void broadcastPresence(int &role, string &myTimestamp, bool &gameStart) {
     broadcastAddr.sin_addr.s_addr = htonl(INADDR_BROADCAST);
     broadcastAddr.sin_port = htons(LOBBY_PORT);
 
-    printf("broadcast thread starts\n");
-    //sendto(sockfd, sendString, strlen(sendString), 0, (struct sockaddr *)&broadcastAddr, sizeof(broadcastAddr));
     while (!gameStart) {
         sendto(sockfd, sendString, strlen(sendString), 0, (struct sockaddr *)&broadcastAddr, sizeof(broadcastAddr));
         //sleep(1);
         this_thread::sleep_for(chrono::seconds(1));
     }
-    printf("broadcast thread ends\n");
+
     close(sockfd);
 }
 
@@ -97,7 +92,6 @@ void sendConfirm(long long otherTime) {
     broadcastAddr.sin_addr.s_addr = htonl(INADDR_BROADCAST);
     broadcastAddr.sin_port = htons(LOBBY_PORT);
 
-    // format ‘%s’ expects argument of type ‘char*’, but argument 4 has type ‘std::string’
     sprintf(sendString, "CONFIRM: %lld | Server_IP: %s", otherTime, serverIp.c_str());
     sendto(sockfd, sendString, strlen(sendString), 0, (struct sockaddr *)&broadcastAddr, sizeof(broadcastAddr));
 
@@ -135,7 +129,7 @@ void listenForBroadcast(int &role, string &myTimestamp, bool &gameStart, string 
         close(sockfd);
         return;
     }
-    printf("listen thread starts\n");
+
     while (!gameStart) {
         int recvStringLen = recvfrom(sockfd, recvString, 100, 0, (struct sockaddr *)&myAddr, &addrLen);
         if (recvStringLen < 0) {
@@ -143,6 +137,7 @@ void listenForBroadcast(int &role, string &myTimestamp, bool &gameStart, string 
             continue;
         }
         recvString[recvStringLen] = '\0';
+        printf("Received: %s\n", recvString);
 
         // TIMESTAMP message
         if (strncmp(recvString, "TIMESTAMP: ", 11) == 0) {
@@ -158,6 +153,7 @@ void listenForBroadcast(int &role, string &myTimestamp, bool &gameStart, string 
             } else if (otherTime < myTime) {
                 // XXX: This is actually unreachable. Because we will
                 // always receive our own broadcast first. So I put a XXX here.
+                printf("My time is %lld, Other time is %lld\n", myTime, otherTime);
                 role = 1;  // Client
                 gameStart = true;
             } else
@@ -169,6 +165,7 @@ void listenForBroadcast(int &role, string &myTimestamp, bool &gameStart, string 
         // CONFIRM message
         else if (strncmp(recvString, "CONFIRM", 7) == 0) {
             // Confirm message format: "CONFIRM: <Timestamp> | Server_IP: <Server Ip>"
+            printf("Received: %s\n", recvString);
             long long time = stoll(string(recvString).substr(9));
             printf("Received: %s\n", recvString);
             if (time == myTime) {
@@ -179,7 +176,6 @@ void listenForBroadcast(int &role, string &myTimestamp, bool &gameStart, string 
             server_ip = getIPfromMsg(recvString);
         }
     }
-    printf("listen thread ends\n");
 
     close(sockfd);
 }
@@ -191,6 +187,7 @@ int main()
     bool gameStart = false; // If game starts, stop listening and broadcasting threads.
     string server_ip = "";
     string myTimestamp =  "TIMESTAMP: " + to_string(getCurTimeStamp());
+    cout << "My timestamp: " << getTimeFromStamp(myTimestamp) << endl;
 
     thread broadcaster(broadcastPresence, ref(role), ref(myTimestamp), ref(gameStart));
     thread listener(listenForBroadcast, ref(role), ref(myTimestamp), ref(gameStart), ref(server_ip));
