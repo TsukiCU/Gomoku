@@ -38,7 +38,7 @@ long long getTimeFromStamp(string msg) {
     return stoll(msg.substr(11));
 }
 
-void broadcastPresence(int &role, string &myTimestamp, bool &gameStart) {
+void broadcastPresence(int &role, string &myTimestamp, bool &gameStart, bool &noPlayersFound) {
     int sockfd;
     struct sockaddr_in broadcastAddr;
     char sendString[64];
@@ -61,7 +61,7 @@ void broadcastPresence(int &role, string &myTimestamp, bool &gameStart) {
     broadcastAddr.sin_addr.s_addr = htonl(INADDR_BROADCAST);
     broadcastAddr.sin_port = htons(LOBBY_PORT);
 
-    while (!gameStart) {
+    while (!gameStart && !noPlayersFound) {
         sendto(sockfd, sendString, strlen(sendString), 0, (struct sockaddr *)&broadcastAddr, sizeof(broadcastAddr));
         //sleep(1);
         this_thread::sleep_for(chrono::seconds(1));
@@ -199,8 +199,8 @@ int main()
     printf("My IP: %s | My Timestamp: %lld\n\n", getLocalIP().c_str(), getTimeFromStamp(myTimestamp));
     printf("Welcome to Gomoku, actively looking for opponents...\n"); 
 
-    thread broadcaster(broadcastPresence, ref(role), ref(myTimestamp), ref(gameStart));
-    thread listener(listenForBroadcast, ref(role), ref(myTimestamp), ref(gameStart), ref(server_ip));
+    thread broadcaster(broadcastPresence, ref(role), ref(myTimestamp), ref(gameStart), ref(noPlayersFound));
+    thread listener(listenForBroadcast, ref(role), ref(myTimestamp), ref(gameStart), ref(server_ip), ref(noPlayersFound));
 
     broadcaster.join();
     listener.join();
