@@ -137,7 +137,6 @@ void listenForBroadcast(int &role, string &myTimestamp, bool &gameStart, string 
             continue;
         }
         recvString[recvStringLen] = '\0';
-        printf("Received: %s\n", recvString);
 
         // TIMESTAMP message
         if (strncmp(recvString, "TIMESTAMP: ", 11) == 0) {
@@ -145,15 +144,13 @@ void listenForBroadcast(int &role, string &myTimestamp, bool &gameStart, string 
 
             // Compare timestamps to decide role
             if (otherTime > myTime) {
-                printf("My time is %lld, Other time is %lld\n", myTime, otherTime);
-                printf("Received: %s\n", recvString);
+                // printf("My time is %lld, Other time is %lld\n", myTime, otherTime);
                 role = 0;  // Server
                 gameStart = true;
                 sendConfirm(otherTime);
             } else if (otherTime < myTime) {
                 // XXX: This is actually unreachable. Because we will
                 // always receive our own broadcast first. So I put a XXX here.
-                printf("111My time is %lld, Other time is %lld\n", myTime, otherTime);
                 role = 1;  // Client
                 gameStart = true;
             } else
@@ -165,9 +162,7 @@ void listenForBroadcast(int &role, string &myTimestamp, bool &gameStart, string 
         // CONFIRM message
         else if (strncmp(recvString, "CONFIRM", 7) == 0) {
             // Confirm message format: "CONFIRM: <Timestamp> | Server_IP: <Server Ip>"
-            printf("Received: %s\n", recvString);
             long long time = stoll(string(recvString).substr(9));
-            printf("Received: %s\n", recvString);
             if (time == myTime) {
                 role = 1;  // Client
                 gameStart = true;
@@ -187,7 +182,10 @@ int main()
     bool gameStart = false; // If game starts, stop listening and broadcasting threads.
     string server_ip = "";
     string myTimestamp =  "TIMESTAMP: " + to_string(getCurTimeStamp());
-    cout << "My timestamp: " << getTimeFromStamp(myTimestamp) << endl;
+
+    // My basic info
+    printf("My IP: %s | My Timestamp: %lld\n\n", getLocalIP().c_str(), getTimeFromStamp(myTimestamp));
+    printf("Welcome to Gomoku, actively looking for opponents...\n"); 
 
     thread broadcaster(broadcastPresence, ref(role), ref(myTimestamp), ref(gameStart));
     thread listener(listenForBroadcast, ref(role), ref(myTimestamp), ref(gameStart), ref(server_ip));
@@ -197,10 +195,8 @@ int main()
 
     // If received broadcast from others who started later than us, we are the server.
     // Otherwise, we are the client.
-    printf("Role: %d\n", role);
 
     if (!role) {
-        printf("Running as server\n");
 		GMKServer server;
 		if(!server.Create())
 			return -1;
@@ -235,7 +231,6 @@ int main()
     }
 
     else if (role == 1) {
-        printf("Running as client\n");
 		GMKClient client;
 		if(!client.Connect(server_ip.c_str()))
 			return -1;
