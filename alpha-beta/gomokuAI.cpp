@@ -87,7 +87,9 @@ int GomokuAI::getScorefromTable(string s)
     // OPEN_THREES
     if (s.find(shapeTable.OTHREE_0) != string::npos ||
         s.find(shapeTable.OTHREE_1) != string::npos ||
-        s.find(shapeTable.OTHREE_2) != string::npos)
+        s.find(shapeTable.OTHREE_2) != string::npos ||
+        s.find(shapeTable.OTHREE_3) != string::npos ||
+        s.find(shapeTable.OTHREE_4) != string::npos)
         {score += shapeTable.OTHREE_SCORE;}
 
     // HALF_OPEN_THREES
