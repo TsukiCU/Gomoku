@@ -44,6 +44,8 @@ const int posWeights[15][15] =
  * 0 for stone in opponent's color.
  * # for blank intersection.
  * I for invalid places (out of board).
+ * XXX: Didn't really take I into consideration which will probably cause bugs
+ * when the game reaches the edge but it should be very unlikely to happen.
  */
 
 
@@ -60,34 +62,39 @@ struct shapesLookup {
     string  RENJU,
         OFOUR,
         HFOUR_0, HFOUR_1, HFOUR_2, HFOUR_3, HFOUR_4,
-        OTHREE_0, OTHREE_1, OTHREE_2,
+        OTHREE_0, OTHREE_1, OTHREE_2, OTHREE_3, OTHREE_4,
         HTHREE_0, HTHREE_1, HTHREE_2, HTHREE_3, HTHREE_4,
         HTHREE_5, HTHREE_6, HTHREE_7, HTHREE_8, HTHREE_9,
         OTWOS_0, OTWOS_1, OTWOS_2,
         HTWOS_0, HTWOS_1, HTWOS_2, HTWOS_3, HTWOS_4, HTWOS_5, HTWOS_6;
 
     shapesLookup() :
-        RENJU_SCORE(10000000),
-        OFOUR_SCORE(1000000),
+        RENJU_SCORE(5000000),
+        OFOUR_SCORE(100000),
         OTHREE_SCORE(10000),
         HFOUR_SCORE(8000),
-        HTHREE_SCORE(1000),
-        OTWO_SCORE(800),
-        HTWO_SCORE(50),
+        HTHREE_SCORE(700),
+        OTWO_SCORE(80),
+        HTWO_SCORE(20),
 
         RENJU("11111"),
         OFOUR("#1111#"),
+
         HFOUR_0("01111#"),
         HFOUR_1("#11110"),
         HFOUR_2("111#1"),
         HFOUR_3("1#111"),
         HFOUR_4("11#11"),
-        OTHREE_0("#111#"),
-        OTHREE_1("1#11#"),
-        OTHREE_2("11#1#"),
+
+        OTHREE_0("##111##"),
+        OTHREE_1("0#111##"),
+        OTHREE_2("##111#0"),
+        OTHREE_3("#1#11#"),
+        OTHREE_4("#11#1#"),
+
         HTHREE_0("##1110"),
-        HTHREE_1("##11#1"),
-        HTHREE_2("##1110"),
+        HTHREE_1("#11#10"),
+        HTHREE_2("011#1#"),
         HTHREE_3("0111##"),
         HTHREE_4("1##11"),
         HTHREE_5("11##1"),
@@ -95,9 +102,11 @@ struct shapesLookup {
         HTHREE_7("0#111#0"),
         HTHREE_8("#1#110"),
         HTHREE_9("01#11#"),
+
         OTWOS_0("##11##"),
         OTWOS_1("#1#1#"),
         OTWOS_2("1##1"),
+
         HTWOS_0("###110"),
         HTWOS_1("1###1"),
         HTWOS_2("011###"),

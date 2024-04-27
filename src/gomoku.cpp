@@ -89,8 +89,10 @@ void Gomoku::displayBoard()
     // [n] -    -    -    -    O    X    -    -    -    -    -    -    -    -    -
     // n is row index, '-' refers to there's no stone on this intercection.
     // 'X' refers to there is a black stone, 'O' refers to white.
+    // '@' refers to the current move made by any player.
 
     string filler = "   ";
+    pair<int, int> lastMove = record.back();
 
     cout << '\n' << filler << "  ";
     for (int i = 0; i < board_size; i++) {
@@ -108,6 +110,9 @@ void Gomoku::displayBoard()
             cout << i + 1 << filler;
 
         for (int j = 0; j < board_size; j++) {
+            if (i == lastMove.first && j == lastMove.second)
+                cout << '@' << filler;
+            else
             switch (board[i][j]) {
                 case 0: {cout << '-' << filler; break;}
                 case 1: {cout << 'X' << filler; break;}
