@@ -7,7 +7,7 @@ LDFLAGS = -lsfml-graphics -lsfml-window -lsfml-system
 TARGET = alphaBetaGomoku
 
 # pve, evp, pvp
-# SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp evp.cpp
+#SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp pve.cpp
 SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp gui.cpp
 
 # OBJECTS = $(SOURCES:.cpp=.o)

@@ -6,19 +6,17 @@
 #include <SFML/System.hpp>
 
 int mouseToBoard(pair<int, int> &move, Player player, int mouseX, int mouseY) {
-    int boardX = floor(mouseX / 40);
-    int boardY = floor(mouseY / 40);
+    // x and y are flipped in the board!!!
+    int boardX = floor(mouseY / 40);
+    int boardY = floor(mouseX / 40);
     // just in case
     if (boardX == 15) boardX --;
     if (boardY == 15) boardY --;
+
     move.first = boardX;
     move.second = boardY;
-
-    // x and y are flipped in the board!!!
-    pair<int, int> myMove = make_pair(boardY, boardX);
-    //cout << "Made a move at: (" << boardY << ", " << boardX << ")" << endl;
-
-    if (!player.makeMove(myMove))
+    //cout << "You made a move at: (" << boardX << ", " << boardY << ")" << endl;
+    if (!player.makeMove(make_pair(boardX, boardY)))
         return 0;
     else
         return 1;
@@ -135,12 +133,13 @@ int main(int argc, char **argv) {
                 if (event.mouseButton.button == sf::Mouse::Left) {
                     int mouseX = event.mouseButton.x;
                     int mouseY = event.mouseButton.y;
-                    //cout << "Mouse click at: (" << mouseX << ", " << mouseY << ")" << endl;
+                    cout << "Mouse click at: (" << mouseX << ", " << mouseY << ")" << endl;
                     if (!mouseToBoard(move, p1, mouseX, mouseY)) {
-                        // draw the stone of player's color here.
-                        meColor.setPosition(move.first * pieceWidth, move.second * pieceWidth);
+                        // draw the stone of player's color here. Fuuuuuuuuckkkkkkkkkk
+                        meColor.setPosition(move.second * pieceWidth, move.first * pieceWidth);
                         window.draw(meColor);
                         game.record.push_back(move);
+                        cout << "you made a move at " << game.record.back().first << " , " << game.record.back().second << endl;
 
                         if (game.state == 1) {
                             message = "Lucked out, huh?";
@@ -163,13 +162,13 @@ int main(int argc, char **argv) {
                         cout << "Invalid move!" << endl;
                         continue;
                     }
-                    
+
                     // AI makes a move.
                     pair<int, int> aiMove = ai.findBestMove();
                     ai.makeMove(aiMove);
                     game.record.push_back(aiMove);
-                    // cout << "ai made a move at " << aiMove.first << " , " << aiMove.second << endl;
-                    // Also, x and y are flipped in the board!!!
+                    cout << "ai made a move at " << game.record.back().first << " , " << game.record.back().second << endl;
+                    // Again, x and y are flipped in the board!!!
                     aiColor.setPosition(aiMove.second * pieceWidth, aiMove.first * pieceWidth);
                     window.draw(aiColor);
 
