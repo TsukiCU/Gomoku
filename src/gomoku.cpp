@@ -92,7 +92,9 @@ void Gomoku::displayBoard()
     // '@' refers to the current move made by any player.
 
     string filler = "   ";
-    pair<int, int> lastMove = record.back();
+    pair<int, int> lastMove = make_pair(-1, -1);
+    if (record.size() > 0)
+        lastMove = record.back();
 
     cout << '\n' << filler << "  ";
     for (int i = 0; i < board_size; i++) {

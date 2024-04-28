@@ -233,7 +233,7 @@ pair<int, int> GomokuAI::decideThirdMove()
     else if (secondMove.first + secondMove.second == 15)
         return make_pair(8, 8);
 
-    else if (secondMove.first + secondMove.second == 15)
+    else if (secondMove.first + secondMove.second == 13)
         return make_pair(6, 6);
 
     else {
