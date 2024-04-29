@@ -327,6 +327,9 @@ pair<int, int> GomokuAI::decideFourthMove()
 
 pair<int, int> GomokuAI::findBestMove()
 {
+    /* HACK:FIXME: This is a temporary fix of this issue. Not a good idea. */
+    int cur_player = game->current_player;
+
     /* Hard code for the first several moves. */
 
     // Hard code for the first move. The best move for the first move is always (7, 7)
@@ -371,6 +374,10 @@ pair<int, int> GomokuAI::findBestMove()
             bestMove = move;
         }
     }
+
+    /* HACK:FIXME: As stated above. */
+    if (game->current_player != cur_player)
+        game->switchPlayers();
 
     return bestMove;
 }
