@@ -2,13 +2,9 @@ CXX = g++
 
 CXXFLAGS = -Wall -std=c++11
 
-LDFLAGS = -lsfml-graphics -lsfml-window -lsfml-system
-
 TARGET = alphaBetaGomoku
 
-# pve, evp, pvp
-#SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp pve.cpp
-SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp gui.cpp
+SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp debug.cpp
 
 # OBJECTS = $(SOURCES:.cpp=.o)
 OBJECTS = $(notdir $(SOURCES:.cpp=.o))
@@ -16,7 +12,7 @@ OBJECTS = $(notdir $(SOURCES:.cpp=.o))
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -o $@ $^
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $<
