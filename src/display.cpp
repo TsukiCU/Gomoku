@@ -31,6 +31,21 @@ bool GMKDisplay::update_message_visibility(uint16_t val)
 	return this->sync();
 }
 
+bool GMKDisplay::show_menu()
+{
+	params_[0]=1;
+	params_[4]=(1<<2);
+	return update_message_visibility(0b111110);
+}
+bool GMKDisplay::show_board(bool clear)
+{
+	params_[0]=0;
+	params_[4]=(1<<6);
+	update_message_visibility(0b111000000);
+	if(clear)
+		clear_board();
+}
+
 bool GMKDisplay::select_message(int index)
 {
 	params_[4]=(1<<index);

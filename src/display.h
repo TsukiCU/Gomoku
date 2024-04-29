@@ -15,6 +15,8 @@ class GMKDisplay{
 		bool select_message(int index);
 		bool update_message_visibility(int index, bool visible);
 		bool update_message_visibility(uint16_t val);
+		bool show_menu();
+		bool show_board(bool clear);
 		bool clear_board();
 		bool sync();
 		bool open_display();
