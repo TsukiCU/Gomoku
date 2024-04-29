@@ -30,6 +30,13 @@ bool GMKDisplay::update_message_visibility(uint16_t val)
 	params_[3] = val;
 	return this->sync();
 }
+bool GMKDisplay::update_touchpad_cursor(uint16_t x, uint16_t y,bool visible)
+{
+	params_[0] = ((params_[0] & 0xFD) | (visible<<1));
+	params_[4] = x;
+	params_[5] = y;
+	return this->sync();
+}
 
 bool GMKDisplay::show_menu()
 {

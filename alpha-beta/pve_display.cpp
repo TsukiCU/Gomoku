@@ -5,6 +5,7 @@
 #include "../kmod/vga_gomoku.h"
 #include <unistd.h>
 
+#include "../src/touchpad.h"
 #include "../src/xboxcont.h"
 #include <libusb-1.0/libusb.h>
 #define SLEEP 1
@@ -36,8 +37,14 @@ int main() {
     Player p1(&game, 1);
     GomokuAI ai(&game, 1);  // Use strategy 1 for best performance.
 	GMKDisplay display(VGA_DRIVER_FILENAME);
+	Touchpad pad;
 	if(!display.open_display())
 		return -1;
+	if(!pad.open_touchpad_device()){
+		printf("Open touchpad device failed.\n");
+		return -1;
+	}
+	pad.create_touchpad_handling_thread();
 
     int result = find_xbox_controller();
 
