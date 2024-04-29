@@ -214,6 +214,7 @@ int GomokuAI::undoMove(pair<int, int> move)
         game->state = 0;
     }
 
+    game->switchPlayers();
     return 0;
 }
 

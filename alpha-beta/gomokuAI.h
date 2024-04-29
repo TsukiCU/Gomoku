@@ -53,8 +53,8 @@ const int posWeights[15][15] =
 struct shapesLookup {
     int RENJU_SCORE,
         OFOUR_SCORE,
-        OTHREE_SCORE,
         HFOUR_SCORE,
+        OTHREE_SCORE,
         HTHREE_SCORE,
         OTWO_SCORE,
         HTWO_SCORE;
