@@ -6,8 +6,6 @@
 #include <thread>
 #include "touchpad.h"
 
-int stop_touchpad_thread = 0;
-
 void Touchpad::print_touchpad_message(struct XPPenMessage msg)
 {
 	const char *touchpad_status_str[]={"NO PEN","PEN","LEFT","RIGHT","LEFT&RIGHT","UNKNOWN"};
@@ -59,12 +57,6 @@ bool Touchpad::open_touchpad_device()
 			fprintf(stderr, "Error detaching kernel driver: %d\n", r);
 		}
 	}
-	r = libusb_claim_interface(handle_, TOUCHPAD_INTERFACE);
-	if (r < 0) {
-		fprintf(stderr, "claim interface error %d - %s\n", r, libusb_strerror(r));
-		goto ERR;
-	}
-	printf("claimed interface %d\n",TOUCHPAD_INTERFACE);
 
 	return true;
 
@@ -84,7 +76,15 @@ void Touchpad::handle_touchpad_message_func()
 	int data_len = 0;
 	int r = 0;
 	XPPenMessage data;
-	while(!stop_touchpad_thread){
+	
+        r = libusb_claim_interface(handle_, TOUCHPAD_INTERFACE);
+        if (r < 0) {
+                fprintf(stderr, "claim interface error %d - %s\n", r, libusb_strerror((libusb_error)r));
+                goto OUT;
+        }
+        printf("claimed interface %d\n",TOUCHPAD_INTERFACE);
+
+	while(!thread_stopped_){
 		// Read data
 		r = libusb_interrupt_transfer(handle_, TOUCHPAD_ENDPOINT, (unsigned char *)&data, sizeof(data), &data_len, 5000);
 		switch (r) {
@@ -96,26 +96,27 @@ void Touchpad::handle_touchpad_message_func()
 		}
 		
 		// printf("\nData: length %d\n",data_len);
-		// print_touchpad_message(data);
+		//print_touchpad_message(data);
 		// printf("\n");
 		// TODO: Message handling
 		if(display_){
-			display_->update_touchpad_cursor(data.horizontal, data.vertical,TOUCHPAD_SHOW_CURSOR(data.status));
+			if(!display_->update_touchpad_cursor((uint16_t)((32767-data.vertical)/51.2), (uint16_t)((32767-data.horizontal)/32768.0*480),TOUCHPAD_SHOW_CURSOR(data.status)))
+			perror("update touchpad cursor");
 		}
 	}
 OUT:
-	stop_touchpad_thread = 1;
+	thread_stopped_ = 1;
 	close_touchpad_device();
 	return;
 }
 
 void Touchpad::create_touchpad_handling_thread()
 {
-	stop_touchpad_thread = 0;
+	thread_stopped_ = 0;
 	thread_ = std::thread(&Touchpad::handle_touchpad_message_func,this);
 }
 
-void stop_touchpad_handling_thread()
+void Touchpad::stop_touchpad_handling_thread()
 {
-	stop_touchpad_thread = 1;
+	thread_stopped_ = 1;
 }

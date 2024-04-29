@@ -44,6 +44,7 @@ int main() {
 		printf("Open touchpad device failed.\n");
 		return -1;
 	}
+	pad.set_display(&display);
 	pad.create_touchpad_handling_thread();
 
     int result = find_xbox_controller();

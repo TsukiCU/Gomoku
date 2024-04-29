@@ -16,5 +16,7 @@ int main()
 	}
 	pad.create_touchpad_handling_thread();
 
+	while(1);
+
 	return 0;
 }

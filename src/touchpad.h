@@ -10,7 +10,7 @@
 #define TOUCHPAD_PRODUCT_ID 0x0928
 #define TOUCHPAD_INTERFACE 1
 #define TOUCHPAD_ENDPOINT 0x82
-#define TOUCHPAD_SHOW_CURSOR(status) (((status)|0xf0)==0xa0)
+#define TOUCHPAD_SHOW_CURSOR(status) (((status)&0xf0)==0xa0)
 
 struct libusb_device_handle;
 struct XPPenMessage{
@@ -54,9 +54,10 @@ public:
 
 protected:
 	void handle_touchpad_message_func();
-	GMKDisplay *display_;
+	GMKDisplay *display_=NULL;
 	libusb_device_handle *handle_;
 	std::thread thread_;
+	int thread_stopped_ = 0;
 };
 
 #endif
