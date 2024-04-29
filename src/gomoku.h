@@ -9,6 +9,7 @@ using namespace std;
 
 class Gomoku {
 public:
+int flag=0;
     int state;                              // 0 for ongoing, 1 for we have a winner already.
     int board_size;                         // The standard Gomoku board is 15x15.
     int current_player;                     // 1 for black's turn, 2 for white's turn.
@@ -57,7 +58,7 @@ public:
             cur_x += x_step;
             cur_y += y_step;
         }
-
+        if (this->flag == 1) cout << "stone is   "<<cumulative_stone <<endl;
         return false;
     }
 };

@@ -321,18 +321,19 @@ pair<int, int> GomokuAI::decideFourthMove()
     if (firstMove != make_pair(7, 7) &&
         (thirdMove.first >= 9 || thirdMove.first <= 5 || thirdMove.second >= 9 || thirdMove.second <= 5))
     {
-        vector<pair<int, int>> response = {make_pair(6, 8), make_pair(8, 6), make_pair(8, 8), make_pair(6, 6),
-        make_pair(6, 7), make_pair(7, 6), make_pair(8, 7), make_pair(7, 8)};
-        srand(time(NULL));
+        // vector<pair<int, int>> response = {make_pair(6, 8), make_pair(8, 6), make_pair(8, 8), make_pair(6, 6),
+        // make_pair(6, 7), make_pair(7, 6), make_pair(8, 7), make_pair(7, 8)};
+        // srand(time(NULL));
 
-        while (true) {               
-            pair<int, int> tmpMove = response[rand() % 8];
-            if (game->valid_move(tmpMove.first, tmpMove.second)) {
-                bestMove = tmpMove;
-                break;
-                // Impossible to reach isKagestu and isUgetsu so it's fine.
-            }
-        }
+        // while (true) {               
+        //     pair<int, int> tmpMove = response[rand() % 8];
+        //     if (game->valid_move(tmpMove.first, tmpMove.second)) {
+        //         bestMove = tmpMove;
+        //         break;
+        //         // Impossible to reach isKagestu and isUgetsu so it's fine.
+        //     }
+        // }
+        return make_pair(6, 6);
     }
 
     bestMove = isKagestu(bestMove);
@@ -346,10 +347,67 @@ pair<int, int> GomokuAI::decideFourthMove()
     return bestMove;
 }
 
+pair<int, int> GomokuAI::finishMove()
+{
+    pair<int, int> bestMove = make_pair(-1, -1);
+    int size = game->record.size();
+    if (size < 8)
+        return bestMove;
+    //pair<int, int> lastMove = game->record.back();
+    pair<int, int> scdlstMove = game->record[size-2];  // second to last
+
+    // If AI has a Half four. Don't hesitate!
+    int x = scdlstMove.first, y = scdlstMove.second, player = game->current_player;
+    vector<string> s_list = {getStrFromPos<1, 0>(x, y, player), getStrFromPos<0, 1>(x, y, player),
+    getStrFromPos<1, 1>(x, y, player), getStrFromPos<1, -1>(x, y, player)};
+
+    for (auto s: s_list) {
+        if (s.find(shapeTable.HFOUR_0) != string::npos ||
+        s.find(shapeTable.HFOUR_1) != string::npos ||
+        s.find(shapeTable.HFOUR_2) != string::npos ||
+        s.find(shapeTable.HFOUR_3) != string::npos ||
+        s.find(shapeTable.HFOUR_4) != string::npos)
+        // We are sure that one single move leads to success.
+        {
+            cout << "enter here"<<endl;
+            for (auto& move:getLegalMoves()) {
+                makeMove(move);
+                if (game->state == 1) {
+                    undoMove(move); // This will also switch back the state.
+                    return move;
+                }
+                undoMove(move);
+            }
+        }
+    }
+
+    // If AI doesn't have a Half four and that the player has one.
+    // This actually seems redundant but I will do it anyway.
+    
+    return bestMove;
+}
+
 pair<int, int> GomokuAI::findBestMove()
 {
     /* HACK:FIXME: This is a temporary fix of this issue. Not a good idea. */
     int cur_player = game->current_player;
+    int bestScore = INT_MIN;
+    pair<int, int> bestMove = {-1, -1};
+
+    // HACK:FIXME: Terrible idea. Fix this if I have time!!!!
+    // If there is a [Half Four] in our (others') sructure. handle this immediately!!
+    bestMove = finishMove();
+    if (bestMove != make_pair(-1, -1)) {
+        int x=bestMove.first,y=bestMove.second, player=cur_player;
+        cout << game->board[x][y] <<endl;
+
+        game->board[x][y] = player;
+        game->board[x][y] = 0;
+        game->flag = 1;
+        cout << "win? " << game->check<1,-1>(x,y)<<endl;
+        game->flag = 0;
+        return bestMove;
+    }
 
     /* Hard code for the first several moves. */
 
@@ -372,7 +430,7 @@ pair<int, int> GomokuAI::findBestMove()
             return make_pair(7, 7);
     }
 
-    // Hard code for the third move.
+    // Hard code for the third move. This is deterministic so don't need to check validity.
     if (game->record.size() == 2) 
         return decideThirdMove();
 
@@ -382,9 +440,6 @@ pair<int, int> GomokuAI::findBestMove()
         if (move.first != -1)
             return move;
     }
-    
-    pair<int, int> bestMove = {-1, -1};
-    int bestScore = INT_MIN;
 
     for(auto& move:getLegalMoves()) {
         makeMove(move);

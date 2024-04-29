@@ -151,9 +151,10 @@ public:
     pair<int, int> decideFourthMove();
     pair<int, int> isKagestu(pair<int, int> bestMove);
     pair<int, int> isUgetsu(pair<int, int> bestMove);
+    pair<int, int> finishMove();
 
-    /*
-     * (1, 0)   vertical line.
+    /* vertical line.
+     * (1, 0)  
      * (0, 1)   horizontal line.
      * (1, 1)   diagonal line from lt to rb.
      * (1, -1)  diagonal line from rt to lb.
