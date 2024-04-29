@@ -53,8 +53,8 @@ const int posWeights[15][15] =
 struct shapesLookup {
     int RENJU_SCORE,
         OFOUR_SCORE,
-        OTHREE_SCORE,
         HFOUR_SCORE,
+        OTHREE_SCORE,
         HTHREE_SCORE,
         OTWO_SCORE,
         HTWO_SCORE;
@@ -71,8 +71,8 @@ struct shapesLookup {
     shapesLookup() :
         RENJU_SCORE(5000000),
         OFOUR_SCORE(100000),
+        HFOUR_SCORE(50000),
         OTHREE_SCORE(10000),
-        HFOUR_SCORE(8000),
         HTHREE_SCORE(700),
         OTWO_SCORE(80),
         HTWO_SCORE(20),
@@ -159,9 +159,10 @@ public:
     template<int x_dir, int y_dir>
     string getStrFromPos(int x, int y, int player)              // Get a string consisted of 9 char as (x, y) in the middle.
     {
+        int dir_len = game->WIN_LENGTH - 1;
         string ret  = "";
-        int r_begin = x - x_dir*4, c_begin = y - y_dir*4;
-        int r_end   = x + x_dir*4, c_end   = y + y_dir*4;
+        int r_begin = x - x_dir*dir_len, c_begin = y - y_dir*dir_len;
+        int r_end   = x + x_dir*dir_len, c_end   = y + y_dir*dir_len;
         int cur_r   = r_begin, cur_c = c_begin;
         // cout << "r_begin: " << r_begin <<" c_begin: "<<c_begin<<" r_end: "<< r_end <<" c_end: "<<c_end<< endl;
 
