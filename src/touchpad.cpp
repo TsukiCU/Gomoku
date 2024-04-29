@@ -75,6 +75,7 @@ void Touchpad::handle_touchpad_message_func()
 {
 	int data_len = 0;
 	int r = 0;
+	bool show_cursor=true;
 	XPPenMessage data;
 	
         r = libusb_claim_interface(handle_, TOUCHPAD_INTERFACE);
@@ -87,7 +88,9 @@ void Touchpad::handle_touchpad_message_func()
 	while(!thread_stopped_){
 		// Read data
 		r = libusb_interrupt_transfer(handle_, TOUCHPAD_ENDPOINT, (unsigned char *)&data, sizeof(data), &data_len, 5000);
+		show_cursor = true;
 		switch (r) {
+		case LIBUSB_ERROR_TIMEOUT: show_cursor = false; break;
 		case LIBUSB_ERROR_PIPE: printf("LIBUSB_ERROR_PIPE\n"); goto OUT;
 		case LIBUSB_ERROR_OVERFLOW: printf("LIBUSB_ERROR_OVERFLOW\n"); goto OUT;
 		case LIBUSB_ERROR_NO_DEVICE: printf("LIBUSB_ERROR_NO_DEVICE\n"); goto OUT;
@@ -100,7 +103,7 @@ void Touchpad::handle_touchpad_message_func()
 		// printf("\n");
 		// TODO: Message handling
 		if(display_){
-			if(!display_->update_touchpad_cursor((uint16_t)((32767-data.vertical)/51.2), (uint16_t)((32767-data.horizontal)/32768.0*480),TOUCHPAD_SHOW_CURSOR(data.status)))
+			if(!display_->update_touchpad_cursor((uint16_t)((32767-data.horizontal)/32768.0*480),(uint16_t)((32767-data.vertical)/51.2),show_cursor))
 			perror("update touchpad cursor");
 		}
 	}

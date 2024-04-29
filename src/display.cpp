@@ -32,11 +32,11 @@ bool GMKDisplay::update_message_visibility(uint16_t val)
 }
 bool GMKDisplay::update_touchpad_cursor(uint16_t x, uint16_t y,bool visible)
 {
-	printf("update touchpad cursor: x %u, y %u, visible %d\n",x,y,visible);
-	params_[0] = ((params_[0] & 0xFD) | (visible<<1));
-	printf("param0 0x%02x\n",params_[0]);
-	params_[4] = x;
-	params_[5] = y;
+	//printf("update touchpad cursor: x %u, y %u, visible %d\n",x,y,visible);
+	params_[0] = ((params_[0] & 0xFFFD) | (visible<<1));
+	//printf("param0 0x%04x\n",params_[0]);
+	params_[5] = x;
+	params_[6] = y;
 	return this->sync();
 }
 
