@@ -32,7 +32,7 @@ void processDirection(unsigned char data,int &a,int &b,GMKDisplay& display) {
                     b = b-1;
                     printf("The value of the coordinate is: %d %d\n", a,b); 
 
-                    display.update_select(x-1,y-1);
+                    display.update_select(a-1,b-1);
                     
                     sleep(SLEEP);   // sleep 1s
                     break;
@@ -41,7 +41,7 @@ void processDirection(unsigned char data,int &a,int &b,GMKDisplay& display) {
                     a = a+1;
                     printf("The value of the coordinate is: %d %d\n", a,b); 
 
-                    display.update_select(x-1,y-1);
+                    display.update_select(a-1,b-1);
 
                     sleep(SLEEP);   // sleep 1s
                     break;
@@ -50,7 +50,7 @@ void processDirection(unsigned char data,int &a,int &b,GMKDisplay& display) {
                     b = b+1;
                     printf("The value of the coordinate is: %d %d\n", a,b);
 
-                    display.update_select(x-1,y-1);
+                    display.update_select(a-1,b-1);
 
                     sleep(SLEEP);   // sleep 1s
                     break;
@@ -59,7 +59,7 @@ void processDirection(unsigned char data,int &a,int &b,GMKDisplay& display) {
                     a = a-1;
                     printf("The value of the coordinate is: %d %d\n", a,b);
 
-                    display.update_select(x-1,y-1);
+                    display.update_select(a-1,b-1);
 
                     sleep(SLEEP);   // sleep 1s
                     break;

@@ -78,7 +78,7 @@ bool GMKDisplay::update_piece_info(int x,int y, int piece, int current)
 
 bool GMKDisplay::update_select(int x,int y)
 {
-	params_[2] = ((y<<4)|x)<<8|(params_[2]&0x00ff);
+	params_[2] = ((x<<4)|y)<<8|(params_[2]&0x00ff);
 	printf("select_params_[2]:%04x\n",params_[2]);
 	return this->sync();
 }
