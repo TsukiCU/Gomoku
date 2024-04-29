@@ -225,9 +225,9 @@ pair<int, int> GomokuAI::decideThirdMove()
 
     // Out of touch
     if (secondMove.first >= 9 || secondMove.first <= 5 || secondMove.second >= 9 || secondMove.second <= 5) {
-        vector<pair<int, int>> reponse = {make_pair(6, 8), make_pair(8, 6), make_pair(8, 8), make_pair(6, 6)};
+        vector<pair<int, int>> response = {make_pair(6, 8), make_pair(8, 6), make_pair(8, 8), make_pair(6, 6)};
         srand(time(NULL));
-        return reponse[rand() % 4];
+        return response[rand() % 4];
     }
 
     // Direct4
@@ -314,6 +314,27 @@ pair<int, int> GomokuAI::decideFourthMove()
 {
     pair<int, int> bestMove = make_pair(-1, -1);
 
+    // If the player keeps playing at the corners or edges, either
+    // (s)he is stupid or does this on purpose.
+    pair<int, int> firstMove = game->record[0];
+    pair<int, int> thirdMove = game->record[2];
+    if (firstMove != make_pair(7, 7) &&
+        (thirdMove.first >= 9 || thirdMove.first <= 5 || thirdMove.second >= 9 || thirdMove.second <= 5))
+    {
+        vector<pair<int, int>> response = {make_pair(6, 8), make_pair(8, 6), make_pair(8, 8), make_pair(6, 6),
+        make_pair(6, 7), make_pair(7, 6), make_pair(8, 7), make_pair(7, 8)};
+        srand(time(NULL));
+
+        while (true) {               
+            pair<int, int> tmpMove = response[rand() % 8];
+            if (game->valid_move(tmpMove.first, tmpMove.second)) {
+                bestMove = tmpMove;
+                break;
+                // Impossible to reach isKagestu and isUgetsu so it's fine.
+            }
+        }
+    }
+
     bestMove = isKagestu(bestMove);
     if (bestMove.first != -1)
         return bestMove;
@@ -342,10 +363,10 @@ pair<int, int> GomokuAI::findBestMove()
         int x = firstMove.first, y = firstMove.second;
         if (x == 7 && y == 7) {
         // Several opening choices. Randomly choose one.
-            vector<pair<int, int>> reponse = {make_pair(6, 8), make_pair(8, 6), make_pair(8, 8), make_pair(6, 6),
+            vector<pair<int, int>> response = {make_pair(6, 8), make_pair(8, 6), make_pair(8, 8), make_pair(6, 6),
                                               make_pair(6, 7), make_pair(7, 6), make_pair(8, 7), make_pair(7, 8)};
             srand(time(NULL));
-            return reponse[rand() % 8];
+            return response[rand() % 8];
         }
         else
             return make_pair(7, 7);
