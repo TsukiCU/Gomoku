@@ -79,6 +79,6 @@ int main(int argc, char **argv)
 			}
 			printf("Waiting for server to restart...\n");
 			client.ResetBoard();
-		}		
+		}
 	}
 }
