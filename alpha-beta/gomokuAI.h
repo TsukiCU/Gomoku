@@ -69,10 +69,12 @@ struct shapesLookup {
         HTWOS_0, HTWOS_1, HTWOS_2, HTWOS_3, HTWOS_4, HTWOS_5, HTWOS_6;
 
     shapesLookup() :
+    // In the case in <branch debug> debug.cpp, the threshold is 33809.
+    // 33809 ❌ 33810 ✅
         RENJU_SCORE(5000000),
         OFOUR_SCORE(100000),
+        HFOUR_SCORE(50000),
         OTHREE_SCORE(10000),
-        HFOUR_SCORE(8000),
         HTHREE_SCORE(700),
         OTWO_SCORE(80),
         HTWO_SCORE(20),
