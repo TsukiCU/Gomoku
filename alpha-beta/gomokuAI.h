@@ -117,16 +117,51 @@ struct shapesLookup {
     {}
 };
 
+struct tsuki {
+    int xxxx_score,
+        xxx_score,
+        xxxy_score,
+        y0xx_score,
+        xx_score;
+
+    string xxxx,
+        xxx,
+        xxxy,
+        yxxx,
+        y0xx,
+        xx0y,
+        xx;
+
+    tsuki():
+        xxxx_score(10000),
+        xxx_score(800),
+        xxxy_score(500),
+        y0xx_score(200),
+        xx_score(15),
+
+        xxxx("1111"),
+        xxx("111"),
+        xxxy("1110"),
+        yxxx("0111"),
+        y0xx("0#11"),
+        xx0y("11#0"),
+        xx("11")
+    {}
+};
 
 class GomokuAI {
 public:
     Gomoku *game;                                               // AI holds reference to the game instance.
     shapesLookup shapeTable;                                    // AI knows all the valid shapes for evaluating.
+    tsuki toyshapetable;
+    int xxx=0;
+    int yyy=0;
     int  maxDepth;                                              // Max calculating depth per move.
     int  strategy;                                              // The aggresive degree of AI. (1->3)
+    pair<int, int> ai_move;
 
     GomokuAI(Gomoku *game, int strategy):
-    game(game), maxDepth(5), strategy(strategy) {}
+    game(game), maxDepth(2), strategy(strategy), ai_move(make_pair(-1,-1)) {}
 
     vector<pair<int, int>> getLegalMoves();                     // Get valid intersections on board.
     vector<pair<int, int>> getLegalMoves(bool heuristic);       // Focus on the possible areas to reduce overhead.
@@ -137,8 +172,9 @@ public:
     int makeMove(pair<int, int> move);                          // AI makes a move at (x, y).
     int undoMove(pair<int, int> move);                          // Undo a move at (x, y). Used when searching.
     pair<int, int> findBestMove();                              // Find the best move, return a (x, y) pair.
-    int MiniMax(int depth, int alpha, int beta, bool isMax);    // Alpha Beta Prunning.    
+    int MiniMax(int depth, int alpha, int beta, bool isMax, bool isRoot);    // Alpha Beta Prunning.    
     int getScorefromTable(string s);                            // Look up shapesLookup table to get score.
+    int toygetScorefromTable(string s);
 
     // Beginnings.
     pair<int, int> decideThirdMove();   // AI plays black and it's the third move.
@@ -159,9 +195,10 @@ public:
     template<int x_dir, int y_dir>
     string getStrFromPos(int x, int y, int player)              // Get a string consisted of 9 char as (x, y) in the middle.
     {
+        int idx = game->WIN_LENGTH-1;
         string ret  = "";
-        int r_begin = x - x_dir*4, c_begin = y - y_dir*4;
-        int r_end   = x + x_dir*4, c_end   = y + y_dir*4;
+        int r_begin = x - x_dir*idx, c_begin = y - y_dir*idx;
+        int r_end   = x + x_dir*idx, c_end   = y + y_dir*idx;
         int cur_r   = r_begin, cur_c = c_begin;
         // cout << "r_begin: " << r_begin <<" c_begin: "<<c_begin<<" r_end: "<< r_end <<" c_end: "<<c_end<< endl;
 

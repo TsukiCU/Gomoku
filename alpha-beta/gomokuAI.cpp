@@ -9,10 +9,15 @@ string GomokuAI::posToStr(int x, int y)
 vector<pair<int, int>> GomokuAI::getLegalMoves()
 {
     vector<pair<int, int>> legalMoves;
+    //if (game->board[0][4] ==0) legalMoves.push_back(make_pair(0,4));
+    // if (game->board[1][4] ==0) legalMoves.push_back(make_pair(1,4));
+    // if (game->board[2][4] ==0) legalMoves.push_back(make_pair(2,4));
     for (int row=0; row<game->board_size; row++)
-        for (int col=0; col<game->board_size; col++)
+        for (int col=0; col<game->board_size; col++) {
+            //if (game->board[2][4] ==0 || game->board[1][4] ==0) continue;
             if (!game->board[row][col])
                 legalMoves.push_back(make_pair(row, col));
+        }
 
     return legalMoves;
 }
@@ -62,6 +67,30 @@ vector<pair<int, int>> GomokuAI::getLegalMoves(bool heuristic)
     }
 
     return legalMoves;
+}
+
+int GomokuAI::toygetScorefromTable(string s)
+{
+    int score = 0;
+
+    if (s.find(toyshapetable.xxxx) != string::npos)
+        score += toyshapetable.xxxx_score;
+
+    if (s.find(toyshapetable.xxx) != string::npos)
+        score += toyshapetable.xxx_score;
+
+    if (s.find(toyshapetable.xxxy) != string::npos)
+        {score += toyshapetable.xxxy_score;}
+
+    if (s.find(toyshapetable.y0xx) != string::npos ||
+        s.find(toyshapetable.xx0y) != string::npos)
+        {score += toyshapetable.y0xx_score;}
+
+    // HALF_OPEN_THREES
+    if (s.find(toyshapetable.xx) != string::npos)
+        {score += toyshapetable.xx_score;}
+
+    return score;
 }
 
 int GomokuAI::getScorefromTable(string s)
@@ -161,7 +190,7 @@ int GomokuAI::evaluate(int player)
             else
                 op_score += ratePos(row, col, 3-player);
         }
-
+// cout <<"op score is " << op_score <<"  my score is "<<my_score<<endl;
     switch(strategy) {
         case 1: {
             return  my_score - 3*op_score;
@@ -184,7 +213,6 @@ int GomokuAI::evaluate(int player)
             return my_score - op_score;
         }
     }
-    
 }
 
 int GomokuAI::evaluate(int player, int heuristic)
@@ -213,6 +241,7 @@ int GomokuAI::undoMove(pair<int, int> move)
     if (game->state == 1) {
         game->state = 0;
     }
+    game->switchPlayers();
 
     return 0;
 }
@@ -326,84 +355,104 @@ pair<int, int> GomokuAI::decideFourthMove()
 
 pair<int, int> GomokuAI::findBestMove()
 {
+    if (ai_move!=make_pair(-1,-1))
+        ai_move = make_pair(-1,-1);
     /* Hard code for the first several moves. */
 
     // Hard code for the first move. The best move for the first move is always (7, 7)
-    if (game->record.size() == 0)
-        return make_pair(7, 7);
+    // if (game->record.size() == 0)
+    //     return make_pair(7, 7);
 
-    // Hard code for the second move.
-    if (game->record.size() == 1) {
-        pair<int, int> firstMove = game->record.back();
-        int x = firstMove.first, y = firstMove.second;
-        if (x == 7 && y == 7) {
-        // Several opening choices. Randomly choose one.
-            vector<pair<int, int>> reponse = {make_pair(6, 8), make_pair(8, 6), make_pair(8, 8), make_pair(6, 6),
-                                              make_pair(6, 7), make_pair(7, 6), make_pair(8, 7), make_pair(7, 8)};
-            srand(time(NULL));
-            return reponse[rand() % 8];
-        }
-        else
-            return make_pair(7, 7);
-    }
+    // // Hard code for the second move.
+    // if (game->record.size() == 1) {
+    //     pair<int, int> firstMove = game->record.back();
+    //     int x = firstMove.first, y = firstMove.second;
+    //     if (x == 7 && y == 7) {
+    //     // Several opening choices. Randomly choose one.
+    //         vector<pair<int, int>> reponse = {make_pair(6, 8), make_pair(8, 6), make_pair(8, 8), make_pair(6, 6),
+    //                                           make_pair(6, 7), make_pair(7, 6), make_pair(8, 7), make_pair(7, 8)};
+    //         srand(time(NULL));
+    //         return reponse[rand() % 8];
+    //     }
+    //     else
+    //         return make_pair(7, 7);
+    // }
 
-    // Hard code for the third move.
-    if (game->record.size() == 2) 
-        return decideThirdMove();
+    // // Hard code for the third move.
+    // if (game->record.size() == 2) 
+    //     return decideThirdMove();
 
-    // Hard code for the fourth move.
-    if (game->record.size() == 3) {
-        pair<int, int> move = decideFourthMove();
-        if (move.first != -1)
-            return move;
-    }
+    // // Hard code for the fourth move.
+    // if (game->record.size() == 3) {
+    //     pair<int, int> move = decideFourthMove();
+    //     if (move.first != -1)
+    //         return move;
+    // }
     
     pair<int, int> bestMove = {-1, -1};
     int bestScore = INT_MIN;
 
-    for(auto& move:getLegalMoves()) {
-        makeMove(move);
-        int score = MiniMax(maxDepth, INT_MAX, INT_MIN, true);
-        undoMove(move);
-        if (score > bestScore) {
-            bestScore = score;
-            bestMove = move;
-        }
-    }
+    // for(auto& move:getLegalMoves()) {
+    //     //makeMove(move);
+    //     int score = MiniMax(maxDepth, INT_MIN, INT_MAX, true);
+    //     //undoMove(move);
+    //     if (score > bestScore) {
+    //         bestScore = score;
+    //         bestMove = move;
+    //     }
+    // }
 
+    MiniMax(maxDepth, INT_MIN, INT_MAX, true, true);
+
+    //cout << "y  is  " << yyy <<endl;
+    //cout << "ai x  is  " << xxx <<endl;
+    // cout << "y  is  " << y<<endl;
+
+    bestMove = ai_move;
     return bestMove;
 }
 
-int GomokuAI::MiniMax(int depth, int alpha, int beta, bool isMax)
-{
+int GomokuAI::MiniMax(int depth, int alpha, int beta, bool isMax, bool isRoot)
+{    
     if (!depth || game->state == 1) {
-        return evaluate(game->current_player);
+        return evaluate(1);
     }
 
     if (isMax) {
-        int maxEval = INT_MIN;
+        //int maxEval = INT_MIN;
         for (auto& move:getLegalMoves()) {
             makeMove(move);
-            int eval = MiniMax(depth-1, alpha, beta, false);   // Now minimizing.
+            int eval = MiniMax(depth-1, alpha, beta, false, false);   // Now minimizing.
             undoMove(move);
-            maxEval = max(maxEval, eval);
-            alpha = max(alpha, maxEval);   // Update alpha.
-            if (beta <= alpha)
+            if (eval>alpha){
+                alpha = eval;
+                if (isRoot)
+                    this->ai_move = move;
+            }
+            //maxEval = max(maxEval, eval);
+            //alpha = max(alpha, maxEval);   // Update alpha.
+            if (beta <= alpha) {
                 break;      // Beta prunning.
+            }
         }
-        return maxEval;
+        //return maxEval;
+        return alpha;
     }
     else {
-        int minEval = INT_MAX;
+      //  int minEval = INT_MAX;
         for (auto& move:getLegalMoves()) {
             makeMove(move);
-            int eval = MiniMax(depth-1, alpha, beta, true);    // Now maximizing.
+            int eval = MiniMax(depth-1, alpha, beta, true, false);    // Now maximizing.
             undoMove(move);
-            minEval = min(minEval, eval);
-            beta = min(beta, minEval);     // Update beta
-            if (beta <= alpha)
+            if (eval<beta) {
+                beta = eval;
+            }
+          //  minEval = min(minEval, eval);
+          //  beta = min(beta, minEval);     // Update beta
+            if (beta <= alpha) {
                 break;      // Alpha prunning.
+            }
         }
-        return minEval;
+        return beta;
     }
 }
