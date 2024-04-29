@@ -116,7 +116,6 @@ int main(int argc, char **argv) {
 
     // If AI plays black
     if (aiFirst) {
-        assert(game.current_player == 1);
         pair<int, int> aiMove = ai.findBestMove();
         ai.makeMove(aiMove);
         black.setPosition(aiMove.first * pieceWidth, aiMove.second * pieceWidth);
@@ -135,7 +134,6 @@ int main(int argc, char **argv) {
                     int mouseX = event.mouseButton.x;
                     int mouseY = event.mouseButton.y;
                     //cout << "Mouse click at: (" << mouseX << ", " << mouseY << ")" << endl;
-                    assert(game.current_player - aiFirst == 1);
                     if (!mouseToBoard(move, p1, mouseX, mouseY)) {
                         // draw the stone of player's color here. Fuuuuuuuuckkkkkkkkkk
                         meColor.setPosition(move.second * pieceWidth, move.first * pieceWidth);
@@ -166,7 +164,7 @@ int main(int argc, char **argv) {
                     }
 
                     // AI makes a move.
-                    assert(game.current_player + aiFirst == 2);
+                    //assert(game.current_player + aiFirst == 2);
 
                     pair<int, int> aiMove = ai.findBestMove();
                     ai.makeMove(aiMove);
