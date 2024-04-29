@@ -38,10 +38,10 @@ int main(int argc, char **argv) {
     GomokuAI ai(&game, 1);  // Use strategy 1 for best performance.
 
     // Board information
-    bool recordGame = false;
+    bool recordGame = true;
     int boardStart = 20, boardEnd = 580;
     int pieceWidth = 40;
-    bool aiFirst = true ? atoi(argv[1]) : false;
+    int aiFirst = 1 ? atoi(argv[1]) : 0;
     string message;
     string fontPath = "../asset/Arial.ttf";
     pair<int, int> move = make_pair(-1, -1);
@@ -116,6 +116,7 @@ int main(int argc, char **argv) {
 
     // If AI plays black
     if (aiFirst) {
+        assert(game.current_player == 1);
         pair<int, int> aiMove = ai.findBestMove();
         ai.makeMove(aiMove);
         black.setPosition(aiMove.first * pieceWidth, aiMove.second * pieceWidth);
@@ -133,7 +134,8 @@ int main(int argc, char **argv) {
                 if (event.mouseButton.button == sf::Mouse::Left) {
                     int mouseX = event.mouseButton.x;
                     int mouseY = event.mouseButton.y;
-                    cout << "Mouse click at: (" << mouseX << ", " << mouseY << ")" << endl;
+                    //cout << "Mouse click at: (" << mouseX << ", " << mouseY << ")" << endl;
+                    assert(game.current_player - aiFirst == 1);
                     if (!mouseToBoard(move, p1, mouseX, mouseY)) {
                         // draw the stone of player's color here. Fuuuuuuuuckkkkkkkkkk
                         meColor.setPosition(move.second * pieceWidth, move.first * pieceWidth);
@@ -164,6 +166,8 @@ int main(int argc, char **argv) {
                     }
 
                     // AI makes a move.
+                    assert(game.current_player + aiFirst == 2);
+
                     pair<int, int> aiMove = ai.findBestMove();
                     ai.makeMove(aiMove);
                     game.record.push_back(aiMove);
@@ -173,6 +177,7 @@ int main(int argc, char **argv) {
                     window.draw(aiColor);
 
                     if (game.state == 1) {
+                        cout << "akjdkakajhsdad" <<endl;
                         message = "Suckkkkkker!!!!";
                         if (recordGame)
                             game.recordGame();
