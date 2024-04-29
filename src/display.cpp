@@ -39,11 +39,13 @@ bool GMKDisplay::show_menu()
 }
 bool GMKDisplay::show_board(bool clear)
 {
+	bool ret;
 	params_[0]=0;
 	params_[4]=(1<<6);
-	update_message_visibility(0b111000000);
+	ret = update_message_visibility(0b111000000);
 	if(clear)
-		clear_board();
+		return clear_board();
+	return ret;
 }
 
 bool GMKDisplay::select_message(int index)
