@@ -1,4 +1,5 @@
 #include "display.h"
+#include <cstdint>
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -6,12 +7,33 @@
 #include <stdint.h>
 
 #include "../kmod/vga_gomoku.h"
+#include "tcp.h"
 
 bool GMKDisplay::update_register(unsigned int index,uint16_t val)
 {
 	if(index>8)
 		return false;
 	params_[index]=val;
+	return this->sync();
+}
+
+bool GMKDisplay::update_message_visibility(int index, bool visible)
+{
+	if(index)
+		params_[3] = (params_[3] & (~(1<<index)));
+	else
+		params_[3] = (params_[3] | (1<<index));
+	return this->sync();
+}
+bool GMKDisplay::update_message_visibility(uint16_t val)
+{
+	params_[3] = val;
+	return this->sync();
+}
+
+bool GMKDisplay::select_message(int index)
+{
+	params_[4]=(1<<index);
 	return this->sync();
 }
 

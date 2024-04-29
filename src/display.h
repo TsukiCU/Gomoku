@@ -1,6 +1,7 @@
 #ifndef _DISPLAY_HH
 #define _DISPLAY_HH
 
+#include <cstdint>
 #include <stdint.h>
 
 class GMKDisplay{
@@ -11,6 +12,9 @@ class GMKDisplay{
 		bool update_piece_info(int x,int y,int piece, int current=1);
 		bool update_select(int x,int y);
 		bool update_register(unsigned int index,uint16_t val);
+		bool select_message(int index);
+		bool update_message_visibility(int index, bool visible);
+		bool update_message_visibility(uint16_t val);
 		bool clear_board();
 		bool sync();
 		bool open_display();
