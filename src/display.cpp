@@ -68,9 +68,9 @@ bool GMKDisplay::open_display()
 
 bool GMKDisplay::update_piece_info(int x,int y, int piece, int current)
 {
-	params_[1] = x|(y<<4)|(piece<<9);
+	params_[1] = y|(x<<4)|(piece<<9);
 	if(current)
-		params_[2] = (params_[2]&0xff00)|(x|(y<<4));
+		params_[2] = (params_[2]&0xff00)|(y|(x<<4));
 	printf("piece_info3:0x%04x\n",params_[1]);
 	printf("piece_info_params_[2]:%04x\n",params_[2]);
 	return this->sync();
