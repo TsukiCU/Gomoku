@@ -47,10 +47,17 @@ int main() {
     
     game.displayBoard();
 	display.clear_board();
+
+    int x=4;
+    int y=4;
+    display.update_select(x-1,y-1);
+
     while (1) {
-        int x, y;
+        //int x=8;
+        //int y=8;
         //std::cin >> x >> y;
-        getCommandXb(&handle,x,y);
+
+        getCommandXb(&handle,x,y,display);
 
         // User makes a move.
         if (p1.makeMove(make_pair(x - 1, y - 1))) {

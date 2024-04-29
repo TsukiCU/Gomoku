@@ -14,7 +14,7 @@ extern libusb_context *ctx;
 extern libusb_device_handle *handle;
 
 
-void processDirection(unsigned char data,int &a,int &b) {
+void processDirection(unsigned char data,int &a,int &b,GMKDisplay& display) {
 
     if (data == 0x00) {
         printf("data[2] is '00'\n");
@@ -29,26 +29,38 @@ void processDirection(unsigned char data,int &a,int &b) {
             switch (data) {
                 case 0x01:  // up
                     printf("got '01'\n");
-                    b = b+1;
+                    b = b-1;
                     printf("The value of the coordinate is: %d %d\n", a,b); 
+
+                    display.update_select(x-1,y-1);
+                    
                     sleep(SLEEP);   // sleep 1s
                     break;
                 case 0x08:  // right
                     printf("got '08'\n");
                     a = a+1;
                     printf("The value of the coordinate is: %d %d\n", a,b); 
+
+                    display.update_select(x-1,y-1);
+
                     sleep(SLEEP);   // sleep 1s
                     break;
                 case 0x02:  // down
                     printf("got '02'\n");
-                    b = b-1;
+                    b = b+1;
                     printf("The value of the coordinate is: %d %d\n", a,b);
+
+                    display.update_select(x-1,y-1);
+
                     sleep(SLEEP);   // sleep 1s
                     break;
                 case 0x04:  // left
                     printf("got '04'\n");
                     a = a-1;
                     printf("The value of the coordinate is: %d %d\n", a,b);
+
+                    display.update_select(x-1,y-1);
+
                     sleep(SLEEP);   // sleep 1s
                     break;
                 default:
@@ -109,12 +121,12 @@ char processFunction(unsigned char data,int &a,int &b){
 
 
 
-char printInput(unsigned char arr[], int size,int &a,int &b) {
+char printInput(unsigned char arr[], int size,int &a,int &b,GMKDisplay& display) {
     //read direction input data[2]: up:01 r:08 d:02 l:04
 
     char action = 'N';      //代表无事发生
     if (arr[2] != 0x00) {
-        processDirection(arr[2],a,b);
+        processDirection(arr[2],a,b,display);
         action ='C';    //代表改变坐标
     }
     if (arr[3] != 0x00){
@@ -234,7 +246,7 @@ int find_xbox_controller() {
 }
 
 
-void getCommandXb(libusb_device_handle **handle,int &x,int &y){
+void getCommandXb(libusb_device_handle **handle,int &x,int &y,GMKDisplay& display){
 
     //above is the part we open a controller
         
@@ -255,7 +267,7 @@ void getCommandXb(libusb_device_handle **handle,int &x,int &y){
         if (rr == 0) {
             //so we will keep use printInput
 
-            char done =printInput(data,actual_length,x,y);
+            char done =printInput(data,actual_length,x,y,display);
             if (done == 'A'){
                 break;   
             }           //直接break，代表参数修改完成,也就是指一个一个落子完成
