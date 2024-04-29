@@ -175,7 +175,6 @@ int main(int argc, char **argv) {
                     window.draw(aiColor);
 
                     if (game.state == 1) {
-                        cout << "akjdkakajhsdad" <<endl;
                         message = "Suckkkkkker!!!!";
                         if (recordGame)
                             game.recordGame();
