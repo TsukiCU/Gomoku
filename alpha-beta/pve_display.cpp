@@ -5,6 +5,14 @@
 #include "../kmod/vga_gomoku.h"
 #include <unistd.h>
 
+#include "../src/xboxcont.h"
+#include <libusb-1.0/libusb.h>
+#define SLEEP 1
+
+libusb_device **devs; //
+libusb_context *ctx = NULL; //
+libusb_device_handle *handle = NULL;
+
 void applyEndgame(Gomoku *game)
 {
     game->board[7][7] = 1;
@@ -30,6 +38,9 @@ int main() {
 	GMKDisplay display(VGA_DRIVER_FILENAME);
 	if(!display.open_display())
 		return -1;
+
+    int result = find_xbox_controller();
+
     cout << "\n\nGame started. " << endl;
 
     //applyEndgame(&game);
@@ -38,8 +49,9 @@ int main() {
 	display.clear_board();
     while (1) {
         int x, y;
-        std::cin >> x >> y;
-        
+        //std::cin >> x >> y;
+        getCommandXb(&handle,x,y);
+
         // User makes a move.
         if (p1.makeMove(make_pair(x - 1, y - 1))) {
             cout << "Invalid move!" << '\n' << endl;
@@ -71,6 +83,8 @@ int main() {
             break;
         }
     }
+
+    close_controller(&devs, &ctx);
 
     return 0;
 }
