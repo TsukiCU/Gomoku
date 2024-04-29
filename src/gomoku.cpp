@@ -173,7 +173,8 @@ void Gomoku::recordGame()
     }
 
     // Record game into the record.txt (append mode)
-    file << "\n\n\n";
+    file << "================== New Game ==================";
+    file << "\n\n";
 
     for (auto move:record) {
         int first = move.first;
