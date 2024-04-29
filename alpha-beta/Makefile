@@ -1,10 +1,11 @@
 CXX = g++
 
-CXXFLAGS = -Wall -std=c++11
+CXXFLAGS = -std=c++11
 
 TARGET = alphaBetaGomoku
 
 SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp debug.cpp
+SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp evp.cpp
 
 # OBJECTS = $(SOURCES:.cpp=.o)
 OBJECTS = $(notdir $(SOURCES:.cpp=.o))
