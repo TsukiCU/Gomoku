@@ -9,12 +9,13 @@ class GMKDisplay{
 		GMKDisplay(const char *dev_name):dev_name_(dev_name)
 			{};
 		// piece 0:No piece, 1:white piece, 2:black piece
-		bool update_piece_info(int x,int y,int piece, int current=1);
-		bool update_select(int x,int y);
-		bool update_register(unsigned int index,uint16_t val);
-		bool select_message(int index);
-		bool update_message_visibility(int index, bool visible);
-		bool update_message_visibility(uint16_t val);
+		bool update_piece_info(int x,int y,int piece, int current=1, bool sync=true);
+		bool update_select(int x,int y, bool sync=true);
+		bool update_register(unsigned int index,uint16_t val, bool sync=true);
+		bool select_message(int index, bool sync=true);
+		bool update_message_visibility(int index, bool visible, bool sync=true);
+		bool update_message_visibility(uint16_t val, bool sync=true);
+		bool update_touchpad_cursor(uint16_t x, uint16_t y, bool visible=true, bool sync=true);
 		bool show_menu();
 		bool show_board(bool clear);
 		bool clear_board();

@@ -1,14 +1,18 @@
 #ifndef TOUCHPAD_HH
 #define TOUCHPAD_HH
 
+#include "display.h"
+#include <libusb-1.0/libusb.h>
 #include <stdint.h>
+#include <thread>
+
 #define TOUCHPAD_VENDOR_ID 0x28bd
 #define TOUCHPAD_PRODUCT_ID 0x0928
 #define TOUCHPAD_INTERFACE 1
 #define TOUCHPAD_ENDPOINT 0x82
+#define TOUCHPAD_SHOW_CURSOR(status) (((status)&0xf0)==0xa0)
 
 struct libusb_device_handle;
-
 struct XPPenMessage{
 	// magic number 0x07
 	unsigned char magic;
@@ -21,8 +25,8 @@ struct XPPenMessage{
 	unsigned char status;
 	
 	// Coordinates, need to convert to display coordinate
-	// Horizontal - (uint16_t)((32767-vertical)/51.2)
-	// Vertical - (uint16_t)((32767-msg.horizontal)/32768.0*480)
+	// Horizontal - (uint16_t)((horizontal)/32768.0*480)
+	// Vertical - (uint16_t)((vertical)/51.2)
 
 	// Horizontal, similar to hcount, 0~32767
 	// 0 at the side that is close to the buttons
@@ -35,8 +39,26 @@ struct XPPenMessage{
 	uint16_t unknown;
 };
 
-libusb_device_handle *open_touchpad_device();
-void close_touchpad_device(libusb_device_handle *handle);
-void print_touchpad_message(struct XPPenMessage msg);
+class Touchpad {
+public:
+	bool open_touchpad_device();
+	void close_touchpad_device();
+	
+	void print_touchpad_message(struct XPPenMessage msg);
+
+	void create_touchpad_handling_thread();
+	void stop_touchpad_handling_thread();
+
+	void set_display(GMKDisplay *display) {display_=display;}
+	GMKDisplay *set_display() {return display_;}
+
+protected:
+	void handle_touchpad_message_func();
+	GMKDisplay *display_=NULL;
+	libusb_device_handle *handle_;
+	std::thread thread_;
+	int thread_stopped_ = 0;
+	const int cursor_hide_timeout_ = 2000;
+};
 
 #endif
