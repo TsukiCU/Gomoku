@@ -399,7 +399,9 @@ pair<int, int> GomokuAI::findBestMove()
     bestMove = finishMove();
     // assert(cur_player == game->current_player);
     if (bestMove != make_pair(-1, -1)) {
-        game->switchPlayers();  /// FUUUUUUUCKKKKKKKK!
+        if (game->current_player != cur_player)
+            game->switchPlayers(); /// FUUUUUUUCKKKKKKKK!
+        //game->switchPlayers();  
         return bestMove;
     }
 
