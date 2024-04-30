@@ -397,7 +397,6 @@ pair<int, int> GomokuAI::findBestMove()
     // HACK:FIXME: Terrible idea. Fix this if I have time!!!!
     // If there is a [Half Four] in our (others') sructure. handle this immediately!!
     bestMove = finishMove();
-    // assert(cur_player == game->current_player);
     if (bestMove != make_pair(-1, -1)) {
         if (game->current_player != cur_player)
             game->switchPlayers(); /// FUUUUUUUCKKKKKKKK!
@@ -405,8 +404,10 @@ pair<int, int> GomokuAI::findBestMove()
         return bestMove;
     }
 
-    /* Hard code for the first several moves. */
+    // This is very important!!!
+    assert(cur_player == game->current_player);
 
+    /* Hard code for the first several moves. */
     // Hard code for the first move. The best move for the first move is always (7, 7)
     if (game->record.size() == 0)
         return make_pair(7, 7);
