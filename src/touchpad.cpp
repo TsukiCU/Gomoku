@@ -109,17 +109,17 @@ void Touchpad::handle_touchpad_message_func()
 		if(display_){
 			if(show_cursor){
 				if(vga_x<=4)
-					piece_y=0;
-				else if(vga_x>=498)
-					piece_y=14;
-				else
-				 	piece_y=(vga_x-4)/33;
-				if(vga_y<=7)
 					piece_x=0;
-				else if(vga_y>=472)
+				else if(vga_x>=498)
 					piece_x=14;
 				else
-				 	piece_x=(vga_y-7)/33;
+				 	piece_x=(vga_x-4)/33;
+				if(vga_y<=7)
+					piece_y=0;
+				else if(vga_y>=472)
+					piece_y=14;
+				else
+				 	piece_y=(vga_y-7)/31;
 				display_->update_select(piece_x, piece_y, false);
 			}
 			if(!display_->update_touchpad_cursor(vga_x,vga_y,show_cursor))
