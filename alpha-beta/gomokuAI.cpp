@@ -369,9 +369,10 @@ pair<int, int> GomokuAI::finishMove()
         s.find(shapeTable.HFOUR_4) != string::npos)
         // We are sure that one single move leads to success.
         {
-            cout << "enter here"<<endl;
             for (auto& move:getLegalMoves()) {
-                makeMove(move);
+                if (makeMove(move)) {
+                    cout << "Failed to make a move in finishMove()!" << endl;
+                }
                 if (game->state == 1) {
                     undoMove(move); // This will also switch back the state.
                     return move;
@@ -397,15 +398,9 @@ pair<int, int> GomokuAI::findBestMove()
     // HACK:FIXME: Terrible idea. Fix this if I have time!!!!
     // If there is a [Half Four] in our (others') sructure. handle this immediately!!
     bestMove = finishMove();
+    // assert(cur_player == game->current_player);
     if (bestMove != make_pair(-1, -1)) {
-        int x=bestMove.first,y=bestMove.second, player=cur_player;
-        cout << game->board[x][y] <<endl;
-
-        game->board[x][y] = player;
-        game->board[x][y] = 0;
-        game->flag = 1;
-        cout << "win? " << game->check<1,-1>(x,y)<<endl;
-        game->flag = 0;
+        game->switchPlayers();  /// FUUUUUUUCKKKKKKKK!
         return bestMove;
     }
 
