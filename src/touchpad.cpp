@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <libusb-1.0/libusb.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -75,6 +76,8 @@ void Touchpad::handle_touchpad_message_func()
 {
 	int data_len = 0;
 	int r = 0;
+	uint16_t vga_x,vga_y;
+	int piece_x,piece_y;
 	bool show_cursor=true;
 	XPPenMessage data;
 	
@@ -97,13 +100,29 @@ void Touchpad::handle_touchpad_message_func()
 		case LIBUSB_ERROR_BUSY: printf("LIBUSB_ERROR_BUSY\n"); goto OUT;
 		case LIBUSB_ERROR_INVALID_PARAM: printf("LIBUSB_ERROR_INVALID_PARAM\n"); goto OUT;
 		}
-		
 		// printf("\nData: length %d\n",data_len);
 		//print_touchpad_message(data);
 		// printf("\n");
 		// TODO: Message handling
+		vga_x = ((data.horizontal)/51.2);
+		vga_y = ((data.vertical)/32768.0*480);
 		if(display_){
-			if(!display_->update_touchpad_cursor((uint16_t)((data.horizontal)/51.2),(uint16_t)((data.vertical)/32768.0*480),show_cursor))
+			if(show_cursor){
+				if(vga_x<=4)
+					piece_y=0;
+				else if(vga_x>=498)
+					piece_y=14;
+				else
+				 	piece_y=(vga_x-4)/33;
+				if(vga_y<=7)
+					piece_x=0;
+				else if(vga_y>=472)
+					piece_x=14;
+				else
+				 	piece_x=(vga_y-7)/33;
+				display_->update_select(piece_x, piece_y, false);
+			}
+			if(!display_->update_touchpad_cursor(vga_x,vga_y,show_cursor))
 			perror("update touchpad cursor");
 		}
 	}

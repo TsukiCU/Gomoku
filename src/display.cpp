@@ -9,35 +9,43 @@
 #include "../kmod/vga_gomoku.h"
 #include "tcp.h"
 
-bool GMKDisplay::update_register(unsigned int index,uint16_t val)
+bool GMKDisplay::update_register(unsigned int index,uint16_t val, bool sync)
 {
 	if(index>8)
 		return false;
 	params_[index]=val;
-	return this->sync();
+	if(sync)
+		return this->sync();
+	return true;
 }
 
-bool GMKDisplay::update_message_visibility(int index, bool visible)
+bool GMKDisplay::update_message_visibility(int index, bool visible, bool sync)
 {
 	if(index)
 		params_[3] = (params_[3] & (~(1<<index)));
 	else
 		params_[3] = (params_[3] | (1<<index));
-	return this->sync();
+	if(sync)
+		return this->sync();
+	return true;
 }
-bool GMKDisplay::update_message_visibility(uint16_t val)
+bool GMKDisplay::update_message_visibility(uint16_t val, bool sync)
 {
 	params_[3] = val;
-	return this->sync();
+	if(sync)
+		return this->sync();
+	return true;
 }
-bool GMKDisplay::update_touchpad_cursor(uint16_t x, uint16_t y,bool visible)
+bool GMKDisplay::update_touchpad_cursor(uint16_t x, uint16_t y,bool visible, bool sync)
 {
 	//printf("update touchpad cursor: x %u, y %u, visible %d\n",x,y,visible);
 	params_[0] = ((params_[0] & 0xFFFD) | (visible<<1));
 	//printf("param0 0x%04x\n",params_[0]);
 	params_[5] = x;
 	params_[6] = y;
-	return this->sync();
+	if(sync)
+		return this->sync();
+	return true;
 }
 
 bool GMKDisplay::show_menu()
@@ -57,10 +65,12 @@ bool GMKDisplay::show_board(bool clear)
 	return ret;
 }
 
-bool GMKDisplay::select_message(int index)
+bool GMKDisplay::select_message(int index,bool sync)
 {
 	params_[4]=(1<<index);
-	return this->sync();
+	if(sync)
+		return this->sync();
+	return true;
 }
 
 bool GMKDisplay::open_display()
@@ -75,21 +85,25 @@ bool GMKDisplay::open_display()
 	return true;
 }
 
-bool GMKDisplay::update_piece_info(int x,int y, int piece, int current)
+bool GMKDisplay::update_piece_info(int x,int y, int piece, int current, bool sync)
 {
 	params_[1] = y|(x<<4)|(piece<<9);
 	if(current)
 		params_[2] = (params_[2]&0xff00)|(y|(x<<4));
 	printf("piece_info3:0x%04x\n",params_[1]);
 	printf("piece_info_params_[2]:%04x\n",params_[2]);
-	return this->sync();
+	if(sync)
+		return this->sync();
+	return true;
 }
 
-bool GMKDisplay::update_select(int x,int y)
+bool GMKDisplay::update_select(int x,int y, bool sync)
 {
 	params_[2] = ((x<<4)|y)<<8|(params_[2]&0x00ff);
 	printf("select_params_[2]:%04x\n",params_[2]);
-	return this->sync();
+	if(sync)
+		return this->sync();
+	return true;
 }
 
 bool GMKDisplay::clear_board()
