@@ -364,7 +364,8 @@ pair<int, int> GomokuAI::finishMove()
         s.find(shapeTable.HFOUR_1) != string::npos ||
         s.find(shapeTable.HFOUR_2) != string::npos ||
         s.find(shapeTable.HFOUR_3) != string::npos ||
-        s.find(shapeTable.HFOUR_4) != string::npos)
+        s.find(shapeTable.HFOUR_4) != string::npos ||
+        s.find(shapeTable.OFOUR) != string::npos)
         // We are sure that one single move leads to success.
         {
             for (auto& move:getLegalMoves()) {

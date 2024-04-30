@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
     GomokuAI ai(&game, 1);  // Use strategy 1 for best performance.
 
     // Board information
-    bool recordGame = false;
+    bool recordGame = true;
     int boardStart = 20, boardEnd = 580;
     int pieceWidth = 40;
     int aiFirst = 1 ? atoi(argv[1]) : 0;
