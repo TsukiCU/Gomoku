@@ -5,6 +5,7 @@
 #include <climits>
 #include <map>
 #include <cassert>
+#include <algorithm>
 
 
 // Weights for each position. Closer to the center, higher the weight.
@@ -119,6 +120,21 @@ struct shapesLookup {
     {}
 };
 
+struct VectorComparer {
+    bool operator()(const vector<pair<int, int>> v1, const vector<pair<int, int>> v2) const {
+    // v1 < v2 return true. otherwise return false.
+        if (v1.size() != v2.size()) {
+            return v1.size() < v2.size();
+        }
+        auto sorted_v1 = v1;
+        auto sorted_v2 = v2;
+
+        sort(sorted_v1.begin(), sorted_v1.end());
+        sort(sorted_v2.begin(), sorted_v2.end());
+
+        return sorted_v1 < sorted_v2;
+    }
+};
 
 class GomokuAI {
 public:
@@ -152,6 +168,14 @@ public:
     pair<int, int> isKagestu(pair<int, int> bestMove);
     pair<int, int> isUgetsu(pair<int, int> bestMove);
     pair<int, int> finishMove();
+
+    // Another way of doing all this.
+    map<vector<pair<int, int>>, pair<int, int>, VectorComparer> OpeningMap {
+        {{{6, 7}, {7, 7}, {7, 6}}, {5, 6}},
+        {{{6, 7}, {7, 7}, {7, 8}}, {5, 8}},
+        {{{8, 7}, {7, 7}, {7, 6}}, {9, 6}},
+        {{{8, 7}, {7, 7}, {7, 8}}, {9, 8}}
+    };
 
     /* vertical line.
      * (1, 0)  

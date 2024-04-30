@@ -287,7 +287,7 @@ pair<int, int> GomokuAI::isUgetsu(pair<int, int> bestMove)
         return bestMove;
     }
 
-    // 花月 e.g. (7,7) -> (7,6) -> (6,7)
+    // 雨月 e.g. (7,7) -> (7,6) -> (6,7)
     pair<int, int> firstMove = game->record[0];
     pair<int, int> secondMove = game->record[1];
     pair<int, int> thirdMove = game->record[2];
@@ -397,6 +397,11 @@ pair<int, int> GomokuAI::findBestMove()
     int cur_player = game->current_player;
     int bestScore = INT_MIN;
     pair<int, int> bestMove = {-1, -1};
+
+    if (this->OpeningMap.find(game->record) != this->OpeningMap.end()) {
+        bestMove = this->OpeningMap[game->record];
+        return bestMove;
+    }
 
     // HACK:FIXME: Terrible idea. Fix this if I have time!!!!
     // If there is a [Half Four] in our (others') sructure. handle this immediately!!
