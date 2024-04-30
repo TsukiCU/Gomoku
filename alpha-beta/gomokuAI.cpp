@@ -310,6 +310,53 @@ pair<int, int> GomokuAI::isUgetsu(pair<int, int> bestMove)
     return bestMove;
 }
 
+pair<int, int> GomokuAI::finishMove()
+{
+    /*  Merging with <tsuki> commit a1f5bce698f8f3730fb9b12cde732eb0bf9bb2a0
+     *
+     *  AI has some bugs such as this scenario:
+     *  (Assuming AI is playing as 1, and its opponent is playing as 0)
+     *  01111
+     *  10000
+     *  Now it's AI's turn. Instead of placing a stone to form a RENJU
+     *  and end the game, it tends to defend, which is not a good idea.
+     *  So let's hardcode this situation. 
+     */
+
+    pair<int, int> bestMove = make_pair(-1, -1);
+    int size = game->record.size();
+    if (size < 8)
+        return bestMove;
+    pair<int, int> scdlstMove = game->record[size-2];  // second to last
+
+    // If AI has a Half four. Don't hesitate!
+    int x = scdlstMove.first, y = scdlstMove.second, player = game->current_player;
+    vector<string> s_list = {getStrFromPos<1, 0>(x, y, player), getStrFromPos<0, 1>(x, y, player),
+    getStrFromPos<1, 1>(x, y, player), getStrFromPos<1, -1>(x, y, player)};
+
+    for (auto s: s_list) {
+        if (s.find(shapeTable.HFOUR_0) != string::npos ||
+        s.find(shapeTable.HFOUR_1) != string::npos ||
+        s.find(shapeTable.HFOUR_2) != string::npos ||
+        s.find(shapeTable.HFOUR_3) != string::npos ||
+        s.find(shapeTable.HFOUR_4) != string::npos)
+        // We are sure that one single move leads to success.
+        {
+            for (auto& move:getLegalMoves()) {
+                int x = move.first, y = move.second;
+                game->board[x][y] = game->current_player;  // temporarily set.
+                if (game->check_win(x, y)) {
+                    game->board[x][y] = 0;
+                    return move;
+                }
+                game->board[x][y] = 0;
+            }
+        }
+    }
+    
+    return bestMove;
+}
+
 pair<int, int> GomokuAI::decideFourthMove()
 {
     pair<int, int> bestMove = make_pair(-1, -1);
@@ -350,9 +397,24 @@ pair<int, int> GomokuAI::findBestMove()
 {
     /* HACK:FIXME: This is a temporary fix of this issue. Not a good idea. */
     int cur_player = game->current_player;
+    int bestScore = INT_MIN;
+    pair<int, int> bestMove = {-1, -1};
+
+    // HACK:FIXME: Terrible idea. Fix this if I have time!!!!
+    // If there is a [Half Four] in our (others') sructure. handle this immediately!!
+    bestMove = finishMove();
+    assert(cur_player == game->current_player);
+    if (bestMove != make_pair(-1, -1)) {
+        if (game->current_player != cur_player)
+            game->switchPlayers(); /// FUUUUUUUCKKKKKKKK!
+        //game->switchPlayers();  
+        return bestMove;
+    }
+
+    // This is very important!!!
+    assert(cur_player == game->current_player);
 
     /* Hard code for the first several moves. */
-
     // Hard code for the first move. The best move for the first move is always (7, 7)
     if (game->record.size() == 0)
         return make_pair(7, 7);
@@ -372,7 +434,7 @@ pair<int, int> GomokuAI::findBestMove()
             return make_pair(7, 7);
     }
 
-    // Hard code for the third move.
+    // Hard code for the third move. This is deterministic so don't need to check validity.
     if (game->record.size() == 2) 
         return decideThirdMove();
 
@@ -382,9 +444,6 @@ pair<int, int> GomokuAI::findBestMove()
         if (move.first != -1)
             return move;
     }
-    
-    pair<int, int> bestMove = {-1, -1};
-    int bestScore = INT_MIN;
 
     for(auto& move:getLegalMoves()) {
         makeMove(move);
