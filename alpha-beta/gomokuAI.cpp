@@ -352,7 +352,6 @@ pair<int, int> GomokuAI::finishMove()
     int size = game->record.size();
     if (size < 8)
         return bestMove;
-    //pair<int, int> lastMove = game->record.back();
     pair<int, int> scdlstMove = game->record[size-2];  // second to last
 
     // If AI has a Half four. Don't hesitate!
@@ -369,20 +368,24 @@ pair<int, int> GomokuAI::finishMove()
         // We are sure that one single move leads to success.
         {
             for (auto& move:getLegalMoves()) {
-                if (makeMove(move)) {
-                    cout << "Failed to make a move in finishMove()!" << endl;
-                }
-                if (game->state == 1) {
-                    undoMove(move); // This will also switch back the state.
+                int x = move.first, y = move.second;
+                game->board[x][y] = game->current_player;  // temporarily set.
+                if (game->check_win(x, y)) {
+                    game->board[x][y] = 0;
                     return move;
                 }
-                undoMove(move);
+                game->board[x][y] = 0;
+                // if (makeMove(move)) {
+                //     cout << "Failed to make a move in finishMove()!" << endl;
+                // }
+                // if (game->state == 1) {
+                //     undoMove(move); // This will also switch back the state.
+                //     return move;
+                // }
+                // undoMove(move);
             }
         }
     }
-
-    // If AI doesn't have a Half four and that the player has one.
-    // This actually seems redundant but I will do it anyway.
     
     return bestMove;
 }
@@ -397,6 +400,7 @@ pair<int, int> GomokuAI::findBestMove()
     // HACK:FIXME: Terrible idea. Fix this if I have time!!!!
     // If there is a [Half Four] in our (others') sructure. handle this immediately!!
     bestMove = finishMove();
+    assert(cur_player == game->current_player);
     if (bestMove != make_pair(-1, -1)) {
         if (game->current_player != cur_player)
             game->switchPlayers(); /// FUUUUUUUCKKKKKKKK!
