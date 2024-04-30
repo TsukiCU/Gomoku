@@ -321,19 +321,18 @@ pair<int, int> GomokuAI::decideFourthMove()
     if (firstMove != make_pair(7, 7) &&
         (thirdMove.first >= 9 || thirdMove.first <= 5 || thirdMove.second >= 9 || thirdMove.second <= 5))
     {
-        // vector<pair<int, int>> response = {make_pair(6, 8), make_pair(8, 6), make_pair(8, 8), make_pair(6, 6),
-        // make_pair(6, 7), make_pair(7, 6), make_pair(8, 7), make_pair(7, 8)};
-        // srand(time(NULL));
+        vector<pair<int, int>> response = {make_pair(6, 8), make_pair(8, 6), make_pair(8, 8), make_pair(6, 6),
+        make_pair(6, 7), make_pair(7, 6), make_pair(8, 7), make_pair(7, 8)};
+        srand(time(NULL));
 
-        // while (true) {               
-        //     pair<int, int> tmpMove = response[rand() % 8];
-        //     if (game->valid_move(tmpMove.first, tmpMove.second)) {
-        //         bestMove = tmpMove;
-        //         break;
-        //         // Impossible to reach isKagestu and isUgetsu so it's fine.
-        //     }
-        // }
-        return make_pair(6, 6);
+        while (true) {               
+            pair<int, int> tmpMove = response[rand() % 8];
+            if (game->valid_move(tmpMove.first, tmpMove.second)) {
+                bestMove = tmpMove;
+                break;
+                // Impossible to reach isKagestu and isUgetsu so it's fine.
+            }
+        }
     }
 
     bestMove = isKagestu(bestMove);
