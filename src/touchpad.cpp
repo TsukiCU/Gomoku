@@ -21,7 +21,7 @@ void Touchpad::print_touchpad_message(struct XPPenMessage msg)
 	printf("Info:\n");
 	printf("Magic:0x%02x\n",msg.magic);
 	printf("Status:0x%02x %s\n",msg.status,touchpad_status_str[status]);
-	printf("Coordinate:%u,%u\n",(uint16_t)((32767-msg.vertical)/51.2),(uint16_t)((32767-msg.horizontal)/32768.0*480));
+	printf("Coordinate:%u,%u\n",(uint16_t)((msg.horizontal)/51.2),(uint16_t)((msg.vertical)/32768.0*480));
 	printf("Pressure:%u\n",msg.pressure);
 	printf("Unknown:%u\n",msg.unknown);
 }
@@ -87,7 +87,7 @@ void Touchpad::handle_touchpad_message_func()
 
 	while(!thread_stopped_){
 		// Read data
-		r = libusb_interrupt_transfer(handle_, TOUCHPAD_ENDPOINT, (unsigned char *)&data, sizeof(data), &data_len, 5000);
+		r = libusb_interrupt_transfer(handle_, TOUCHPAD_ENDPOINT, (unsigned char *)&data, sizeof(data), &data_len, cursor_hide_timeout_);
 		show_cursor = true;
 		switch (r) {
 		case LIBUSB_ERROR_TIMEOUT: show_cursor = false; break;
@@ -103,7 +103,7 @@ void Touchpad::handle_touchpad_message_func()
 		// printf("\n");
 		// TODO: Message handling
 		if(display_){
-			if(!display_->update_touchpad_cursor((uint16_t)((32767-data.horizontal)/32768.0*480),(uint16_t)((32767-data.vertical)/51.2),show_cursor))
+			if(!display_->update_touchpad_cursor((uint16_t)((data.horizontal)/51.2),(uint16_t)((data.vertical)/32768.0*480),show_cursor))
 			perror("update touchpad cursor");
 		}
 	}

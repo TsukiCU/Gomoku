@@ -25,8 +25,8 @@ struct XPPenMessage{
 	unsigned char status;
 	
 	// Coordinates, need to convert to display coordinate
-	// Horizontal - (uint16_t)((32767-vertical)/51.2)
-	// Vertical - (uint16_t)((32767-msg.horizontal)/32768.0*480)
+	// Horizontal - (uint16_t)((horizontal)/32768.0*480)
+	// Vertical - (uint16_t)((vertical)/51.2)
 
 	// Horizontal, similar to hcount, 0~32767
 	// 0 at the side that is close to the buttons
@@ -58,6 +58,7 @@ protected:
 	libusb_device_handle *handle_;
 	std::thread thread_;
 	int thread_stopped_ = 0;
+	const int cursor_hide_timeout_ = 2000;
 };
 
 #endif
