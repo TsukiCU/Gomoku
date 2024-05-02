@@ -130,7 +130,7 @@ int GomokuAI::ratePos(int x, int y, int player)
     // int dirs[4][4] = {{1, 0}, {0, 1}, {1, 1}, {1, -1}};
 
     int score = 0;
-    int weight = posWeights[x][y];
+    //int weight = posWeights[x][y];
     string s;
 
     s = getStrFromPos<1, 0>(x, y, player);
@@ -142,7 +142,7 @@ int GomokuAI::ratePos(int x, int y, int player)
     s = getStrFromPos<1, -1>(x, y, player);
     score += getScorefromTable(s);
 
-    return weight * score;
+    return score;
 }
 
 int GomokuAI::evaluate(int player)
