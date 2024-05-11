@@ -130,7 +130,9 @@ int GomokuAI::ratePos(int x, int y, int player)
     // int dirs[4][4] = {{1, 0}, {0, 1}, {1, 1}, {1, -1}};
 
     int score = 0;
-    int weight = posWeights[x][y];
+    int weight = 1;
+    if (game->record.size() < 8)
+        weight = posWeights[x][y];
     string s;
 
     s = getStrFromPos<1, 0>(x, y, player);
@@ -142,7 +144,7 @@ int GomokuAI::ratePos(int x, int y, int player)
     s = getStrFromPos<1, -1>(x, y, player);
     score += getScorefromTable(s);
 
-    return weight * score;
+    return weight*score;
 }
 
 int GomokuAI::evaluate(int player)
@@ -396,12 +398,17 @@ pair<int, int> GomokuAI::decideFourthMove()
 
 pair<int, int> GomokuAI::findBestMove()
 {
-    /* HACK:FIXME: This is a temporary fix of this issue. Not a good idea. */
+    /* HACK:TODO: This is a temporary fix of this issue. Not a good idea. */
     int cur_player = game->current_player;
     int bestScore = INT_MIN;
     pair<int, int> bestMove = {-1, -1};
 
-    // HACK:FIXME: Terrible idea. Fix this if I have time!!!!
+    if (this->OpeningMap.find(game->record) != this->OpeningMap.end()) {
+        bestMove = this->OpeningMap[game->record];
+        return bestMove;
+    }
+
+    // HACK:TODO: Terrible idea. Fix this if I have time!!!!
     // If there is a [Half Four] in our (others') sructure. handle this immediately!!
     bestMove = finishMove();
     assert(cur_player == game->current_player);

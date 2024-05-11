@@ -5,6 +5,7 @@
 #include <climits>
 #include <map>
 #include <cassert>
+#include <algorithm>
 
 
 // Weights for each position. Closer to the center, higher the weight.
@@ -15,11 +16,11 @@ const int posWeights[15][15] =
     {0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0},
     {0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 1, 0},
     {0, 1, 2, 3, 4, 4, 4, 4, 4, 4, 4, 3, 2, 1, 0},
-    {0, 1, 2, 3, 4, 5, 5, 5, 5, 5, 4, 3, 2, 1, 0},
-    {0, 1, 2, 3, 4, 5, 6, 6, 6, 5, 4, 3, 2, 1, 0},
-    {0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1, 0},
-    {0, 1, 2, 3, 4, 5, 6, 6, 6, 5, 4, 3, 2, 1, 0},
-    {0, 1, 2, 3, 4, 5, 5, 5, 5, 5, 4, 3, 2, 1, 0},
+    {0, 1, 2, 3, 4, 6, 6, 6, 6, 6, 4, 3, 2, 1, 0},
+    {0, 1, 2, 3, 4, 6, 7, 7, 7, 6, 4, 3, 2, 1, 0},
+    {0, 1, 2, 3, 4, 6, 7, 8, 7, 6, 4, 3, 2, 1, 0},
+    {0, 1, 2, 3, 4, 6, 7, 7, 7, 6, 4, 3, 2, 1, 0},
+    {0, 1, 2, 3, 4, 6, 6, 6, 6, 6, 4, 3, 2, 1, 0},
     {0, 1, 2, 3, 4, 4, 4, 4, 4, 4, 4, 3, 2, 1, 0},
     {0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 1, 0},
     {0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0},
@@ -69,6 +70,8 @@ struct shapesLookup {
         HTWOS_0, HTWOS_1, HTWOS_2, HTWOS_3, HTWOS_4, HTWOS_5, HTWOS_6;
 
     shapesLookup() :
+    // In the case in <branch debug> debug.cpp, the threshold is 33809.
+    // 33809 ❌ 33810 ✅
         RENJU_SCORE(5000000),
         OFOUR_SCORE(100000),
         HFOUR_SCORE(50000),
@@ -117,6 +120,21 @@ struct shapesLookup {
     {}
 };
 
+struct VectorComparer {
+    bool operator()(const vector<pair<int, int>> v1, const vector<pair<int, int>> v2) const {
+    // v1 < v2 return true. otherwise return false.
+        if (v1.size() != v2.size()) {
+            return v1.size() < v2.size();
+        }
+        auto sorted_v1 = v1;
+        auto sorted_v2 = v2;
+
+        sort(sorted_v1.begin(), sorted_v1.end());
+        sort(sorted_v2.begin(), sorted_v2.end());
+
+        return sorted_v1 < sorted_v2;
+    }
+};
 
 class GomokuAI {
 public:
@@ -147,12 +165,27 @@ public:
     // https://zhuanlan.zhihu.com/p/549399379
     // [花月, Kagetsu], [雨月, Ugetsu]
     pair<int, int> decideFourthMove();
-    pair<int, int> finishMove();
     pair<int, int> isKagestu(pair<int, int> bestMove);
     pair<int, int> isUgetsu(pair<int, int> bestMove);
+    pair<int, int> finishMove();
 
-    /*
-     * (1, 0)   vertical line.
+    // Another way of doing all this.
+    map<vector<pair<int, int>>, pair<int, int>, VectorComparer> OpeningMap {
+        // ai as white
+        {{{6, 7}, {7, 7}, {7, 6}}, {5, 6}},
+        {{{6, 7}, {7, 7}, {7, 8}}, {5, 8}},
+        {{{8, 7}, {7, 7}, {7, 6}}, {9, 6}},
+        {{{8, 7}, {7, 7}, {7, 8}}, {9, 8}},
+        {{{6, 6}, {7, 7}, {6, 8}, {6, 7}, {5, 7}}, {5, 6}},
+
+        // ai as black
+        {{{7, 7}, {6, 6}, {6, 8}, {8, 6}}, {9, 7}},
+        {{{7, 7}, {6, 6}, {8, 6}, {8, 8}}, {6, 8}},
+        {{{7, 7}, {6, 8}, {8, 8}, {6, 6}}, {7, 5}}
+    };
+
+    /* vertical line.
+     * (1, 0)  
      * (0, 1)   horizontal line.
      * (1, 1)   diagonal line from lt to rb.
      * (1, -1)  diagonal line from rt to lb.
@@ -160,8 +193,8 @@ public:
     template<int x_dir, int y_dir>
     string getStrFromPos(int x, int y, int player)              // Get a string consisted of 9 char as (x, y) in the middle.
     {
-        int dir_len = game->WIN_LENGTH - 1;
         string ret  = "";
+        int dir_len = game->WIN_LENGTH - 1;
         int r_begin = x - x_dir*dir_len, c_begin = y - y_dir*dir_len;
         int r_end   = x + x_dir*dir_len, c_end   = y + y_dir*dir_len;
         int cur_r   = r_begin, cur_c = c_begin;
