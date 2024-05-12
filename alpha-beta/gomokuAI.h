@@ -141,10 +141,11 @@ public:
     Gomoku *game;                                               // AI holds reference to the game instance.
     shapesLookup shapeTable;                                    // AI knows all the valid shapes for evaluating.
     int  maxDepth;                                              // Max calculating depth per move.
+    bool applyWeight;                                           // Apply weight to the board.
     int  strategy;                                              // The aggresive degree of AI. (1->3)
 
     GomokuAI(Gomoku *game, int strategy):
-    game(game), maxDepth(5), strategy(strategy) {}
+    game(game), maxDepth(5), applyWeight(true), strategy(strategy) {}
 
     vector<pair<int, int>> getLegalMoves();                     // Get valid intersections on board.
     vector<pair<int, int>> getLegalMoves(bool heuristic);       // Focus on the possible areas to reduce overhead.

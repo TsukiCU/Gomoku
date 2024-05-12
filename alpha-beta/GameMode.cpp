@@ -93,8 +93,10 @@ void GameMenu::PvEMode(int player)
         if (game->state == 1) {
             game->displayBoard();
             std::cout << "You win!" << endl;
+            game->resetGame();
             break;
         }
+        game->displayBoard();
 
         // AI makes a move.
         aiMove = ai.findBestMove();
@@ -104,13 +106,13 @@ void GameMenu::PvEMode(int player)
         std::cout << "You made a move at " << x << ", " << y << ", " << "AI made a move at " 
         << aiMove.first + 1 << ", " << aiMove.second + 1 << "\n" << endl;
 
-        game->displayBoard();
-
         if (game->state == 1) {
-            game->resetGame();
+            game->displayBoard();
             std::cout << "You lose!" << endl;
+            game->resetGame();
             break;
         }
+        game->displayBoard();
     }
 }
 
@@ -135,8 +137,9 @@ void GameMenu::PvPMode()
         }
 
         if (x == 0 && y == 0) {
+        string regretPlayer = (game->current_player == 2) ? "Black" : "White";
             if (!game->regret_move()) {
-                std::cout << "White regrets a move, please continue" << endl;
+                std::cout << regretPlayer <<" regrets a move, please continue" << endl;
                 game->displayBoard();
             }
             continue;
@@ -167,8 +170,9 @@ void GameMenu::PvPMode()
         }
 
         if (x == 0 && y == 0) {
+        string regretPlayer = (game->current_player == 2) ? "Black" : "White";
             if (!game->regret_move()) {
-                std::cout << "Black regrets a move, please continue" << endl;
+                std::cout << regretPlayer <<" regrets a move, please continue" << endl;
                 game->displayBoard();
             }
             continue;
@@ -230,7 +234,28 @@ void GameMenu::networkMode()
 				int x,y;
 				cin.clear();
 				cin >> x >> y;
-				server.MakeMove(x, y);
+                if (x == 0 && y == 0) {
+                    // FIXME: regret move. Need to implement this in GMKServer.
+                }
+                else if (x == -1 && y == -1) {
+                    // FIXME: Need to send "resign" message to the other player, so that the other player can return to main menu.
+                    string confirm;
+                    std::cout << "Returning to main menu. Type \"yes\" to continue " << std::endl;
+                    std::cin >> confirm;
+                    if (confirm == "yes") {
+                        // FIXME: This will throw an error. Need to make the threads in tcp.cpp join.
+                        // Possibly set a gameEnd flag in GMKServer
+                        std::cout << "You lose. Returning to main menu." << std::endl;
+                        return;
+                    }
+                    else {
+                        std::cout << "Continuing." << std::endl;
+                        continue;
+                    }
+                }
+				if (!server.MakeMove(x, y)){
+                    //TODO: error handling
+                }
 			}
 			// Connection closed
 			if(server.CheckGameResult()==3){
@@ -258,9 +283,29 @@ void GameMenu::networkMode()
 			while(client.CheckGameResult()<0){
 				int x,y;
 				cin.clear();
-				fflush(stdin);
 				cin >> x >> y;
-				client.MakeMove(x, y);
+                if (x == 0 && y == 0) {
+                    // FIXME: regret move. Need to implement this in GMKServer.
+                }
+                else if (x == -1 && y == -1) {
+                    // FIXME: Need to send "resign" message to the other player, so that the other player can return to main menu.
+                    string confirm;
+                    std::cout << "Returning to main menu. Type \"yes\" to continue " << std::endl;
+                    std::cin >> confirm;
+                    if (confirm == "yes") {
+                        // FIXME: This will throw an error. Need to make the threads in tcp.cpp join.
+                        // Possibly set a gameEnd flag in GMKServer
+                        std::cout << "You lose. Returning to main menu." << std::endl;
+                        return;
+                    }
+                    else {
+                        std::cout << "Continuing." << std::endl;
+                        continue;
+                    }
+                }
+				if (!client.MakeMove(x, y)){
+                    //TODO: error handling
+                }
 			}
 			if(client.CheckGameResult()==1){
 				printf("You win!\n");
