@@ -1,4 +1,5 @@
 #include "../src/tcp.h"
+#include "network.h"
 #include <cstdio>
 #include <string>
 
@@ -185,93 +186,4 @@ void listenForBroadcast(int &role, string &myTimestamp, bool &gameStart, string 
     }
 
     close(sockfd);
-}
-
-int main()
-{
-    int role = -1;  // -1 for unknown, 0 for server, 1 for client;
-    bool gameStart = false; // If game starts, stop listening and broadcasting threads.
-    bool noPlayersFound = false; // If waiting too long(more than 15 seconds), set this to true and report this message.
-    string server_ip = "";
-    string myTimestamp =  "TIMESTAMP: " + to_string(getCurTimeStamp());
-
-    // My basic info
-    printf("My IP: %s | My Timestamp: %lld\n\n", getLocalIP().c_str(), getTimeFromStamp(myTimestamp));
-    printf("Welcome to Gomoku, actively looking for opponents...\n"); 
-
-    thread broadcaster(broadcastPresence, ref(role), ref(myTimestamp), ref(gameStart), ref(noPlayersFound));
-    thread listener(listenForBroadcast, ref(role), ref(myTimestamp), ref(gameStart), ref(server_ip), ref(noPlayersFound));
-
-    broadcaster.join();
-    listener.join();
-
-    if (noPlayersFound) {
-        printf("You know the game is too highbrow. Nobody's around here for now. But you can always start later.\n");
-        return 1;
-    }
-
-    // If received broadcast from others who started later than us, we are the server.
-    // Otherwise, we are the client.
-    if (!role) {
-		GMKServer server;
-		if(!server.Create())
-			return -1;
-		if(!server.WaitForPlayer()){
-			printf("Wait for player failed.\n");
-			return -1;
-		}
-		while(true){
-			server.StartGame();
-			while(server.CheckGameResult()<0){
-				int x,y;
-				cin.clear();
-				cin >> x >> y;
-				server.MakeMove(x, y);
-			}
-			// Connection closed
-			if(server.CheckGameResult()==3){
-				server.WaitForPlayer();
-				continue;
-			}
-			else if(server.CheckGameResult()==1){
-				printf("You win!\n");
-			}
-			else{
-				printf("You lose!\n");
-			}
-			server.ResetBoard();
-			printf("Press enter to restart.\n");
-			fflush(stdin);
-			getchar();
-		}
-    }
-
-    else if (role == 1) {
-		GMKClient client;
-		if(!client.Connect(server_ip.c_str()))
-			return -1;
-		while(true){
-			while(client.CheckGameResult()<0){
-				int x,y;
-				cin.clear();
-				fflush(stdin);
-				cin >> x >> y;
-				client.MakeMove(x, y);
-			}
-			if(client.CheckGameResult()==1){
-				printf("You win!\n");
-			}
-			else{
-				printf("You lose!\n");
-			}
-			printf("Waiting for server to restart...\n");
-			client.ResetBoard();
-		}
-    }
-
-    else {
-        // Shouldn't reach here.
-        fprintf(stderr, "Roles Undetermined Error.\n");
-        return 1;
-    }
 }

@@ -133,9 +133,14 @@ void Gomoku::displayBoard()
 	// }
 }
 
-void Gomoku::clearBoard()
+void Gomoku::resetGame()
 {
-	board = vector<vector<int>>(board_size, vector<int>(board_size, 0));
+    this->board = vector<vector<int>>(board_size, vector<int>(board_size, 0));
+    this->record.erase(record.begin(), record.end());
+    this->state = 0;
+    this->current_player = 1;
+    this->winner = 0;
+    this->regretTimes = 0;
 }
 
 int Gomoku::regret_move()
@@ -154,7 +159,7 @@ int Gomoku::regret_move()
         record.erase(record.end());
         current_player = 3 - current_player;
 
-        /* FIXME: Online gaming mode and Local pvp mode should be handled differently? */
+        /* TODO: Online gaming mode and Local pvp mode should be handled differently? */
     }
 
     // PvE
@@ -177,7 +182,7 @@ int Gomoku::regret_move()
             cout << "Think before you make a move!" << endl;
         }
 
-        /* TODO: We might disable regret function if a certain number of regrets are made. */
+        /* TODO: We might disable regret function if player regrets too often. */
     }
 
     return 0;

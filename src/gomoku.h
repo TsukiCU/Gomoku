@@ -31,7 +31,8 @@ public:
     bool is_draw();                         // Check if players draw.
     void switchPlayers();                   // Switch Black and white.
     void displayBoard();                    // Display board in terminal.
-	void clearBoard();						// Clear board
+
+    void resetGame();                       // Clear board, reset everything.
     void recordGame();                      // Record game in a record/
 
     template<int x_step, int y_step>

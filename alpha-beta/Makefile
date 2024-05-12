@@ -1,15 +1,18 @@
 CXX = g++
 
 CXXFLAGS = -Wall -std=c++11 -pthread
-LDFLAGS = -lusb-1.0
+# LDFLAGS = -lusb-1.0
 
 TARGET = alphaBetaGomoku
 
+# May 12th
 # SOURCES = ../src/gomoku.cpp ../src/players.cpp ../src/tcp.cpp ../src/display.cpp network.cpp 
-# SOURCES = ../src/gomoku.cpp ../src/players.cpp ../src/tcp.cpp tcp_main.cpp ../src/display.cpp
+SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp GameMode.cpp ../src/display.cpp \
+game.cpp ../src/tcp.cpp network.cpp
+
+# legacy
 # SOURCES = ../src/gomoku.cpp ../src/players.cpp ../src/tcp.cpp tcp_main_display.cpp ../src/display.cpp
-# SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp selfplay.cpp
-SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp pve_display.cpp ../src/display.cpp ../src/xboxcont.cpp ../src/touchpad.cpp
+# SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp pve_display.cpp ../src/display.cpp ../src/xboxcont.cpp ../src/touchpad.cpp
 # SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp pve.cpp ../src/xboxcont.cpp
 
 
@@ -20,7 +23,8 @@ all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
 #$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS)
-	$(CXX) $(OBJECTS) $(CXXFLAGS) $(LDFLAGS) -o $@
+#$(CXX) $(OBJECTS) $(CXXFLAGS) $(LDFLAGS) -o $@
+	$(CXX) $(OBJECTS) $(CXXFLAGS) -o $@
 
 %.o: %.cpp
 #$(CXX) $(CXXFLAGS) -c $<

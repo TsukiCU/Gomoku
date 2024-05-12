@@ -2,13 +2,13 @@
 #include "gomokuAI.h"
 #include "../src/players.h"
 
-#include "../src/xboxcont.h"
-#include <libusb-1.0/libusb.h>
+// #include "../src/xboxcont.h"
+// #include <libusb-1.0/libusb.h>
 #define SLEEP 1
 
-libusb_device **devs; //
-libusb_context *ctx = NULL; //
-libusb_device_handle *handle = NULL;
+// libusb_device **devs; //
+// libusb_context *ctx = NULL; //
+// libusb_device_handle *handle = NULL;
 
 
 void applyEndgame(Gomoku *game)
@@ -34,25 +34,25 @@ int main() {
     Player p1(&game, 1);
     GomokuAI ai(&game, 1);  // Use strategy 1 for best performance.
 
-    int result = find_xbox_controller();
+    //int result = find_xbox_controller();
 
     cout << "\n\nGame started. " << endl;
 
     //applyEndgame(&game);
-    
+
     game.displayBoard();
     while (1) {
         int x, y;
-        //std::cin >> x >> y;
-        getCommandXb(&handle,x,y);
-        
+        std::cin >> x >> y;
+        //getCommandXb(&handle,x,y);
+
         // User makes a move. Assume (-1, -1) means want to regret.
         if (x == -1 && y == -1) {
             if (!game.regret_move()) {
                 game.displayBoard();
                 cout << "regret a move, please continue" << endl;
             }
-            
+
             continue;
         }
 
@@ -84,7 +84,7 @@ int main() {
         }
     }
 
-    close_controller(&devs, &ctx);
+    //close_controller(&devs, &ctx);
 
     return 0;
 }

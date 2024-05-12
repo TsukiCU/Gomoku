@@ -30,7 +30,7 @@ bool GMKNetBase::SendPlayerInfo(const PlayerInfo &info)
 void GMKNetBase::ResetBoard()
 {
 	game_.state=2;
-	game_.clearBoard();
+	game_.resetGame();
 }
 
 void GMKNetBase::CreateReceiveThread()
@@ -151,7 +151,7 @@ void GMKNetBase::UdpReceiveThreadFunc()
 
 void GMKNetBase::StartLocalGame()
 {
-	game_.clearBoard();
+	game_.resetGame();
 	printf("Game started! You take %s piece!\n",
 			local_player_.black?"Black":"White"
 	);
