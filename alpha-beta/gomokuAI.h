@@ -11,21 +11,21 @@
 // Weights for each position. Closer to the center, higher the weight.
 const int posWeights[15][15] =
 {
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
-    {0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0},
-    {0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 1, 0},
-    {0, 1, 2, 3, 4, 4, 4, 4, 4, 4, 4, 3, 2, 1, 0},
-    {0, 1, 2, 3, 4, 6, 6, 6, 6, 6, 4, 3, 2, 1, 0},
-    {0, 1, 2, 3, 4, 6, 7, 7, 7, 6, 4, 3, 2, 1, 0},
-    {0, 1, 2, 3, 4, 6, 7, 8, 7, 6, 4, 3, 2, 1, 0},
-    {0, 1, 2, 3, 4, 6, 7, 7, 7, 6, 4, 3, 2, 1, 0},
-    {0, 1, 2, 3, 4, 6, 6, 6, 6, 6, 4, 3, 2, 1, 0},
-    {0, 1, 2, 3, 4, 4, 4, 4, 4, 4, 4, 3, 2, 1, 0},
-    {0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 1, 0},
-    {0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0},
-    {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+    {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+    {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+    {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+    {2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2},
+    {2, 2, 2, 3, 4, 4, 4, 4, 4, 4, 4, 3, 2, 2, 2},
+    {2, 2, 2, 3, 4, 6, 6, 6, 6, 6, 4, 3, 2, 2, 2},
+    {2, 2, 2, 3, 4, 6, 7, 7, 7, 6, 4, 3, 2, 2, 2},
+    {2, 2, 2, 3, 4, 6, 7, 8, 7, 6, 4, 3, 2, 2, 2},
+    {2, 2, 2, 3, 4, 6, 7, 7, 7, 6, 4, 3, 2, 2, 2},
+    {2, 2, 2, 3, 4, 6, 6, 6, 6, 6, 4, 3, 2, 2, 2},
+    {2, 2, 2, 3, 4, 4, 4, 4, 4, 4, 4, 3, 2, 2, 2},
+    {2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2},
+    {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+    {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+    {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}
 };
 
 
@@ -142,9 +142,10 @@ public:
     shapesLookup shapeTable;                                    // AI knows all the valid shapes for evaluating.
     int  maxDepth;                                              // Max calculating depth per move.
     int  strategy;                                              // The aggresive degree of AI. (1->3)
+    bool applyWeight;                                           // Apply weight to the evaluation.
 
     GomokuAI(Gomoku *game, int strategy):
-    game(game), maxDepth(5), strategy(strategy) {}
+    game(game), maxDepth(5), strategy(strategy), applyWeight(true) {}
 
     vector<pair<int, int>> getLegalMoves();                     // Get valid intersections on board.
     vector<pair<int, int>> getLegalMoves(bool heuristic);       // Focus on the possible areas to reduce overhead.

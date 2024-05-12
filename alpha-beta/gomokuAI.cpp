@@ -131,7 +131,7 @@ int GomokuAI::ratePos(int x, int y, int player)
 
     int score = 0;
     int weight = 1;
-    if (game->record.size() < 8)
+    if (applyWeight && game->record.size() < 8)
         weight = posWeights[x][y];
     string s;
 
@@ -323,6 +323,7 @@ pair<int, int> GomokuAI::decideFourthMove()
     if (firstMove != make_pair(7, 7) &&
         (thirdMove.first >= 9 || thirdMove.first <= 5 || thirdMove.second >= 9 || thirdMove.second <= 5))
     {
+        applyWeight = false;
         vector<pair<int, int>> response = {make_pair(6, 8), make_pair(8, 6), make_pair(8, 8), make_pair(6, 6),
         make_pair(6, 7), make_pair(7, 6), make_pair(8, 7), make_pair(7, 8)};
         srand(time(NULL));
