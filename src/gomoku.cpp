@@ -24,21 +24,16 @@ int Gomoku::make_move(pair<int, int> move)
 
     if (!valid_move(x, y))  return 1;
     board[x][y] = current_player;
+	if(display)
+		display->update_piece_info(x, y, 3-current_player);
+	if(record_game)
+		record.push_back(make_pair(x, y));
     if (check_win(x, y)) {
         winner = current_player;
         state = 1;
         return 0;
     }
 
-	// vga_gomoku_arg_t arg;
-	// arg.param[0] = 1;
-	// arg.param[1] = (unsigned char)x;
-	// arg.param[2] = (unsigned char)y;
-	// arg.param[3] = (unsigned char)current_player;
-	// if (ioctl(vga_gomoku_fd, VGA_GOMOKU_WRITE, &arg)){
-	// 	perror("ioctl(VGA_GOMOKU_WRITE) failed");
-	// 	return 0;
-	// }
     switchPlayers();
     return 0;
 }
@@ -141,6 +136,8 @@ void Gomoku::resetGame()
     this->current_player = 1;
     this->winner = 0;
     this->regretTimes = 0;
+	if(display)
+		display->clear_board();
 }
 
 int Gomoku::regret_move()
@@ -156,8 +153,12 @@ int Gomoku::regret_move()
         board[lastMove.first][lastMove.second] = 0;
 
         // clear the record.
-        record.erase(record.end());
+        if(record_game)
+       		record.erase(record.end());
         current_player = 3 - current_player;
+		
+		if(display)
+			display->update_piece_info(lastMove.first, lastMove.second, 0);
 
         /* TODO: Online gaming mode and Local pvp mode should be handled differently? */
     }
@@ -175,8 +176,14 @@ int Gomoku::regret_move()
         board[secondLastMove.first][secondLastMove.second] = 0;
 
         // clear the record.
-        record.erase(record.end()-2, record.end());
+		if(record_game)
+        	record.erase(record.end()-2, record.end());
         regretTimes++;
+		
+		if(display){
+			display->update_piece_info(lastMove.first, lastMove.second, 0);
+			display->update_piece_info(secondLastMove.first, secondLastMove.second, 0);
+		}
 
         if (regretTimes >= 3) {
             cout << "Think before you make a move!" << endl;

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <iostream>
+#include "display.h"
 
 class Player;
 using namespace std;
@@ -18,6 +19,8 @@ public:
     int regretTimes;                        // Times user has regreted. Used only when online gaming and playing with AI.
     vector<vector<int>> board;              // The board.
     vector<pair<int, int>> record;          // Game record.
+	GMKDisplay *display=NULL;				// Display driver pointer
+	bool record_game = true;				// Whether to record game
 
     Gomoku(int mode) : state(0), board_size(15), current_player(1),
     WIN_LENGTH(5), mode(mode), regretTimes(0), board(board_size, vector<int>(board_size, 0)) {}
@@ -31,6 +34,9 @@ public:
     bool is_draw();                         // Check if players draw.
     void switchPlayers();                   // Switch Black and white.
     void displayBoard();                    // Display board in terminal.
+
+	void set_display(GMKDisplay *display)	// Set display driver
+		{this->display=display;}
 
     void resetGame();                       // Clear board, reset everything.
     void recordGame();                      // Record game in a record/
