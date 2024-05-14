@@ -14,3 +14,16 @@ int Player::makeMove(pair<int, int> move)
         return 1;
     }
 }
+
+int Player::regretMove()
+{
+	if(!game->regret_move())
+		return 0;
+	return 1;
+}
+
+int Player::resign()
+{
+	game->end_game(false);
+	return 0;
+}

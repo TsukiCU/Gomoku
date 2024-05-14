@@ -16,6 +16,8 @@ class Player {
     Player(Gomoku *game, int id) : game(game) {info.pid=id;}     // the current player is pid == 1? Black : White.
 
     int makeMove(pair<int, int>);   // Player makes a move at (x, y).
+	int regretMove();				// Player regrets move
+	int resign();					// Player resigns
 };
 
 

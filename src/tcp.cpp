@@ -10,6 +10,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <thread>
+#include <type_traits>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/poll.h>
@@ -17,28 +18,27 @@
 
 using namespace std;
 
-bool GMKNetBase::SendPlayerInfo(const PlayerInfo &info)
+bool GMKNetBase::send_player_info(const PlayerInfo &info)
 {
 	GMKNetMessage msg;
-	msg.magic = 0x474D4B4D;
 	msg.type = GMK_MSG_PLAYER_INFO;
 	memcpy(msg.msg, &info, sizeof(info));
 	write(remote_fd_, &msg, sizeof(msg));
 	return true;
 }
 
-void GMKNetBase::ResetBoard()
+void GMKNetBase::reset_board()
 {
-	game_.state=2;
-	game_.resetGame();
+	game_->state=2;
+	game_->resetGame();
 }
 
-void GMKNetBase::CreateReceiveThread()
+void GMKNetBase::create_receive_thread()
 {
-	recv_thread_=std::thread(&GMKNetBase::ReceiveThreadFunc,this);
+	recv_thread_=std::thread(&GMKNetBase::receive_thread_func,this);
 }
 
-void GMKNetBase::ReceiveThreadFunc()
+void GMKNetBase::receive_thread_func()
 {
 	GMKNetMessage msg;
 	printf("TCP Message handling thread created!\n");
@@ -58,16 +58,16 @@ void GMKNetBase::ReceiveThreadFunc()
 			close(remote_fd_);
 			break;
 		}
-		HandleMessage(msg);
+		handle_message(msg);
 	}
-	printf("Connection closed!\n");
+	printf("connect_toion closed!\n");
 	connected_ = false;
 	// TODO: Do some work after thread exits
-	ReceiveThreadCallback();
+	receive_thread_callback();
 	return;
 }
 
-bool GMKNetBase::CreateUdpSocket()
+bool GMKNetBase::create_udp_socket()
 {
     struct sockaddr_in anyAddr;
 	int reuse_port_val = 0;
@@ -104,11 +104,11 @@ bool GMKNetBase::CreateUdpSocket()
 	printf("UDP Socket created on port %u!\n",udp_port_);
 
 	// Create UDP Receive thread
-	udp_recv_thread_=std::thread(&GMKNetBase::UdpReceiveThreadFunc,this);
+	udp_recv_thread_=std::thread(&GMKNetBase::udp_receive_thread_func,this);
 	return true;
 }
 
-void GMKNetBase::UdpReceiveThreadFunc()
+void GMKNetBase::udp_receive_thread_func()
 {
     struct sockaddr_in srcAddr;
     socklen_t addrLen = sizeof(srcAddr);
@@ -133,7 +133,7 @@ void GMKNetBase::UdpReceiveThreadFunc()
 			printf("UDP message received type %d.\n",msg.type);
 			// Copy source Address, used for later reply.
 			memcpy(msg.msg, &srcAddr, addrLen);
-			HandleMessage(msg);
+			handle_message(msg);
 		}
 		memset(&srcAddr, 0, sizeof(srcAddr));
 		bzero(&msg, sizeof(msg));
@@ -145,29 +145,24 @@ void GMKNetBase::UdpReceiveThreadFunc()
 		perror("UDP Recv:");
 	}
 	// TODO: Do some work after thread exits
-	ReceiveThreadCallback();
+	receive_thread_callback();
 	return;
 }
 
-void GMKNetBase::StartLocalGame()
+void GMKNetBase::start_local_game()
 {
-	game_.resetGame();
+	game_->resetGame();
 	printf("Game started! You take %s piece!\n",
 			local_player_.black?"Black":"White"
 	);
 	piece_count_=0;
-	game_.state=0;
-	game_.current_player=1;
-	game_.displayBoard();
+	game_->state=0;
+	game_->current_player=1;
+	game_->displayBoard();
 }
 
-bool GMKNetBase::IsMoveValid(const GMKMoveInfo &info, const Player &player)
+bool GMKNetBase::is_players_turn(const Player &player)
 {
-	// Game not started
-	if(game_.state>0){
-		printf("Game not started.\n");
-		return false;
-	}
 	// Not player's turn
 	// It is players's turn when:
 	// 1. current number of pieces is even and player holds black pieces.
@@ -177,33 +172,40 @@ bool GMKNetBase::IsMoveValid(const GMKMoveInfo &info, const Player &player)
 		printf("It's not your turn.\n");
 		return false;
 	}
-	if(!game_.valid_move(info.x-1,info.y-1)){
-		printf("Invalid move!\n");
-		return false;
-	}
 	return true;
 }
 
-bool GMKNetBase::MakeMove(int x, int y)
+bool GMKNetBase::is_move_valid(const GMKMoveInfo &info, const Player &player)
+{
+	// Game not started
+	if(game_->state>0){
+		printf("Game not started.\n");
+		return false;
+	}
+
+	if(!is_players_turn(player))
+		return false;
+
+	if(!game_->valid_move(info.x,info.y))
+		return false;
+	return true;
+}
+
+bool GMKNetBase::make_move(int x, int y)
 {
 	GMKMoveInfo info;
 	info.idx=piece_count_;
 	info.x=x;
 	info.y=y;
 
-	if(!IsMoveValid(info, local_player_))
+	if(!is_move_valid(info, local_player_))
 		return false;
 
 	// Local player takes move
-	local_player_.makeMove(make_pair(x - 1, y - 1));
+	local_player_.makeMove(make_pair(x, y));
 	++piece_count_;
-	if(display_){
-		display_->update_piece_info(x-1,y-1,local_player_.black?1:2,1);
-		display_->update_select(x-1,y-1);
-	}
 	// Send move message
 	GMKNetMessage msg;
-	msg.magic = 0x474D4B4D;
 	msg.type = GMK_MSG_MOVE_INFO;
 	memcpy(msg.msg, &info, sizeof(info));
 	write(remote_fd_, &msg, sizeof(msg));
@@ -212,41 +214,108 @@ bool GMKNetBase::MakeMove(int x, int y)
 		   local_player_.black?"Black":"White",
 		   x,y
 	);
-	game_.displayBoard();
+	game_->displayBoard();
 	return true;
 }
 
-int GMKNetBase::CheckGameResult()
+bool GMKNetBase::regret_move()
+{
+	// Only allow local player to regret when it's player's turn
+	if(!is_players_turn(local_player_))
+		return false;
+	// Local player regrets
+	game_->regret_move();
+	// Fall back 2 moves
+	piece_count_-=2;
+
+	// Send move message
+	GMKNetMessage msg;
+	msg.type = GMK_MSG_MOVE_REGRET;
+	write(remote_fd_, &msg, sizeof(msg));
+	
+	printf("%d:%s (You) regret a move!\n", piece_count_,
+		   local_player_.black?"Black":"White"
+	);
+	game_->displayBoard();
+	return true;
+}
+
+bool GMKNetBase::resgin()
+{
+	// Only allow local player to regret when it's player's turn
+	if(!is_players_turn(local_player_))
+		return false;
+
+	// local player resigns
+	local_player_.resign();
+
+	// Send move message
+	GMKNetMessage msg;
+	msg.type = GMK_MSG_GAME_RESIGN;
+	write(remote_fd_, &msg, sizeof(msg));
+
+	printf("%d:%s (You) resigned the game!\n", piece_count_,
+		   local_player_.black?"Black":"White"
+	);
+	game_->displayBoard();
+	return true;
+}
+
+int GMKNetBase::check_game_result()
 {
 	if(!connected_)
 		return 3;
 	// Game not started/ended.
-	if(game_.state!=1)
+	if(game_->state!=1)
 		return -1;
-	return local_player_.black^(game_.winner==2);
+	return local_player_.black^(game_->winner==2);
 }
 
-void GMKNetBase::HandleRemoteMove(const GMKMoveInfo &info)
+void GMKNetBase::handle_remote_move(const GMKMoveInfo &info)
 {
-	if(!IsMoveValid(info, remote_player_)){
+	if(!is_move_valid(info, remote_player_)){
 		// TODO:Remote move not valid
+		return ;
 	}
 	// Remote player takes move
-	remote_player_.makeMove(make_pair(info.x - 1, info.y - 1));
+	remote_player_.makeMove(make_pair(info.x, info.y));
 	++piece_count_;
-	if(display_){
-		printf("Remote move\n");
-		display_->update_piece_info(info.x-1,info.y-1,remote_player_.black?1:2,1);
-	}
-	printf("%d:%s take a move at (%d,%d)\n", piece_count_,
+	printf("%d:%s takes a move at (%d,%d)\n", piece_count_,
 		remote_player_.black?"Black":"White",
 		info.x,info.y
 	);
-	game_.displayBoard();
+	game_->displayBoard();
 }
 
+void GMKNetBase::handle_remote_regret()
+{
+	if(!is_players_turn(remote_player_)){
+		return ;
+	}
+	if(remote_player_.regretMove()){
+	// if return value is not 0, an error occurs
+		return;
+	}
+	piece_count_-=2;
+	printf("%d:%s regrets a move!\n", piece_count_,
+		   remote_player_.black?"Black":"White"
+	);
+	game_->displayBoard();
+}
 
-void GMKServer::HandleMessage(const GMKNetMessage &msg)
+void GMKNetBase::handle_remote_resign()
+{
+	if(!is_players_turn(remote_player_)){
+		return ;
+	}
+	remote_player_.resign();
+	printf("%d:%s resigns!\n", piece_count_,
+		   remote_player_.black?"Black":"White"
+	);
+	game_->displayBoard();
+}
+
+void GMKServer::handle_message(const GMKNetMessage &msg)
 {
 	if(msg.type==GMK_MSG_PLAYER_INFO){// Player info
 		PlayerInfo info;
@@ -257,7 +326,13 @@ void GMKServer::HandleMessage(const GMKNetMessage &msg)
 	else if(msg.type==GMK_MSG_MOVE_INFO){ // Move info
 		GMKMoveInfo info;
 		memcpy(&info, msg.msg, sizeof(info));
-		HandleRemoteMove(info);
+		handle_remote_move(info);
+	}
+	else if(msg.type==GMK_MSG_MOVE_REGRET){ // Remote player regrets
+		handle_remote_regret();
+	}
+	else if(msg.type==GMK_MSG_GAME_RESIGN){ // Remote player resigns
+		handle_remote_resign();
 	}
 	else if(msg.type==GMK_MSG_UDP_DISCOVER){ // UDP Server discover
 		GMKNetMessage reply;
@@ -266,7 +341,6 @@ void GMKServer::HandleMessage(const GMKNetMessage &msg)
 		// Read reply address
 		memcpy(&addr, msg.msg, sizeof(struct sockaddr_in));
 		//addr.sin_port = GMK_UDP_PORT;
-		reply.magic = 0x474D4B4D;
 		// Send server status
 		// Playing or ready to play
 		reply.type = connected_?GMK_MSG_UDP_BUSY:GMK_MSG_UDP_READY;
@@ -278,7 +352,7 @@ void GMKServer::HandleMessage(const GMKNetMessage &msg)
 }
 
 
-bool GMKServer::Create()
+bool GMKServer::create()
 {
     // socket create and verification 
     local_fd_ = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -318,11 +392,11 @@ bool GMKServer::Create()
         return false;
     } 
 	printf("Gomoku Server: Server listening at port %d..\n",GMK_SERVER_PORT+i);
-	CreateUdpSocket();
+	create_udp_socket();
 	return true;
 }
 
-bool GMKServer::WaitForPlayer()
+bool GMKServer::wait_for_player()
 {
 	struct sockaddr_in client;
 	uint len;
@@ -342,14 +416,14 @@ bool GMKServer::WaitForPlayer()
 		printf("Gomoku Server: Server accept the client...\n");
 
 		// Create message handling thread
-		CreateReceiveThread();
-		RequestPlayerInfo();
+		create_receive_thread();
+		request_player_info();
 		/* 
 		* After connection established,
 		* the gomoku client must send player info in 5s,
 		* or the connection will be closed.
 		*/
-		if(!WaitForPlayerInfo()){
+		if(!wait_for_player_info()){
 			printf("Gomoku Server: Not a valid player.\n");
 			close(remote_fd_);
 			recv_thread_.join();
@@ -361,15 +435,14 @@ bool GMKServer::WaitForPlayer()
 	return true;
 }
 
-void GMKServer::RequestPlayerInfo()
+void GMKServer::request_player_info()
 {
 	GMKNetMessage msg;
-	msg.magic = 0x474D4B4D;
 	msg.type = GMK_MSG_REQ_PLAYER_INFO;
 	write(remote_fd_, &msg, sizeof(msg));
 }
 
-bool GMKServer::WaitForPlayerInfo()
+bool GMKServer::wait_for_player_info()
 {
 	printf("Gomoku Server: Waiting for remote player info...\n");
 	for(int i=0;i<100;++i){
@@ -377,9 +450,9 @@ bool GMKServer::WaitForPlayerInfo()
 		if(is_player_joined_){
 			printf("Gomoku Server: Player info received!\n");
 			// Send server player info
-			SendPlayerInfo(local_player_.info);
+			send_player_info(local_player_.info);
 			// Send server game info
-			SendGameInfo();
+			send_game_info();
 			return true;
 		}
 	}
@@ -387,55 +460,53 @@ bool GMKServer::WaitForPlayerInfo()
 	return false;
 }
 
-bool GMKServer::SendGameInfo()
+bool GMKServer::send_game_info()
 {
 	GMKNetMessage msg;
 	bzero(&msg, sizeof(msg));
-	msg.magic = 0x474D4B4D;
 	msg.type = GMK_MSG_GAME_INFO;
 
 	GMKGameInfo info;
-	info.board_size = game_.board_size;
-	info.win_length = game_.WIN_LENGTH;
+	info.board_size = game_->board_size;
+	info.win_length = game_->WIN_LENGTH;
 	memcpy(msg.msg, &info, sizeof(info));
 	write(remote_fd_, &msg, sizeof(msg));
 	return true;
 }
 
-bool GMKServer::StartGame()
+bool GMKServer::start_game()
 {
-	AssignPieces();
+	assign_pieces();
 
 	// Send start signal
 	GMKNetMessage msg;
 	bzero(&msg, sizeof(msg));
-	msg.magic = 0x474D4B4D;
 	msg.type = GMK_MSG_GAME_START;
 	msg.msg[0]=	local_player_.black;
 	msg.msg[1] = remote_player_.black;
 	write(remote_fd_, &msg, sizeof(msg));
 
 	// Wait for remote acknowledge?
-	StartLocalGame();
+	start_local_game();
 	return true;
 }
 
-void GMKServer::AssignPieces()
+void GMKServer::assign_pieces()
 {
 	srand(time(NULL));
 	local_player_.black=((rand()%4)>=2);
 	remote_player_.black=!local_player_.black;
 }
 
-bool GMKClient::Connect(const char *ip)
+bool GMKClient::connect_to(const char *ip)
 {
 	GMKServerInfo info;
 	info.address = ip;
 	info.port = GMK_SERVER_PORT;
-	return Connect(info);
+	return connect_to(info);
 }
 
-bool GMKClient::Connect(const GMKServerInfo &info)
+bool GMKClient::connect_to(const GMKServerInfo &info)
 {
 	struct sockaddr_in servaddr;
 	// socket create and verification
@@ -455,30 +526,30 @@ bool GMKClient::Connect(const GMKServerInfo &info)
     // connect the client socket to server socket
     if (connect(remote_fd_, (struct sockaddr*)&servaddr, sizeof(servaddr))
         != 0) {
-        printf("Gomoku Client: Connection with the server failed...\n");
+        printf("Gomoku Client: connect_toion with the server failed...\n");
         return false;
     }
-    printf("Gomoku Client: Connected to the server..\n");
+    printf("Gomoku Client: connect_toed to the server..\n");
 	connected_ = true;
-	CreateReceiveThread();
+	create_receive_thread();
 	return true;
 }
 
-void GMKClient::ResetServerList()
+void GMKClient::reset_server_list()
 {
 	for(auto server: server_list_){
 		server.status=0;
 	}
 }
 
-bool GMKClient::SendServerDiscover()
+bool GMKClient::send_server_discover()
 {
 	struct sockaddr_in broadcastAddr;
 	int broadcastPermission = 1;
 	struct GMKNetMessage msg;
 
 	if(udp_fd_<0){
-		if(!CreateUdpSocket())
+		if(!create_udp_socket())
 			return false;
 	}
 
@@ -489,13 +560,12 @@ bool GMKClient::SendServerDiscover()
     }
 
     // Reset server list
-	ResetServerList();
+	reset_server_list();
 	
 	memset(&broadcastAddr, 0, sizeof(broadcastAddr));
 	broadcastAddr.sin_family = AF_INET;
 	broadcastAddr.sin_addr.s_addr = htonl(INADDR_BROADCAST);
 	bzero(&msg, sizeof(msg));
-	msg.magic = 0x474D4B4D;
 	msg.type = GMK_MSG_UDP_DISCOVER;
 	for(int i=0;i<GMK_SERVER_PORT_MAX_OFFSET;++i){
 		broadcastAddr.sin_port = htons(GMK_UDP_PORT+i);
@@ -505,7 +575,7 @@ bool GMKClient::SendServerDiscover()
 	return true;
 }
 
-void GMKClient::UpdateServerList(const GMKServerInfo & info)
+void GMKClient::update_server_list(const GMKServerInfo & info)
 {
 	for(auto element: server_list_){
 		if(element.address==info.address&&element.port==info.port){
@@ -519,13 +589,13 @@ void GMKClient::UpdateServerList(const GMKServerInfo & info)
 }
 
 
-void GMKClient::HandleMessage(const GMKNetMessage &msg)
+void GMKClient::handle_message(const GMKNetMessage &msg)
 {
 	if(msg.type==GMK_MSG_GAME_INFO){// Game info
 		GMKGameInfo info;
 		memcpy(&info, msg.msg, sizeof(info));
-		game_.board_size=info.board_size;
-		game_.WIN_LENGTH=info.win_length;
+		game_->board_size=info.board_size;
+		game_->WIN_LENGTH=info.win_length;
 		printf("Game info received! Waiting game to start...\n");
 	}
 	else if(msg.type==GMK_MSG_PLAYER_INFO){
@@ -536,15 +606,21 @@ void GMKClient::HandleMessage(const GMKNetMessage &msg)
 	else if(msg.type==GMK_MSG_GAME_START){// Game start signal
 		remote_player_.black=msg.msg[0];
 		local_player_.black=msg.msg[1];
-		StartLocalGame();
+		start_local_game();
 	}
 	else if(msg.type==GMK_MSG_MOVE_INFO){ // Move info
 		GMKMoveInfo info;
 		memcpy(&info, msg.msg, sizeof(info));
-		HandleRemoteMove(info);
+		handle_remote_move(info);
+	}
+	else if(msg.type==GMK_MSG_MOVE_REGRET){ // Remote player regrets
+		handle_remote_regret();
+	}
+	else if(msg.type==GMK_MSG_GAME_RESIGN){ // Remote player resigns
+		handle_remote_resign();
 	}
 	else if(msg.type==GMK_MSG_REQ_PLAYER_INFO){ // Server requests player info
-		SendPlayerInfo(local_player_.info);
+		send_player_info(local_player_.info);
 		printf("Server requests player info\n");
 	}
 	else if(IS_GMK_UDP_MSG(msg.type)){ // Handle UDP message
@@ -564,7 +640,7 @@ void GMKClient::HandleMessage(const GMKNetMessage &msg)
 		case GMK_MSG_UDP_BUSY: info.status=1;  break;
 		default: return;	//Drop Other messages
 		}
-		UpdateServerList(info);
+		update_server_list(info);
 	}
 }
 

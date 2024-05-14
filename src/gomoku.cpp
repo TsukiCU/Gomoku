@@ -17,6 +17,13 @@ bool Gomoku::valid_move(int x, int y)
     return on_board(x, y) && board[x][y] == 0;
 }
 
+void Gomoku::end_game(bool current_player_win)
+{
+	winner = current_player_win?current_player:(3-current_player);
+	state = 1;
+	return;
+}
+
 int Gomoku::make_move(pair<int, int> move)
 {
     int x = move.first;
@@ -25,12 +32,12 @@ int Gomoku::make_move(pair<int, int> move)
     if (!valid_move(x, y))  return 1;
     board[x][y] = current_player;
 	if(display)
+		// Piece value is different from current_player
 		display->update_piece_info(x, y, 3-current_player);
 	if(record_game)
 		record.push_back(make_pair(x, y));
     if (check_win(x, y)) {
-        winner = current_player;
-        state = 1;
+		end_game(true);
         return 0;
     }
 
