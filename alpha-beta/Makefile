@@ -1,14 +1,14 @@
 CXX = g++
 
 CXXFLAGS = -Wall -std=c++11 -pthread
-# LDFLAGS = -lusb-1.0
+LDFLAGS = -lusb-1.0
 
 TARGET = alphaBetaGomoku
 
 # May 12th
 # SOURCES = ../src/gomoku.cpp ../src/players.cpp ../src/tcp.cpp ../src/display.cpp network.cpp 
-SOURCES = ../src/gomoku.cpp ../src/players.cpp gomokuAI.cpp GameMode.cpp ../src/display.cpp \
-game.cpp ../src/tcp.cpp network.cpp
+SOURCES = ../src/display.cpp ../src/gomoku.cpp ../src/input.cpp ../src/players.cpp\
+../src/tcp.cpp ../src/touchpad.cpp ../src/xboxcont.cpp gomokuAI.cpp game.cpp main.cpp
 
 # legacy
 # SOURCES = ../src/gomoku.cpp ../src/players.cpp ../src/tcp.cpp tcp_main_display.cpp ../src/display.cpp
@@ -24,7 +24,7 @@ all: $(TARGET)
 $(TARGET): $(OBJECTS)
 #$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS)
 #$(CXX) $(OBJECTS) $(CXXFLAGS) $(LDFLAGS) -o $@
-	$(CXX) $(OBJECTS) $(CXXFLAGS) -o $@
+	$(CXX) $(OBJECTS) $(CXXFLAGS) -o $@ $(LDFLAGS)
 
 %.o: %.cpp
 #$(CXX) $(CXXFLAGS) -c $<
