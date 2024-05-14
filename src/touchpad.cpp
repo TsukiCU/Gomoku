@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <thread>
+#include "input.h"
 #include "touchpad.h"
 
 void Touchpad::print_touchpad_message(struct XPPenMessage msg)
@@ -27,70 +28,30 @@ void Touchpad::print_touchpad_message(struct XPPenMessage msg)
 	printf("Unknown:%u\n",msg.unknown);
 }
 
-bool Touchpad::open_touchpad_device()
+void Touchpad::create_handling_thread()
 {
-	libusb_context *ctx;
-	int r;
-
-    r = libusb_init(&ctx);
-    if (r < 0) {
-        fprintf(stderr, "fail to init libusb: %d\n", r);
-        return false;
-    }
-
-	handle_ = libusb_open_device_with_vid_pid(ctx,TOUCHPAD_VENDOR_ID,TOUCHPAD_PRODUCT_ID);
-	if(!handle_){
-		perror("Open touchpad usb device");
-		goto ERR;
-	}
-
-	// Use interface 0
-	r = libusb_set_auto_detach_kernel_driver(handle_,1);
-	if(r!=LIBUSB_SUCCESS){
-		printf("Detach kernel driver failed.\n");
-		goto ERR;
-	}
-	if (libusb_kernel_driver_active(handle_, TOUCHPAD_INTERFACE) == 1) {
-		r = libusb_detach_kernel_driver(handle_, TOUCHPAD_INTERFACE);
-		if (r == 0) {
-			printf("Kernel Driver Detached\n");
-		} else {
-			fprintf(stderr, "Error detaching kernel driver: %d\n", r);
-		}
-	}
-
-	return true;
-
-ERR:
-	close_touchpad_device();
-	return false;
+	thread_stopped_ = 0;
+	thread_ = std::thread(&Touchpad::handle_message_func,this);
 }
 
-void Touchpad::close_touchpad_device()
-{
-	libusb_close(handle_);
-	libusb_exit(NULL);	
-}
-
-void Touchpad::handle_touchpad_message_func()
+void Touchpad::handle_message_func()
 {
 	int data_len = 0;
 	int r = 0;
 	uint16_t vga_x,vga_y;
-	int piece_x,piece_y;
 	bool show_cursor=true;
 	XPPenMessage data;
 	
-        r = libusb_claim_interface(handle_, TOUCHPAD_INTERFACE);
-        if (r < 0) {
-                fprintf(stderr, "claim interface error %d - %s\n", r, libusb_strerror((libusb_error)r));
-                goto OUT;
-        }
-        printf("claimed interface %d\n",TOUCHPAD_INTERFACE);
+	r = libusb_claim_interface(handle_, interface_);
+	if (r < 0) {
+			fprintf(stderr, "claim interface error %d - %s\n", r, libusb_strerror((libusb_error)r));
+			goto OUT;
+	}
+	printf("claimed interface %d\n",interface_);
 
 	while(!thread_stopped_){
 		// Read data
-		r = libusb_interrupt_transfer(handle_, TOUCHPAD_ENDPOINT, (unsigned char *)&data, sizeof(data), &data_len, cursor_hide_timeout_);
+		r = libusb_interrupt_transfer(handle_, endpoint_, (unsigned char *)&data, sizeof(data), &data_len, usb_timeout_);
 		show_cursor = true;
 		switch (r) {
 		case LIBUSB_ERROR_TIMEOUT: show_cursor = false; break;
@@ -101,44 +62,62 @@ void Touchpad::handle_touchpad_message_func()
 		case LIBUSB_ERROR_INVALID_PARAM: printf("LIBUSB_ERROR_INVALID_PARAM\n"); goto OUT;
 		}
 		// printf("\nData: length %d\n",data_len);
-		//print_touchpad_message(data);
+		// print_touchpad_message(data);
 		// printf("\n");
 		// TODO: Message handling
 		vga_x = ((data.horizontal)/51.2);
 		vga_y = ((data.vertical)/32768.0*480);
 		if(display_){
-			if(show_cursor){
-				if(vga_x<=4)
-					piece_x=0;
-				else if(vga_x>=498)
-					piece_x=14;
-				else
-				 	piece_x=(vga_x-4)/33;
-				if(vga_y<=7)
-					piece_y=0;
-				else if(vga_y>=472)
-					piece_y=14;
-				else
-				 	piece_y=(vga_y-7)/31;
-				display_->update_select(piece_x, piece_y, false);
-			}
 			if(!display_->update_touchpad_cursor(vga_x,vga_y,show_cursor))
-			perror("update touchpad cursor");
+				perror("update touchpad cursor");
 		}
+		if(input_handler_)
+			handle_touchpad_pen_event(&data);
 	}
 OUT:
 	thread_stopped_ = 1;
-	close_touchpad_device();
+	close_device();
 	return;
 }
 
-void Touchpad::create_touchpad_handling_thread()
+void Touchpad::handle_touchpad_pen_event(struct XPPenMessage *msg)
 {
-	thread_stopped_ = 0;
-	thread_ = std::thread(&Touchpad::handle_touchpad_message_func,this);
-}
+	const int debounce_threshold = 0;
+	static unsigned int debounce = 0;
+	static unsigned int debounce_status = 0xc0;
+	static unsigned char prev_status = 0xc0;
+	if(msg->status==debounce_status)
+		++debounce;
+	else {
+		debounce_status = msg->status;
+		debounce = 0;
+	}
+	if(debounce>=debounce_threshold && prev_status!=msg->status){
+		// DEBUG
+		print_touchpad_message(*msg);
+		printf("\n\n");
 
-void Touchpad::stop_touchpad_handling_thread()
-{
-	thread_stopped_ = 1;
+		InputEvent event;
+		// Set event PAD type 1<<5
+		unsigned char event_type=16;
+
+		event.vga_x = ((msg->horizontal)/51.2);
+		event.vga_y = ((msg->vertical)/32768.0*480);
+		// Check pen press status
+		for(int i=0;i<TOUCHPAD_MOUSE_EVENT_COUNT;++i){
+			unsigned char pressed = (msg->status>>i)%2;
+			if(pressed!=((prev_status>>i)%2)){
+				// Set press/release and button status
+				event_type+=i;
+				event.type = InputEventType(event_type);
+				// Send pen input event
+				if(pressed)
+					input_handler_->handle_input_press(event);
+				else
+					input_handler_->handle_input_release(event);
+			}
+		}
+
+		prev_status = msg->status;
+	}
 }

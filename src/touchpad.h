@@ -2,15 +2,22 @@
 #define TOUCHPAD_HH
 
 #include "display.h"
+#include <cstdint>
 #include <libusb-1.0/libusb.h>
 #include <stdint.h>
 #include <thread>
+#include "input.h"
 
 #define TOUCHPAD_VENDOR_ID 0x28bd
 #define TOUCHPAD_PRODUCT_ID 0x0928
 #define TOUCHPAD_INTERFACE 1
 #define TOUCHPAD_ENDPOINT 0x82
 #define TOUCHPAD_SHOW_CURSOR(status) (((status)&0xf0)==0xa0)
+
+#define TOUCHPAD_MOUSE_EVENT_COUNT 3
+#define TOUCHPAD_MOUSE_LEFT 0
+#define TOUCHPAD_MOUSE_RIGHT 1
+#define TOUCHPAD_MOUSE_MID 2
 
 struct libusb_device_handle;
 struct XPPenMessage{
@@ -39,26 +46,23 @@ struct XPPenMessage{
 	uint16_t unknown;
 };
 
-class Touchpad {
+class Touchpad : public BaseInputDevice{
 public:
-	bool open_touchpad_device();
-	void close_touchpad_device();
-	
+	Touchpad()
+	{
+		device_name_ = "Touchpad";
+		vendor_id_ = TOUCHPAD_VENDOR_ID;
+		product_id_ = TOUCHPAD_PRODUCT_ID;
+		interface_ = TOUCHPAD_INTERFACE;
+		endpoint_ = TOUCHPAD_ENDPOINT;	
+	}
 	void print_touchpad_message(struct XPPenMessage msg);
 
-	void create_touchpad_handling_thread();
-	void stop_touchpad_handling_thread();
-
-	void set_display(GMKDisplay *display) {display_=display;}
-	GMKDisplay *set_display() {return display_;}
+	void create_handling_thread() override;
 
 protected:
-	void handle_touchpad_message_func();
-	GMKDisplay *display_=NULL;
-	libusb_device_handle *handle_;
-	std::thread thread_;
-	int thread_stopped_ = 0;
-	const int cursor_hide_timeout_ = 2000;
+	void handle_message_func() override;
+	void handle_touchpad_pen_event(struct XPPenMessage *msg);
 };
 
 #endif

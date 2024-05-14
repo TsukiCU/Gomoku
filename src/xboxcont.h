@@ -2,22 +2,48 @@
 #ifndef XBOXCONT_H
 #define XBOXCONT_H
 
+#include <cstdint>
 #include <stdio.h>
 #include <libusb-1.0/libusb.h>
+#include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
 
 #include "display.h"
+#include "input.h"
 
-// Global variable declaration
-extern int eraseDouble;
+#define CONTROLLER_VENDOR_ID 0x045e
+#define CONTROLLER_PRODUCT_ID 0x028e
+#define CONTROLLER_ENDPOINT 0x81
 
-// Function declarations
-void processDirection(unsigned char data, int &a, int &b,GMKDisplay& display);
-char processFunction(unsigned char data, int &a, int &b);
-char printInput(unsigned char arr[], int size, int &a, int &b,GMKDisplay& display);
-int find_xbox_controller();
-void getCommandXb(libusb_device_handle **handle, int &x, int &y,GMKDisplay& display);
-void close_controller(libusb_device ***devs, libusb_context **ctx);
+struct XboxMessage{
+	uint16_t header;
+	uint16_t buttons;
+	unsigned char lt_level;
+	unsigned char rt_level;
+	int16_t lstick_dir_right;
+	int16_t lstick_dir_up;
+	int16_t rstick_dir_right;
+	int16_t rstick_dir_up;
+	unsigned char unknown[9];
+};
+
+class XboxController: public BaseInputDevice{
+public:
+	XboxController()
+	{
+		device_name_ = "Xbox controller";
+		vendor_id_ = CONTROLLER_VENDOR_ID;
+		product_id_ = CONTROLLER_PRODUCT_ID;
+		interface_ = 0;
+		endpoint_ = CONTROLLER_ENDPOINT;		
+	}
+	void create_handling_thread() override;
+	void print_xbox_message(XboxMessage msg);
+
+protected:
+	void handle_message_func() override;
+	void handle_xbox_button_event(uint16_t status);
+};
 
 #endif // XBOXCONT_H
