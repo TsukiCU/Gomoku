@@ -133,12 +133,13 @@ void GameMenu::PvEMode(int player)
             std::cout << "You lose!" << endl;
 			printf("Resign not implemented.\n");
 			continue;
-		case 8:
+		case 8:{
 			// TODO: HINT
 			std::pair<int, int> ai_hint = ai.findBestMove();
 			// std::cout << "Hint: " << hint.first + 1 << ", " << hint.second + 1 << endl;
 			// TODO: display hint on the board
 			continue;
+		}
 		default:
 			printf("Invalid command!\n");
 			continue;
