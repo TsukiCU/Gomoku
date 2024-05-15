@@ -36,7 +36,7 @@ public:
 	void showMenu();
 	void showBoard();
 
-	void setDisplay(GMKDisplay *display){this->display=display;}
+	void setDisplay(GMKDisplay *display);
 	void setMessageGroup(GMKDisplayMessageGroup *group){this->msg_group=group;}
 
 	

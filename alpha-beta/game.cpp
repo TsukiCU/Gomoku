@@ -11,6 +11,13 @@ void* findPlayersWait(void *arg)
 	return NULL;
 }
 
+void GameMenu::setDisplay(GMKDisplay *display)
+{
+	if(game)
+		game->set_display(display);
+	this->display=display;
+}
+
 void GameMenu::showMenu()
 {
 	if(display)
