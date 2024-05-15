@@ -24,7 +24,7 @@ void GameMenu::showMenu()
 	selected_msg_index = msg_group->first_selectable_message();
 	if(display)
 		display->update_select(selected_msg_index);
-	msg_group->display_selectable();
+	//msg_group->display_selectable();
 }
 
 void GameMenu::showBoard()
@@ -40,7 +40,7 @@ void GameMenu::showBoard()
 	selected_msg_index = 0x7700;
 	if(display)
 		display->update_select(selected_msg_index);
-	msg_group->display_selectable();
+	//msg_group->display_selectable();
 }
 
 void GameMenu::displayMode()
@@ -489,7 +489,7 @@ void GameMenu::handle_input_press(InputEvent event){
 		}
 		else
 			printf("%s selected!\n",msg_group->messages[msg_group->get_message_command(cursor)].content.c_str());
-		// command_received_ = true;
+		command_received_ = true;
 		break;
 	case PAD_MOUSE_RIGHT:
 	case PAD_MOUSE_MID:
