@@ -23,7 +23,7 @@ bool BaseInputDevice::open_device()
         return false;
     }
 
-	handle_ = libusb_open_device_with_vid_pid(ctx,vendor_id_,product_id_);
+	handle_ = libusb_open_device_with_vid_pid(context_,vendor_id_,product_id_);
 	if(!handle_){
 		std::string error = "Open "+device_name_+" usb device";
 		perror(error.c_str());
@@ -63,6 +63,8 @@ void BaseInputDevice::close_device()
 void BaseInputDevice::stop_handling_thread()
 {
 	thread_stopped_ = 1;
+	if(thread_.joinable())
+		thread_.join();
 }
 
 void Console::create_handling_thread()

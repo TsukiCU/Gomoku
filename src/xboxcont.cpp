@@ -10,7 +10,8 @@
 void XboxController::create_handling_thread()
 {
 	thread_stopped_ = 0;
-	thread_ = std::thread(&XboxController::handle_message_func,this);
+	std::thread t(&XboxController::handle_message_func,this);
+	thread_.swap(t);
 }
 
 void XboxController::handle_message_func()

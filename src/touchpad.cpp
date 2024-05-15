@@ -31,7 +31,8 @@ void Touchpad::print_touchpad_message(struct XPPenMessage msg)
 void Touchpad::create_handling_thread()
 {
 	thread_stopped_ = 0;
-	thread_ = std::thread(&Touchpad::handle_message_func,this);
+	std::thread t(&Touchpad::handle_message_func,this);
+	thread_.swap(t);
 }
 
 void Touchpad::handle_message_func()
