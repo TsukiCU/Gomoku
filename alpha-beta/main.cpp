@@ -22,7 +22,10 @@ int main()
 	if(!display.open_display()){
 		perror("Open VGA display");
 	}
-	else menu.setDisplay(&display);
+	else {
+		touchpad.set_display(&display);
+		menu.setDisplay(&display);
+	}
 
 	if(!touchpad.open_device()){
 		printf("Open touchpad device failed.\n");
