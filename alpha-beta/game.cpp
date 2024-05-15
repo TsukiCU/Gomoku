@@ -19,6 +19,7 @@ void GameMenu::showMenu()
 		msg_group->update_group_visibility(0, false);
 		msg_group->update_group_visibility(1, true);
 		msg_group->update_group_visibility(2, false);
+		msg_group->update_group_visibility(3, false);
 		selected_msg_index = msg_group->first_selectable_message();
 	}
 }
@@ -31,6 +32,7 @@ void GameMenu::showBoard()
 		msg_group->update_group_visibility(0, true);
 		msg_group->update_group_visibility(1, false);
 		msg_group->update_group_visibility(2, true);
+		msg_group->update_group_visibility(3, true);
 		selected_msg_index = msg_group->first_selectable_message();
 	}
 }
@@ -463,6 +465,7 @@ void GameMenu::handle_input_press(InputEvent event){
 	case XBOX_A: // Confirm selection
 		command_type_ = msg_group->get_message_command(selected_msg_index);
    		command_received_ = true;
+		printf("%s selected!\n",msg_group->messages[msg_group->get_message_command(selected_msg_index)].content.c_str());
 		break;
 	case XBOX_B: // TODO: Cancel buttion
 	case XBOX_X:
