@@ -103,10 +103,13 @@ void GameMenu::PvEMode(int player)
     while (1) {
         uint16_t command = wait_for_command();
 		switch (command) {
-		case 10: // TODO: Quit
+		case 10: // Quit
+			// TODO: Confirm message?
+			// should add display message
+			// if(!wait_for_confirm())
+			// 	continue;
 			std::cout << "Returning to main menu ..." << std::endl;
             game->resetGame();  // NOTE: modified from clearBoard method in class Gomoku.
-			showMenu();
             return;
 		case 0: // Move
 			break;
@@ -117,7 +120,9 @@ void GameMenu::PvEMode(int player)
             }
             continue;
 		case 9:
-			// TODO: Resign
+			// Resign without confirm
+			game->displayBoard();
+            std::cout << "You lose!" << endl;
 			printf("Resign not implemented.\n");
 			continue;
 		case 8:
@@ -138,8 +143,12 @@ void GameMenu::PvEMode(int player)
         if (game->state == 1) {
             game->displayBoard();
             std::cout << "You win!" << endl;
-            game->resetGame();
-            break;
+			// Wait for confirm command, quit to main menu.
+			bool confirm = wait_for_confirm();
+			if(confirm){
+				game->resetGame();
+				return;
+			}
         }
         game->displayBoard();
 
@@ -154,8 +163,12 @@ void GameMenu::PvEMode(int player)
         if (game->state == 1) {
             game->displayBoard();
             std::cout << "You lose!" << endl;
-            game->resetGame();
-            break;
+			// Wait for confirm command, quit to main menu.
+			bool confirm = wait_for_confirm();
+			if(confirm){
+				game->resetGame();
+				return;
+			}
         }
         game->displayBoard();
     }
@@ -174,10 +187,9 @@ void GameMenu::PvPMode()
     while (1) {
         uint16_t command = wait_for_command();
 		switch (command) {
-		case 10: // TODO: Quit
+		case 10: // Quit without confirm
 			std::cout << "Returning to main menu ..." << std::endl;
             game->resetGame();  // NOTE: modified from clearBoard method in class Gomoku.
-			showMenu();
             return;
 		case 0: // Move
 			break;
@@ -187,13 +199,10 @@ void GameMenu::PvPMode()
                 game->displayBoard();
             }
             continue;
-		case 9:
-			// TODO: Resign
-			printf("Resign not implemented.\n");
-			continue;
 		case 8:
-			// TODO: tip
+			// HINT
 			printf("Tip not implemented.\n");
+			continue;
 		case 5:
 			// TODO: restart?
 		default:
@@ -217,8 +226,12 @@ void GameMenu::PvPMode()
         if (game->state == 1) {
             game->displayBoard();
             cout << str_player << "wins! Returning to main menu. " << endl;
-            game->resetGame();
-            break;
+			// Wait for confirm command, quit to main menu.
+			bool confirm = wait_for_confirm();
+			if(confirm){
+				game->resetGame();
+				return;
+			}
         }
         game->displayBoard();
     }
@@ -251,95 +264,85 @@ void GameMenu::networkMode(bool server)
 			printf("Wait for player failed.\n");
 			return;
 		}
-		while(true){
-			server.start_game();
-			while(server.check_game_result()<0){
-				uint16_t command = wait_for_command();
-				switch (command) {
-				case 10: // TODO: Quit
-				    std::cout << "Returning to main menu. Type \"yes\" to continue " << std::endl;
-					std::cout << "Returning to main menu ..." << std::endl;
-					game->resetGame();  // NOTE: modified from clearBoard method in class Gomoku.
-					showMenu();
-					return;
-				case 0: // Move or remote resigns
-					break;
-				case 7: // Regret
-					if (!game->regret_move()) {
-						std::cout << ((game->current_player == 2) ? "Black" : "White") <<" regrets a move, please continue" << endl;
-						game->displayBoard();
-					}
-					continue;
-				case 9:
-					// TODO: Resign
-					printf("Resign not implemented.\n");
-					continue;
-				case 8:
-					// TODO: tip
-					printf("Tip not implemented.\n");
-				case 5:
-					// TODO: restart?
-				case 6:
-					// TODO: confirm?
-				default:
-					printf("Invalid command!\n");
-					continue;
+		server.start_game();
+		while(server.check_game_result()<0){
+			uint16_t command = wait_for_command();
+			switch (command) {
+			case 10: // Quit
+				// TODO: Confirm message?
+				// should add display message
+				// if(!wait_for_confirm())
+				// 	continue;
+				server.resign();
+				std::cout << "Returning to main menu ..." << std::endl;
+				game->resetGame();  // NOTE: modified from clearBoard method in class Gomoku.
+				return;
+			case 0: // Move or remote resigns
+				break;
+			case 7: // Regret
+				if (!game->regret_move()) {
+					std::cout << ((game->current_player == 2) ? "Black" : "White") <<" regrets a move, please continue" << endl;
+					game->displayBoard();
 				}
-				
-                /*if (board_x == -1 && board_y == -1) {
-                    // FIXME: Need to send "resign" message to the other player, so that the other player can return to main menu.
-                    string confirm;
-                    std::cout << "Returning to main menu. Type \"yes\" to continue " << std::endl;
-                    std::cin >> confirm;
-                    if (confirm == "yes") {
-                        // FIXME: This will throw an error. Need to make the threads in tcp.cpp join.
-                        // Possibly set a gameEnd flag in GMKServer
-                        std::cout << "You lose. Returning to main menu." << std::endl;
-                        return;
-                    }
-                    else {
-                        std::cout << "Continuing." << std::endl;
-                        continue;
-                    }
-                }*/
-				// Remote player resign check, end the loop
-				if(game->state==1)
+				continue;
+			case 9:
+				// Resign without confirm
+				if(server.resign())
 					break;
-
-				// Make move
-				if (!server.make_move(board_x - 1, board_y- 1)){
-                    printf("Invalid move!\n");
-                }
-			}
-			// Connection closed
-			if(server.check_game_result()==3){
-				server.wait_for_player();
+				else
+					continue;
+			case 8:
+				// HINT
+				printf("HINT disabled in PVP.\n");
+			default:
+				printf("Invalid command!\n");
 				continue;
 			}
-			else if(server.check_game_result()==1){
-				printf("You win!\n");
-			}
-			else{
-				printf("You lose!\n");
-			}
-			printf("Press enter to restart.\n");
 			
-			bool restart = false;
-			while(!restart){
-				uint16_t command = wait_for_command();
-				switch (command) {
-				case 0: // TODO: Quit
-					std::cout << "Returning to main menu ..." << std::endl;
-					game->resetGame();  // NOTE: modified from clearBoard method in class Gomoku.
+			/*if (board_x == -1 && board_y == -1) {
+				// FIXME: Need to send "resign" message to the other player, so that the other player can return to main menu.
+				string confirm;
+				std::cout << "Returning to main menu. Type \"yes\" to continue " << std::endl;
+				std::cin >> confirm;
+				if (confirm == "yes") {
+					// FIXME: This will throw an error. Need to make the threads in tcp.cpp join.
+					// Possibly set a gameEnd flag in GMKServer
+					std::cout << "You lose. Returning to main menu." << std::endl;
 					return;
-				case 1: // Restart
-					restart = true;
-					break;
-				default: // Invalid command
-					printf("Invalid command!\n");
-					break;
 				}
+				else {
+					std::cout << "Continuing." << std::endl;
+					continue;
+				}
+			}*/
+			// Remote player resign check, end the loop
+			if(game->state==1)
+				break;
+
+			// Make move
+			if (!server.make_move(board_x - 1, board_y- 1)){
+				printf("Invalid move!\n");
 			}
+		}
+
+		// Connection closed
+		if(server.check_game_result()==3){
+			server.wait_for_player();
+			printf("Connection lost!\n");
+			// Probably print you win.
+		}
+		else if(server.check_game_result()==1){
+			printf("You win!\n");
+		}
+		else{
+			printf("You lose!\n");
+		}
+		
+		// Wait for confirm command, quit to main menu.
+		bool confirm = wait_for_confirm();
+		if(confirm){
+			game->resetGame();
+			return;
 		}
     }
     else {
@@ -350,8 +353,11 @@ void GameMenu::networkMode(bool server)
 		GMKServerInfo info;
 		bool found=false;
 
-		// TODO : Display some message
+		// TODO : Display some message on display
 		printf("Discovering server...\n");
+		// TODO: change sleep logic here,
+		// need to wait but not block.
+		// Also should input command to cancel discover
 		sleep(3);
 		if(client.get_server_list().empty()){
 			printf("No server discovered!\n");
@@ -373,67 +379,62 @@ void GameMenu::networkMode(bool server)
 		if(!client.connect_to(info))
 			return;
 		
-		while(true){
-			showBoard();
-			while(client.check_game_result()<0){
-				uint16_t command = wait_for_command();
-				switch (command) {
-				case 10: // TODO: Quit
-				    std::cout << "Returning to main menu. Type \"yes\" to continue " << std::endl;
-					std::cout << "Returning to main menu ..." << std::endl;
-					game->resetGame();  // NOTE: modified from clearBoard method in class Gomoku.
-					showMenu();
-					return;
-				case 0: // Move or remote resigns
-					break;
-				case 7: // Regret
-					if (!game->regret_move()) {
-						std::cout << ((game->current_player == 2) ? "Black" : "White") <<" regrets a move, please continue" << endl;
-						game->displayBoard();
-					}
-					continue;
-				case 9:
-					// TODO: Resign
-					printf("Resign not implemented.\n");
-					continue;
-				case 8:
-					// TODO: tip
-					printf("Tip not implemented.\n");
-				case 5:
-					// TODO: restart?
-				case 6:
-					// TODO: confirm?
-				default:
-					printf("Invalid command!\n");
-					continue;
+		/* Connected. Show board page. */
+		showBoard();
+		while(client.check_game_result()<0){
+			uint16_t command = wait_for_command();
+			switch (command) {
+			case 10: // TODO: Quit confirm
+				std::cout << "Returning to main menu. Type \"yes\" to continue " << std::endl;
+				std::cout << "Returning to main menu ..." << std::endl;
+				game->resetGame();  // NOTE: modified from clearBoard method in class Gomoku.
+				showMenu();
+				return;
+			case 0: // Move or remote resigns
+				break;
+			case 7: // Regret
+				if (!game->regret_move()) {
+					std::cout << ((game->current_player == 2) ? "Black" : "White") <<" regrets a move, please continue" << endl;
+					game->displayBoard();
 				}
-				if (!client.make_move(board_x - 1, board_y- 1)){
-                    //TODO: error handling
-                }
-			}
-			if(client.check_game_result()==1){
-				printf("You win!\n");
-			}
-			else{
-				printf("You lose!\n");
-			}
-			printf("Waiting for server to restart...\n");
-			bool restart = false;
-			while(!restart){
-				uint16_t command = wait_for_command();
-				switch (command) {
-				case 0: // TODO: Quit
-					std::cout << "Returning to main menu ..." << std::endl;
-					game->resetGame();  // NOTE: modified from clearBoard method in class Gomoku.
-					return;
-				case 1: // Restart
-					restart = true;
+				continue;
+			case 9:
+				// Resign without confirm
+				if(client.resign())
 					break;
-				default: // Invalid command
-					printf("Invalid command!\n");
-					break;
-				}
+				else
+					continue;
+			case 8:
+				// HINT
+				printf("HINT disabled in PVP.\n");
+			default:
+				printf("Invalid command!\n");
+				continue;
 			}
+			// Resign check, end the loop
+			if(game->state==1)
+				break;
+			if (!client.make_move(board_x - 1, board_y- 1)){
+				//TODO: error handling
+			}
+		}
+
+		if(client.check_game_result()==3){ // Connection closed
+			printf("Connection lost!\n");
+			// Probably print you win.
+			printf("You win!\n");
+		}
+		else if(client.check_game_result()==1){
+			printf("You win!\n");
+		}
+		else{
+			printf("You lose!\n");
+		}
+
+		bool confirm = wait_for_confirm();
+		if(confirm){
+			game->resetGame();
+			return;
 		}
     }
 }
@@ -461,7 +462,7 @@ void GameMenu::handle_input_press(InputEvent event){
 		command_type_ = msg_group->get_message_command(selected_msg_index);
    		command_received_ = true;
 		break;
-	case XBOX_B:
+	case XBOX_B: // TODO: Cancel buttion
 	case XBOX_X:
 	case XBOX_Y:
 	case PAD_MOUSE_LEFT: // Click uses current cursor position
@@ -484,4 +485,23 @@ void GameMenu::handle_input_press(InputEvent event){
 		break;
     }
 
+}
+
+bool GameMenu::wait_for_confirm()
+{
+	// Wait for confirm command, quit to main menu.
+	// TODO: Probably pop up a message on display
+	uint16_t command;
+	while(true){
+		command = wait_for_command();
+		switch (command) {
+		case 0: // TODO: set correct confirm index
+			return true;
+		case 1: // TODO: set correct cancel index
+			return false;
+		default:
+			printf("Invalid command!\n");
+			break;
+		};
+	}
 }

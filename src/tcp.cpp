@@ -240,12 +240,8 @@ bool GMKNetBase::regret_move()
 	return true;
 }
 
-bool GMKNetBase::resgin()
+bool GMKNetBase::resign()
 {
-	// Only allow local player to regret when it's player's turn
-	if(!is_players_turn(local_player_))
-		return false;
-
 	// local player resigns
 	local_player_.resign();
 
@@ -305,9 +301,7 @@ void GMKNetBase::handle_remote_regret()
 
 void GMKNetBase::handle_remote_resign()
 {
-	if(!is_players_turn(remote_player_)){
-		return ;
-	}
+	// TODO: NOTIFY MAIN THREAD
 	remote_player_.resign();
 	printf("%d:%s resigns!\n", piece_count_,
 		   remote_player_.black?"Black":"White"

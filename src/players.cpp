@@ -24,6 +24,6 @@ int Player::regretMove()
 
 int Player::resign()
 {
-	game->end_game(false);
+	game->end_game(black);
 	return 0;
 }

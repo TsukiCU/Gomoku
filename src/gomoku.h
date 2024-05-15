@@ -29,7 +29,7 @@ public:
     bool valid_move(int x, int y);          // Check if the move at (x, y) is valid.
     int make_move(pair<int, int> move);     // Make a move at (x, y).    vector<pair<int, int>> getLegalMoves();
     int regret_move();                      // Regret a move. If it's pvp, dial back one move. If it's pve, dial back 2 moves.
-	void end_game(bool current_player_win);	// Set the winner and end the game.
+	void end_game(bool black_win);			// Set the winner and end the game.
 
     bool check_win(int x, int y);           // Check if the winning condition is satisfied.
     bool is_draw();                         // Check if players draw.

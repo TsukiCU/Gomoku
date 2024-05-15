@@ -61,7 +61,7 @@ struct GMKServerInfo{
 	uint16_t status;
 };
 
-class GMKNetBase : public InputEventHandler{
+class GMKNetBase{
 public:
 	GMKNetBase(Gomoku *game) :
 	game_(game),
@@ -74,7 +74,7 @@ public:
 	}
 	bool make_move(int x, int y);
 	bool regret_move();
-	bool resgin();
+	bool resign();
 	int check_game_result();
 	void reset_board();
 	int start_game_loop();

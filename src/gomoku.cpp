@@ -17,9 +17,9 @@ bool Gomoku::valid_move(int x, int y)
     return on_board(x, y) && board[x][y] == 0;
 }
 
-void Gomoku::end_game(bool current_player_win)
+void Gomoku::end_game(bool black_win)
 {
-	winner = current_player_win?current_player:(3-current_player);
+	winner = black_win?1:2;
 	state = 1;
 	return;
 }
@@ -37,7 +37,7 @@ int Gomoku::make_move(pair<int, int> move)
 	if(record_game)
 		record.push_back(make_pair(x, y));
     if (check_win(x, y)) {
-		end_game(true);
+		end_game(current_player==1);
         return 0;
     }
 
