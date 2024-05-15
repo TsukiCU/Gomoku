@@ -42,6 +42,8 @@ public:
 	void generate_visibility();
 	void update_group_visibility(uint16_t group, bool visible);
 
+	void display_selectable();
+
 	inline static bool is_board_selected(uint16_t message_index){return !(message_index&0x00ff);}
 
 	std::vector<GMKDisplayMessageInfo> messages;

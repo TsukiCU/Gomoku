@@ -11,7 +11,7 @@
 
 bool BBOX::in(uint16_t x, uint16_t y)
 {
-	printf("left %u, x %u, right %u, up %u, y %u, bottom %u\n",left,x,right,up,y,bottom);
+	//printf("left %u, x %u, right %u, up %u, y %u, bottom %u\n",left,x,right,up,y,bottom);
 	return (left<=x && x<=right && up<=y && y<= bottom);
 }
 void BBOX::reset()
@@ -212,6 +212,15 @@ void GMKDisplayMessageGroup::update_group_visibility(uint16_t group, bool visibl
 		}
 	}
 	update_selectable_cache();
+}
+
+void GMKDisplayMessageGroup::display_selectable()
+{
+	printf("Selectable\n");
+	for(auto msg:messages){
+		printf("%d:%s\n",msg.index,msg.content.c_str());
+	}
+	printf("\n");
 }
 
 bool GMKDisplay::update_register(unsigned int index,uint16_t val, bool sync)

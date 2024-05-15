@@ -22,6 +22,9 @@ void GameMenu::showMenu()
 		msg_group->update_group_visibility(3, false);
 	}
 	selected_msg_index = msg_group->first_selectable_message();
+	if(display)
+		display->update_select(selected_msg_index);
+	msg_group->display_selectable();
 }
 
 void GameMenu::showBoard()
@@ -33,8 +36,11 @@ void GameMenu::showBoard()
 		msg_group->update_group_visibility(1, false);
 		msg_group->update_group_visibility(2, true);
 		msg_group->update_group_visibility(3, true);
-		selected_msg_index = msg_group->first_selectable_message();
 	}
+	selected_msg_index = 0x7700;
+	if(display)
+		display->update_select(selected_msg_index);
+	msg_group->display_selectable();
 }
 
 void GameMenu::displayMode()
