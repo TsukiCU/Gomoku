@@ -34,11 +34,10 @@ public:
     void gameStart();           	// Game start.
 
 	void showMenu();
-	void showBoard();
+	void showBoard(bool top_first=true);
 
 	void setDisplay(GMKDisplay *display);
 	void setMessageGroup(GMKDisplayMessageGroup *group){this->msg_group=group;}
-
 	
 	bool wait_for_confirm();		// Wait for confirm message. True means confirm, False means cancel.
 };

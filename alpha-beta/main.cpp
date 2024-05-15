@@ -45,6 +45,8 @@ int main()
 
 	//while (1);
     menu.gameStart();
+	controller.close_device();
+	touchpad.close_device();
     return 0;
 }
 void init_message_group(GMKDisplayMessageGroup &group)

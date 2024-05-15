@@ -128,7 +128,8 @@ protected:
 	void request_player_info();
 	void handle_message(const GMKNetMessage &msg) override;
 	//void receive_thread_callback() override;
-	void assign_pieces();
+	// Return local black
+	bool assign_pieces();
 	int local_fd_;
 	uint16_t server_port_;
 	bool is_player_joined_ = false;

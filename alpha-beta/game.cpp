@@ -1,4 +1,5 @@
 #include "game.h"
+#include <cassert>
 #include <cstdint>
 #include <cstdio>
 #include <string>
@@ -34,10 +35,14 @@ void GameMenu::showMenu()
 	//msg_group->display_selectable();
 }
 
-void GameMenu::showBoard()
+void GameMenu::showBoard(bool top_first)
 {
-	if(display)
-		display->show_board(true);
+	if(display){
+		display->clear_board();
+		display->set_player_piece(top_first,false);
+		display->set_turn_mark(top_first,false);
+		display->show_board(false);
+	}
 	else{
 		msg_group->update_group_visibility(0, true);
 		msg_group->update_group_visibility(1, false);
@@ -45,6 +50,8 @@ void GameMenu::showBoard()
 		msg_group->update_group_visibility(3, true);
 	}
 	selected_msg_index = 0x7700;
+	board_x = 8;
+	board_y = 8;
 	if(display)
 		display->update_select(selected_msg_index);
 	//msg_group->display_selectable();
@@ -67,8 +74,8 @@ int GameMenu::getChoice()
 
 void GameMenu::gameStart()
 {
-	showMenu();
     while (1) {
+		showMenu();
         std::cout << "\n\nChoose a mode to play. " <<std::endl;
         displayMode();
         uint16_t mode = wait_for_command();
@@ -109,7 +116,7 @@ void GameMenu::PvEMode(int player)
     string playerColor = (player == 1) ? "black" : "white";
     pair<int, int> aiMove = make_pair(-1, -1);  // ai moves
 
-	showBoard();
+	showBoard(!aiFirst);
     std::cout << "\n\nGame started. You Play as " << playerColor << endl;
     std::cout << "\nType in (board_x, board_y) to make a move. (0, 0) to regret a move.\
     (-1, -1) to return to main menu. " << playerColor << endl;
@@ -117,7 +124,6 @@ void GameMenu::PvEMode(int player)
     if (aiFirst) {
         aiMove = ai.findBestMove();
         ai.makeMove(aiMove);
-        game->record.push_back(aiMove);
     }
     game->displayBoard();
 
@@ -143,8 +149,14 @@ void GameMenu::PvEMode(int player)
 		case 9:
 			// Resign without confirm
 			game->displayBoard();
+			// TODO: POPUP MESSAGE
             std::cout << "You lose!" << endl;
-			printf("Resign not implemented.\n");
+			game->end_game(!(player==1));
+			// Wait for confirm command, quit to main menu.
+			while(wait_for_confirm()){
+				game->resetGame();
+				return;
+			}
 			continue;
 		case 8:{
 			// TODO: HINT
@@ -163,14 +175,14 @@ void GameMenu::PvEMode(int player)
             std::cout << "Invalid move!" << '\n' << endl;
             continue;
         }
-        game->record.push_back(make_pair(board_x - 1, board_y- 1));
+		board_x=-1;
+		board_y=-1;
 
         if (game->state == 1) {
             game->displayBoard();
             std::cout << "You win!" << endl;
 			// Wait for confirm command, quit to main menu.
-			bool confirm = wait_for_confirm();
-			if(confirm){
+			while(!wait_for_confirm()){
 				game->resetGame();
 				return;
 			}
@@ -178,9 +190,9 @@ void GameMenu::PvEMode(int player)
         game->displayBoard();
 
         // AI makes a move.
+		assert(game->current_player+player==3);
         aiMove = ai.findBestMove();
         ai.makeMove(aiMove);
-        game->record.push_back(aiMove);
 
         std::cout << "You made a move at " << board_x << ", " << board_y << ", " << "AI made a move at " 
         << aiMove.first + 1 << ", " << aiMove.second + 1 << "\n" << endl;
@@ -245,8 +257,9 @@ void GameMenu::PvPMode()
             cout << "Invalid move!" << '\n' << endl;
             continue;
         }
-        game->record.push_back(make_pair(board_x-1, board_y-1));
         cout << str_player << "made a move at " << board_x << ", " << board_y << endl;
+		board_x=-1;
+		board_y=-1;
 
         if (game->state == 1) {
             game->displayBoard();
@@ -276,7 +289,8 @@ void GameMenu::networkMode(bool server)
 			printf("Wait for player failed.\n");
 			return;
 		}
-		server.start_game();
+		bool top_first = server.start_game();
+		showBoard(top_first);
 		while(server.check_game_result()<0){
 			uint16_t command = wait_for_command();
 			switch (command) {
@@ -337,6 +351,8 @@ void GameMenu::networkMode(bool server)
 			if (!server.make_move(board_x - 1, board_y- 1)){
 				printf("Invalid move!\n");
 			}
+			board_x=-1;
+			board_y=-1;
 		}
 
 		// Connection closed
@@ -435,6 +451,8 @@ void GameMenu::networkMode(bool server)
 			if (!client.make_move(board_x - 1, board_y - 1)){
 				//TODO: error handling
 			}
+			board_x=-1;
+			board_y=-1;
 		}
 
 		if(client.check_game_result()==3){ // Connection closed
@@ -466,15 +484,17 @@ void GameMenu::handle_input_press(InputEvent event){
 	case XBOX_RIGHT: // Direction buttons
 		// Next message
 		selected_msg_index = msg_group->next_message_by_direction(selected_msg_index, event.type);
-		board_x = (selected_msg_index>>12)+1;
-		board_y = ((selected_msg_index>>8)&0xf)+1;
-		if(display)
-			display->update_select(selected_msg_index);
+		board_x = 0xf;
+		board_y = 0xf;
 		if(msg_group->is_board_selected(selected_msg_index)){
 			printf("(%d,%d) selected!\n",(selected_msg_index>>12),((selected_msg_index>>8)&0xf));
+			board_x = (selected_msg_index>>12)+1;
+			board_y = ((selected_msg_index>>8)&0xf)+1;
 		}
 		else
 			printf("%s selected!\n",msg_group->messages[msg_group->get_message_command(selected_msg_index)].content.c_str());
+		if(display)
+			display->update_select(selected_msg_index);
 		break;
 	case XBOX_A: // Confirm selection
 		command_type_ = msg_group->get_message_command(selected_msg_index);
@@ -492,10 +512,12 @@ void GameMenu::handle_input_press(InputEvent event){
 			break;
 		}
 		selected_msg_index = cursor;
-		board_x = (selected_msg_index>>12)+1;
-		board_y = ((selected_msg_index>>8)&0xf)+1;
+		board_x = 0xf;
+		board_y = 0xf;
 		if(msg_group->is_board_selected(selected_msg_index)){
 			printf("(%d,%d) selected!\n",(selected_msg_index>>12),((selected_msg_index>>8)&0xf));
+			board_x = (selected_msg_index>>12)+1;
+			board_y = ((selected_msg_index>>8)&0xf)+1;
 		}
 		else
 			printf("%s selected!\n",msg_group->messages[msg_group->get_message_command(cursor)].content.c_str());

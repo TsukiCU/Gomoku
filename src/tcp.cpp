@@ -470,7 +470,7 @@ bool GMKServer::send_game_info()
 
 bool GMKServer::start_game()
 {
-	assign_pieces();
+	bool local_first = assign_pieces();
 
 	// Send start signal
 	GMKNetMessage msg;
@@ -482,14 +482,15 @@ bool GMKServer::start_game()
 
 	// Wait for remote acknowledge?
 	start_local_game();
-	return true;
+	return local_first;
 }
 
-void GMKServer::assign_pieces()
+bool GMKServer::assign_pieces()
 {
 	srand(time(NULL));
 	local_player_.black=((rand()%4)>=2);
 	remote_player_.black=!local_player_.black;
+	return local_player_.black;
 }
 
 bool GMKClient::connect_to(const char *ip)
@@ -600,6 +601,11 @@ void GMKClient::handle_message(const GMKNetMessage &msg)
 	else if(msg.type==GMK_MSG_GAME_START){// Game start signal
 		remote_player_.black=msg.msg[0];
 		local_player_.black=msg.msg[1];
+		// FIXME: Move display logic
+		if(game_->display){
+			game_->display->set_player_piece(local_player_.black);
+			game_->display->set_turn_mark(local_player_.black);
+		}
 		start_local_game();
 	}
 	else if(msg.type==GMK_MSG_MOVE_INFO){ // Move info

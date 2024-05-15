@@ -14,6 +14,9 @@ bool Gomoku::on_board(int x, int y)
 
 bool Gomoku::valid_move(int x, int y)
 {
+	/* Game not ongoing. */
+	if(state==1)
+		return false;
     return on_board(x, y) && board[x][y] == 0;
 }
 
@@ -24,24 +27,24 @@ void Gomoku::end_game(bool black_win)
 	return;
 }
 
-int Gomoku::make_move(pair<int, int> move)
+int Gomoku::make_move(pair<int, int> move,bool fake)
 {
     int x = move.first;
     int y = move.second;
 
     if (!valid_move(x, y))  return 1;
     board[x][y] = current_player;
-	if(display)
+	if(display && !fake)
 		// Piece value is different from current_player
-		display->update_piece_info(x, y, 3-current_player);
-	if(record_game)
+		display->update_piece_info(x, y, current_player);
+	if(record_game && !fake)
 		record.push_back(make_pair(x, y));
     if (check_win(x, y)) {
 		end_game(current_player==1);
         return 0;
     }
 
-    switchPlayers();
+    switchPlayers(fake);
     return 0;
 }
 
@@ -81,9 +84,11 @@ bool Gomoku::is_draw()
     return true;
 }
 
-void Gomoku::switchPlayers()
+void Gomoku::switchPlayers(bool fake)
 {
     current_player = 3 - current_player;
+	if(display && !fake)
+		display->switch_turn_mark();
 }
 
 void Gomoku::displayBoard()
@@ -162,11 +167,20 @@ int Gomoku::regret_move()
         // clear the record.
         if(record_game)
        		record.erase(record.end());
-        current_player = 3 - current_player;
 		
-		if(display)
+		if(display){
 			display->update_piece_info(lastMove.first, lastMove.second, 0);
+			if(record.size()){ // Set last mark
+				const pair<int, int> &lastMove = *(record.rbegin());
+				display->update_piece_info(lastMove.first,lastMove.second,board[lastMove.first][lastMove.second]);
+			}
+			else { // No more piece on board, hide last mark
+				printf("No piece Params[2]_:%04x\n",display->get_register(2)|0x00ff );
+				display->update_register(2, display->get_register(2)|0x00ff );
+			}
+		}
 
+		switchPlayers();
         /* TODO: Online gaming mode and Local pvp mode should be handled differently? */
     }
 
@@ -190,6 +204,14 @@ int Gomoku::regret_move()
 		if(display){
 			display->update_piece_info(lastMove.first, lastMove.second, 0);
 			display->update_piece_info(secondLastMove.first, secondLastMove.second, 0);
+			if(record.size()){ // Set last mark
+				const pair<int, int> &lastMove = *(record.rbegin());
+				display->update_piece_info(lastMove.first,lastMove.second,board[lastMove.first][lastMove.second]);
+			}
+			else { // No more piece on board, hide last mark
+				printf("Params[2]_:%04x\n",display->get_register(2)|0x00ff );
+				display->update_register(2, display->get_register(2)|0x00ff );
+			}
 		}
 
         if (regretTimes >= 3) {

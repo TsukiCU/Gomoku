@@ -74,6 +74,10 @@ class GMKDisplay{
 		bool sync();
 		bool open_display();
 
+		bool set_player_piece(bool top_black,bool sync=true);
+		bool set_turn_mark(bool top_turn,bool sync=true);
+		bool switch_turn_mark(bool sync=true);
+
 		void set_message_group(GMKDisplayMessageGroup *group){msg_group_ = group;}
 		bool update_message_visibility(uint16_t index, bool visible, bool sync=true);
 		bool update_group_visibility(uint16_t group, bool visible, bool sync=true);

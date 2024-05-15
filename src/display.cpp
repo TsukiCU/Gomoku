@@ -45,7 +45,7 @@ uint16_t GMKDisplayMessageGroup::message_select_by_vga_xy(uint16_t vga_x, uint16
 		return 0xFFFF;
 	for(auto msg:selectable){
 		if(msg.bounding_box.in(vga_x, vga_y))
-			return msg.index;
+			return msg.index|0xFF00;
 	}
 	return 0xFFFF;
 }
@@ -172,7 +172,7 @@ uint16_t GMKDisplayMessageGroup::get_message_command(uint16_t index)
 	if(is_board_selected(index)) // Selected a board position
 		// Return make move command
 		return 0;
-	return index;
+	return index & 0x00FF;
 }
 
 void GMKDisplayMessageGroup::update_message_selectable(uint16_t index, bool selectable, bool update)
@@ -348,7 +348,12 @@ bool GMKDisplay::update_select(int x,int y, bool sync)
 
 bool GMKDisplay::clear_board()
 {
+	// Reset board command
 	params_[0] = 0xffff;
+	// Piece Info register
+	params_[1] = 0;
+	// Selected register
+	params_[2] = 0xFFFF;
 	bool ret = this->sync();
 	params_[0] = 0x0000;
 	return ret;
@@ -365,11 +370,39 @@ bool GMKDisplay::sync()
 
 bool GMKDisplay::update_select(uint16_t message_index, bool sync)
 {
-	// Update board selection
-	params_[2] = (message_index&0xff00)|(params_[2]&0x00ff);
+	if(message_index&0xFF00)
+		// Update board selection
+		params_[2] = (message_index&0xff00)|(params_[2]&0x00ff);
+	else
+		params_[2] = (0xff00)|(params_[2]&0x00ff);
 	// Update message selection
 	params_[4] = message_index&0x00ff;
 	if(sync)
 		return this->sync();
 	return true;
+}
+
+bool GMKDisplay::set_player_piece(bool top_black,bool sync)
+{
+	
+	params_[0] = ((params_[0] & ~(top_black<<2)) | (top_black<<2));
+	if(sync)
+		return this->sync();
+	return true;
+}
+
+bool GMKDisplay::set_turn_mark(bool top_turn,bool sync)
+{
+	params_[0] = ((params_[0] & ~(top_turn<<3)) | (top_turn<<3));
+	if(sync)
+		return this->sync();
+	return true;
+}
+
+bool GMKDisplay::switch_turn_mark(bool sync)
+{
+	params_[0] ^= (1 << 3);
+	if(sync)
+		return this->sync();
+	return true;	
 }
