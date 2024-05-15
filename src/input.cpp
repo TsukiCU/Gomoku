@@ -15,10 +15,9 @@ uint16_t InputEventHandler::wait_for_command()
 bool BaseInputDevice::open_device()
 {
 	printf("%u %u %d %02x\n",vendor_id_,product_id_,interface_,endpoint_);
-	libusb_context *ctx;
 	int r;
 
-    r = libusb_init(&ctx);
+    r = libusb_init(&context_);
     if (r < 0) {
         fprintf(stderr, "fail to init libusb: %d\n", r);
         return false;
@@ -57,7 +56,8 @@ void BaseInputDevice::close_device()
 {
 	if(handle_!=NULL)
 		libusb_close(handle_);
-	libusb_exit(NULL);	
+	if(context_)
+		libusb_exit(context_);	
 }
 
 void BaseInputDevice::stop_handling_thread()

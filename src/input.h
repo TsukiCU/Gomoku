@@ -77,6 +77,7 @@ protected:
 	GMKDisplay *display_=NULL;
 	libusb_device_handle *handle_=NULL;
 	InputEventHandler *input_handler_=NULL;
+	libusb_context *context_=NULL;
 
 	std::string device_name_ = "";
 	uint16_t vendor_id_ = 0;

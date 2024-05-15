@@ -173,7 +173,7 @@ void init_message_group(GMKDisplayMessageGroup &group)
 
 	info[13].content="P1";
 	info[13].group=3;
-	info[13].group_idx=2s;
+	info[13].group_idx=2;
 	info[13].index=13;
 	info[13].selectable=0;
 	info[13].bounding_box=BBOX(583,309,614,328);
