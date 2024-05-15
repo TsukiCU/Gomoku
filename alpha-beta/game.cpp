@@ -492,6 +492,8 @@ void GameMenu::handle_input_press(InputEvent event){
 			break;
 		}
 		selected_msg_index = cursor;
+		board_x = (selected_msg_index>>12)+1;
+		board_y = ((selected_msg_index>>8)&0xf)+1;
 		if(msg_group->is_board_selected(selected_msg_index)){
 			printf("(%d,%d) selected!\n",(selected_msg_index>>12),((selected_msg_index>>8)&0xf));
 		}
