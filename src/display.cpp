@@ -272,19 +272,21 @@ bool GMKDisplay::update_touchpad_cursor(uint16_t vga_x, uint16_t vga_y,bool visi
 bool GMKDisplay::show_menu()
 {
 	// Dialog set to 1
-	params_[0]=1;
+	params_[0]|=1;
 	update_group_visibility(0, false);
 	update_group_visibility(1, true);
-	return update_group_visibility(2, false);
+	update_group_visibility(2, false);
+	return update_group_visibility(3, false);
 }
 bool GMKDisplay::show_board(bool clear)
 {
 	bool ret=true;
 	// Dialog set to 0
-	params_[0]=0;
+	params_[0]&=(~1);
 	update_group_visibility(0, true);
 	update_group_visibility(1, false);
 	update_group_visibility(2, true);
+	update_group_visibility(3, true);
 	// Select board center
 	ret = update_select(7, 7,false);
 	if(clear)

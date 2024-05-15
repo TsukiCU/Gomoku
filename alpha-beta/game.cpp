@@ -20,8 +20,8 @@ void GameMenu::showMenu()
 		msg_group->update_group_visibility(1, true);
 		msg_group->update_group_visibility(2, false);
 		msg_group->update_group_visibility(3, false);
-		selected_msg_index = msg_group->first_selectable_message();
 	}
+	selected_msg_index = msg_group->first_selectable_message();
 }
 
 void GameMenu::showBoard()
