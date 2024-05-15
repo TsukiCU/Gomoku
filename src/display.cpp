@@ -264,6 +264,10 @@ bool GMKDisplay::update_touchpad_cursor(uint16_t vga_x, uint16_t vga_y,bool visi
 	//printf("param0 0x%04x\n",params_[0]);
 	params_[5] = vga_x;
 	params_[6] = vga_y;
+
+	uint16_t index = msg_group_->message_select_by_vga_xy(vga_x, vga_y);
+	update_select(index,false);
+
 	if(sync)
 		return this->sync();
 	return true;
