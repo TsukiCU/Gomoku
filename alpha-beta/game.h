@@ -13,7 +13,7 @@ private:
     Gomoku *game;
 	GMKDisplay *display=NULL;
     int currentMode;
-	uint16_t board_x,board_y;
+	uint16_t board_x, board_y;
 	uint16_t selected_msg_index;
 	GMKDisplayMessageGroup *msg_group;
 

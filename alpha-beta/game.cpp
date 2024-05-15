@@ -5,6 +5,12 @@
 #include <type_traits>
 #include <unistd.h>
 
+void* findPlayersWait(void *arg)
+{
+	sleep(3);
+	return;
+}
+
 void GameMenu::showMenu()
 {
 	if(display)
@@ -100,7 +106,7 @@ void GameMenu::PvEMode(int player)
     }
     game->displayBoard();
 
-    while (1) {
+	while (1) {
         uint16_t command = wait_for_command();
 		switch (command) {
 		case 10: // Quit
@@ -127,7 +133,10 @@ void GameMenu::PvEMode(int player)
 			continue;
 		case 8:
 			// TODO: HINT
-			printf("HINT not implemented.\n");
+			std::pair<int, int> ai_hint = ai.findBestMove();
+			// std::cout << "Hint: " << hint.first + 1 << ", " << hint.second + 1 << endl;
+			// TODO: display hint on the board
+			continue;
 		default:
 			printf("Invalid command!\n");
 			continue;
@@ -200,7 +209,7 @@ void GameMenu::PvPMode()
             }
             continue;
 		case 8:
-			// HINT
+			// HINT. There should not be a hint in PVP mode.
 			printf("Tip not implemented.\n");
 			continue;
 		case 5:
@@ -239,22 +248,9 @@ void GameMenu::PvPMode()
 
 void GameMenu::networkMode(bool server)
 {
-    // bool gameStart = false; // If game starts, stop listening and broadcasting threads.
-    // bool noPlayersFound = false; // If waiting too long(more than 15 seconds), set this to true and report this message.
-    // string server_ip = "";
-    // string myTimestamp =  "TIMESTAMP: " + to_string(getCurTimeStamp());
+    GomokuAI ai(game, 1); // AI is here to provide hints.
+	std::pair<int, int> ai_hint;
 
-    // // My basic info
-    // printf("My IP: %s | My Timestamp: %lld\n\n", getLocalIP().c_str(), getTimeFromStamp(myTimestamp));
-    // printf("Welcome to Gomoku, actively looking for opponents...\n"); 
-
-    // if (noPlayersFound) {
-    //     printf("You know the game is too highbrow. Nobody's around here for now. But you can always start later.\n");
-    //     return;
-    // }
-
-    // If received broadcast from others who started later than us, we are the server.
-    // Otherwise, we are the client.
     if (server) {
 		GMKServer server(game);
 		if(!server.create())
@@ -293,12 +289,14 @@ void GameMenu::networkMode(bool server)
 					continue;
 			case 8:
 				// HINT
+				ai_hint = ai.findBestMove();
+				// std::cout << "Hint: " << hint.first + 1 << ", " << hint.second + 1 << endl;
 				printf("HINT disabled in PVP.\n");
 			default:
 				printf("Invalid command!\n");
 				continue;
 			}
-			
+
 			/*if (board_x == -1 && board_y == -1) {
 				// FIXME: Need to send "resign" message to the other player, so that the other player can return to main menu.
 				string confirm;
@@ -331,13 +329,13 @@ void GameMenu::networkMode(bool server)
 			printf("Connection lost!\n");
 			// Probably print you win.
 		}
-		else if(server.check_game_result()==1){
+		else if(server.check_game_result()==1) {
 			printf("You win!\n");
 		}
 		else{
 			printf("You lose!\n");
 		}
-		
+
 		// Wait for confirm command, quit to main menu.
 		bool confirm = wait_for_confirm();
 		if(confirm){
@@ -355,10 +353,14 @@ void GameMenu::networkMode(bool server)
 
 		// TODO : Display some message on display
 		printf("Discovering server...\n");
-		// TODO: change sleep logic here,
-		// need to wait but not block.
-		// Also should input command to cancel discover
-		sleep(3);
+		
+		// Wait for 3 seconds but without blocking the main thread.
+		pthread_t waitThread;
+		pthread_create(&waitThread, NULL, findPlayersWait, NULL);
+		pthread_join(waitThread, NULL);
+		// sleep(3);
+
+		// TODO: should input command to cancel discover
 		if(client.get_server_list().empty()){
 			printf("No server discovered!\n");
 			return;
@@ -378,7 +380,7 @@ void GameMenu::networkMode(bool server)
 		printf("Connecting %s:%u\n",info.address.c_str(),info.port);
 		if(!client.connect_to(info))
 			return;
-		
+
 		/* Connected. Show board page. */
 		showBoard();
 		while(client.check_game_result()<0){
@@ -412,9 +414,9 @@ void GameMenu::networkMode(bool server)
 				continue;
 			}
 			// Resign check, end the loop
-			if(game->state==1)
+			if (game->state == 1)
 				break;
-			if (!client.make_move(board_x - 1, board_y- 1)){
+			if (!client.make_move(board_x - 1, board_y - 1)){
 				//TODO: error handling
 			}
 		}
