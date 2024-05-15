@@ -8,7 +8,7 @@
 void* findPlayersWait(void *arg)
 {
 	sleep(3);
-	return;
+	return NULL;
 }
 
 void GameMenu::showMenu()
