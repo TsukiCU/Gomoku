@@ -491,11 +491,13 @@ void GameMenu::handle_input_press(InputEvent event){
 			printf("None selected! (%d,%d)\n",event.vga_x,event.vga_y);
 			break;
 		}
-		else if(msg_group->is_board_selected(cursor)){
+		selected_msg_index = cursor;
+		if(msg_group->is_board_selected(selected_msg_index)){
 			printf("(%d,%d) selected!\n",(selected_msg_index>>12),((selected_msg_index>>8)&0xf));
 		}
 		else
 			printf("%s selected!\n",msg_group->messages[msg_group->get_message_command(cursor)].content.c_str());
+		command_type_ = msg_group->get_message_command(selected_msg_index);
 		command_received_ = true;
 		break;
 	case PAD_MOUSE_RIGHT:
