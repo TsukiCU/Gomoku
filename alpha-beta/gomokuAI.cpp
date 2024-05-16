@@ -195,9 +195,9 @@ int GomokuAI::evaluate(int player, int heuristic)
     return 0;
 }
 
-int GomokuAI::makeMove(pair<int, int> move)
+int GomokuAI::makeMove(pair<int, int> move, bool fake)
 {
-    if (!game->make_move(move)) {
+    if (!game->make_move(move, fake)) {
         // cout << "AI makes move at " << move.first << ", " << move.second << endl;
         return 0;
     }
@@ -216,7 +216,7 @@ int GomokuAI::undoMove(pair<int, int> move)
         game->state = 0;
     }
 
-    game->switchPlayers();
+    game->switchPlayers(true);
     return 0;
 }
 
@@ -455,7 +455,7 @@ pair<int, int> GomokuAI::findBestMove()
     }
 
     for(auto& move:getLegalMoves()) {
-        makeMove(move);
+        makeMove(move, true);
         int score = MiniMax(maxDepth, INT_MAX, INT_MIN, true);
         undoMove(move);
         if (score > bestScore) {
@@ -480,7 +480,7 @@ int GomokuAI::MiniMax(int depth, int alpha, int beta, bool isMax)
     if (isMax) {
         int maxEval = INT_MIN;
         for (auto& move:getLegalMoves()) {
-            makeMove(move);
+            makeMove(move, true);
             int eval = MiniMax(depth-1, alpha, beta, false);   // Now minimizing.
             undoMove(move);
             maxEval = max(maxEval, eval);
@@ -493,7 +493,7 @@ int GomokuAI::MiniMax(int depth, int alpha, int beta, bool isMax)
     else {
         int minEval = INT_MAX;
         for (auto& move:getLegalMoves()) {
-            makeMove(move);
+            makeMove(move, true);
             int eval = MiniMax(depth-1, alpha, beta, true);    // Now maximizing.
             undoMove(move);
             minEval = min(minEval, eval);

@@ -27,13 +27,13 @@ public:
 
     bool on_board(int x, int y);            // Check if (x, y) is a valid position.
     bool valid_move(int x, int y);          // Check if the move at (x, y) is valid.
-    int make_move(pair<int, int> move);     // Make a move at (x, y).    vector<pair<int, int>> getLegalMoves();
+    int make_move(pair<int, int> move, bool fake=false);// Make a move at (x, y).    vector<pair<int, int>> getLegalMoves();
     int regret_move();                      // Regret a move. If it's pvp, dial back one move. If it's pve, dial back 2 moves.
 	void end_game(bool black_win);			// Set the winner and end the game.
 
     bool check_win(int x, int y);           // Check if the winning condition is satisfied.
     bool is_draw();                         // Check if players draw.
-    void switchPlayers();                   // Switch Black and white.
+    void switchPlayers(bool fake=false);    // Switch Black and white.
     void displayBoard();                    // Display board in terminal.
 
 	void set_display(GMKDisplay *display)	// Set display driver
