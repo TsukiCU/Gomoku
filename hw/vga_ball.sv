@@ -1102,26 +1102,19 @@ module vga_ball(input logic 		clk,
 					if (is_message) begin
 						{VGA_R, VGA_G, VGA_B} = 24'he4e6ed;  // message background: light grey
 
-						// You win when against with AI
-						if(is_pve_win) begin
-							// Draw ingame_message 
-							if(msg_display_ingame_message && font_val[font_pix_idx]) begin
-								// Font selected			
-								if(cur_msg_selected)
-									{VGA_R, VGA_G, VGA_B} = 24'h00ffff;
-								else
-									{VGA_R, VGA_G, VGA_B} = 24'h000000;
-							end
-							// Draw ingame_confirm message
-							else if(msg_display_ingame_confirm && font_val[font_pix_idx]) begin
-								// Font selected			
-								if(cur_msg_selected)
-									{VGA_R, VGA_G, VGA_B} = 24'h00ffff;
-								else
-									{VGA_R, VGA_G, VGA_B} = 24'h000000;
-							end
-
+						// Draw ingame_message
+						if(msg_display_ingame_message && font_val[font_pix_idx]) begin			
+							{VGA_R, VGA_G, VGA_B} = 24'h000000;
 						end
+						// Draw ingame_confirm message
+						else if(msg_display_ingame_confirm && font_val[font_pix_idx]) begin
+							// Font selected			
+							if(cur_msg_selected)
+								{VGA_R, VGA_G, VGA_B} = 24'h00ffff;
+							else
+								{VGA_R, VGA_G, VGA_B} = 24'h000000;
+						end
+
 					end
 					
 				end
@@ -1534,12 +1527,8 @@ module vga_ball(input logic 		clk,
 				else if(is_player1_area || is_player2_area) begin
 					{VGA_R, VGA_G, VGA_B} = 24'h96968C; //菜单背景颜色
 					// Draw ingame_players message
-					if(msg_display_ingame_players && font_val[font_pix_idx]) begin
-						// Font selected			
-						if(cur_msg_selected)
-							{VGA_R, VGA_G, VGA_B} = 24'h00ffff;
-						else
-							{VGA_R, VGA_G, VGA_B} = 24'h000000;
+					if(msg_display_ingame_players && font_val[font_pix_idx]) begin			
+						{VGA_R, VGA_G, VGA_B} = 24'h000000;
 					end
 				end
 			end
