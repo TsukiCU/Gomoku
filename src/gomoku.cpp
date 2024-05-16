@@ -34,9 +34,11 @@ int Gomoku::make_move(pair<int, int> move,bool fake)
 
     if (!valid_move(x, y))  return 1;
     board[x][y] = current_player;
-	if(display && !fake)
+	if(display && !fake){
 		// Piece value is different from current_player
 		display->update_piece_info(x, y, current_player);
+		display->play_sound(3);
+	}
 	if(record_game && !fake)
 		record.push_back(make_pair(x, y));
     if (check_win(x, y)) {
@@ -148,8 +150,11 @@ void Gomoku::resetGame()
     this->current_player = 1;
     this->winner = 0;
     this->regretTimes = 0;
-	if(display)
+	this->winArray.clear();
+	if(display){
+		display->show_confirm_message(false);
 		display->clear_board();
+	}
 }
 
 int Gomoku::regret_move()

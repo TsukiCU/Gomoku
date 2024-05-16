@@ -34,11 +34,12 @@
 
 struct GMKNetMessage{
 	// Gomoku message magic 0x474D4B4D
-	const uint32_t magic = 0x474D4B4D;
+	uint32_t magic = 0x474D4B4D;
 	u_char type;
 	// For UDP Message, data should start from msg+sizeof(struct sockaddr_in).
 	// Because the first several bytes are preserved for source IP.
 	u_char msg[251];
+	GMKNetMessage():magic(0x474D4B4D){}
 };
 
 struct GMKGameInfo{
@@ -78,6 +79,9 @@ public:
 	int check_game_result();
 	void reset_board();
 	int start_game_loop();
+	void set_cancel(bool *cancel){cancel_=cancel;}
+	bool is_connected(){return connected_;}
+	void set_event_handler(InputEventHandler *handler){handler_=handler;}
 
 protected:
 	bool send_player_info(const PlayerInfo &info);
@@ -108,6 +112,8 @@ protected:
 	bool loop_stopped_ = true;
 
 	bool connected_ = false;
+	bool *cancel_ = NULL;
+	InputEventHandler *handler_=NULL;
 };
 
 class GMKServer : public GMKNetBase{
@@ -121,7 +127,7 @@ public:
 	bool send_game_info();
 	// Send game start message
 	bool start_game();
-	// bool Close();
+	~GMKServer();
 protected:
 	// Wait for the player to send player info.
 	bool wait_for_player_info();
@@ -130,20 +136,22 @@ protected:
 	//void receive_thread_callback() override;
 	// Return local black
 	bool assign_pieces();
-	int local_fd_;
+	int local_fd_ = -1;
 	uint16_t server_port_;
 	bool is_player_joined_ = false;
 };
 
 class GMKClient : public GMKNetBase{
 public:
-	GMKClient(Gomoku *game) : GMKNetBase(game) {}
+	GMKClient(Gomoku *game) : GMKNetBase(game) {server_list_.clear();}
 	bool connect_to(const char *ip);
 	bool connect_to(const GMKServerInfo &info);
 	//bool Disconnect();
 	// UDP Broadcast;
 	bool send_server_discover();
 	std::vector<GMKServerInfo> get_server_list() const {return server_list_;}
+	bool wait_for_scan();
+	~GMKClient();
 protected:
 	void handle_message(const GMKNetMessage &msg) override;
 	void update_server_list(const GMKServerInfo &info);

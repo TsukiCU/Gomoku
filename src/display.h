@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <string>
 #include <sys/types.h>
+#include <utility>
 #include <vector>
 #define VGA_DRIVER_FILENAME "/dev/vga_ball"
 
@@ -26,6 +27,7 @@ struct GMKDisplayMessageInfo{
 	uint16_t up=0xffff, down=0xffff, left=0xffff, right=0xffff;
 	bool selectable=false;
 	bool visible=false;
+	bool disabled=false;
 	BBOX bounding_box=BBOX(0xFFFF,0xFFFF,0xFFFF,0xFFFF);
 };
 
@@ -60,7 +62,7 @@ protected:
 class GMKDisplay{
 	public:
 		GMKDisplay()
-			{};
+			{hint_.first=15;hint_.second=15;};
 		// piece 0:No piece, 1:white piece, 2:black piece
 		bool update_piece_info(int x,int y,int piece, int current=1, bool sync=true);
 		bool update_select(int board_x,int board_y, bool sync=true);
@@ -81,12 +83,27 @@ class GMKDisplay{
 		void set_message_group(GMKDisplayMessageGroup *group){msg_group_ = group;}
 		bool update_message_visibility(uint16_t index, bool visible, bool sync=true);
 		bool update_group_visibility(uint16_t group, bool visible, bool sync=true);
+		bool update_group_visibility(uint16_t group, uint16_t val, bool sync=true);
+
+		bool update_p2_profile(int profile, bool sync=true);
+		void show_game_result(int result, bool show=true);
+		void show_confirm_message(bool show=true);
+		void show_scanning_message(bool show=true);
+		void show_hint(int x_index,int y_index);
+
+		// Play sound
+		// 0 - victory
+		// 1 - defeat
+		// 2 - menu
+		// 3 - move
+		void play_sound(int index);
 
 	protected:
 
 		uint16_t params_[8];
 		int vga_gomoku_fd_=-1;
 		const char *dev_name_=VGA_DRIVER_FILENAME;
+		std::pair<uint16_t, uint16_t> hint_;
 
 		GMKDisplayMessageGroup *msg_group_;
 };

@@ -16,6 +16,9 @@ private:
 	uint16_t board_x, board_y;
 	uint16_t selected_msg_index;
 	GMKDisplayMessageGroup *msg_group;
+	bool block_input=false;
+	bool cancel = false;
+	bool waiting = false;
 
 public:
     GameMenu(Gomoku *game) : game(game), currentMode(0) {}
@@ -35,6 +38,7 @@ public:
 
 	void showMenu();
 	void showBoard(bool top_first=true);
+	void playAnime();
 
 	void setDisplay(GMKDisplay *display);
 	void setMessageGroup(GMKDisplayMessageGroup *group){this->msg_group=group;}
