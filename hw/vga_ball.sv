@@ -770,7 +770,7 @@ module vga_ball(input logic 		clk,
 			msg_display_ingame_message[0] <= 0;
 
 		/**
-		* message: You Loss
+		* message: You Lose
 		* group 4: ingame_message
 		* group_index: 1
 		* select_index: 15
@@ -790,14 +790,13 @@ module vga_ball(input logic 		clk,
 				8'd4: font_addr <= 8'd55+((vcount[9:0]-187)>>3);
 				8'd5: font_addr <= 8'd70+((vcount[9:0]-187)>>3);
 				8'd6: font_addr <= 8'd90+((vcount[9:0]-187)>>3);
-				8'd7: font_addr <= 8'd90+((vcount[9:0]-187)>>3);
+				8'd7: font_addr <= 8'd20+((vcount[9:0]-187)>>3);
 				default:;
 			endcase
 			font_pix_idx <= (hcount[10:1]-125)>>2;
 		end
 		else
 			msg_display_ingame_message[1] <= 0;
-
 
 
 		/**
@@ -1013,9 +1012,9 @@ module vga_ball(input logic 		clk,
 	always_ff @(posedge clk)
 		/************ Initial **************/
 		if (reset) begin
-			is_menu <= 1; 	// Show Menu on boot
-			is_board <= 0; 	// Show Board on boot
-			is_message<= 1; // Show Message on boot
+			is_menu <= 0; 	// Show Menu on boot
+			is_board <= 1; 	// Show Board on boot
+			is_message<= 0; // Show Message on boot
 			
 			
 			// show message 
@@ -1035,11 +1034,11 @@ module vga_ball(input logic 		clk,
 			//selected_x = 4'h7;
 			//last_piece_x = 4'hf;
 			//last_piece_y = 4'hf;
-			msg_visible_ingame_options <= 4'b0000;
-			msg_selected = 5; // Join LAN selected
+			msg_visible_ingame_options <= 4'b1111;
+			//msg_selected = 5; // Join LAN selected
 			msg_visible_menu <= 6'b111111;
-			msg_visible_ingame_players <= 3'b000;
-			msg_visible_ingame_message <= 6'b100000;
+			msg_visible_ingame_players <= 3'b011;
+			msg_visible_ingame_message <= 6'b000000;
 			msg_visible_ingame_confirm <= 3'b000;
 			black_on_top <= 0;
 		end 
@@ -1127,8 +1126,8 @@ module vga_ball(input logic 		clk,
 			else if (is_menu) begin //draw menu 菜单
 				{VGA_R, VGA_G, VGA_B} = 24'h00DDAA; //菜单背景颜色
 				// Draw scanning message
-				if (is_scan_area) begin
-					if(is_message)begin
+				if (is_message) begin
+					if(is_scan_area)begin
 						{VGA_R, VGA_G, VGA_B} = 24'he4e6ed;  // message background: light grey
 						// Draw scanning message on menu
 						if(msg_display_ingame_message && font_val[font_pix_idx]) begin			
@@ -1149,8 +1148,8 @@ module vga_ball(input logic 		clk,
 			/************** Board Page *************/
 			else if(is_board) begin
 				/************** Message Area *************/
-				if(is_message_area) begin
-					if (is_message) begin
+				if(is_message) begin
+					if (is_message_area) begin
 						{VGA_R, VGA_G, VGA_B} = 24'he4e6ed;  // message background: light grey
 
 						// Draw ingame_message
