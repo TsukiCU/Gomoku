@@ -926,7 +926,7 @@ module vga_ball(input logic 		clk,
 		* message: EXIT
 		* group 5: ingame_confirm
 		* group_index: 0
-		* select_index: 19
+		* select_index: 20
 		* h_start: 220
 		* v_start: 241
 		* font_width: 16
@@ -934,7 +934,7 @@ module vga_ball(input logic 		clk,
 		*/
 		if((hcount[10:1] >= 10'd220) && (hcount[10:1] < 10'd284) && (vcount >= 10'd241) && (vcount < 10'd261) && msg_visible_ingame_confirm[0]) begin
 			msg_display_ingame_confirm[0] <= 1;
-			cur_msg_selected <= (msg_selected==19);
+			cur_msg_selected <= (msg_selected==20);
 			case((hcount[10:1]-220)>>4)
 				8'd0: font_addr <= 8'd20+((vcount[9:0]-241)>>2);
 				8'd1: font_addr <= 8'd115+((vcount[9:0]-241)>>2);
@@ -951,7 +951,7 @@ module vga_ball(input logic 		clk,
 		* message: yes
 		* group 5: ingame_confirm
 		* group_index: 1
-		* select_index: 20
+		* select_index: 21
 		* h_start: 164
 		* v_start: 244
 		* font_width: 16
@@ -959,7 +959,7 @@ module vga_ball(input logic 		clk,
 		*/
 		if((hcount[10:1] >= 10'd164) && (hcount[10:1] < 10'd212) && (vcount >= 10'd244) && (vcount < 10'd264) && msg_visible_ingame_confirm[1]) begin
 			msg_display_ingame_confirm[1] <= 1;
-			cur_msg_selected <= (msg_selected==20);
+			cur_msg_selected <= (msg_selected==21);
 			case((hcount[10:1]-164)>>4)
 				8'd0: font_addr <= 8'd120+((vcount[9:0]-244)>>2);
 				8'd1: font_addr <= 8'd20+((vcount[9:0]-244)>>2);
@@ -975,7 +975,7 @@ module vga_ball(input logic 		clk,
 		* message: no
 		* group 5: ingame_confirm
 		* group_index: 2
-		* select_index: 21
+		* select_index: 22
 		* h_start: 311
 		* v_start: 244
 		* font_width: 16
@@ -983,7 +983,7 @@ module vga_ball(input logic 		clk,
 		*/
 		if((hcount[10:1] >= 10'd311) && (hcount[10:1] < 10'd343) && (vcount >= 10'd244) && (vcount < 10'd264) && msg_visible_ingame_confirm[2]) begin
 			msg_display_ingame_confirm[2] <= 1;
-			cur_msg_selected <= (msg_selected==21);
+			cur_msg_selected <= (msg_selected==22);
 			case((hcount[10:1]-311)>>4)
 				8'd0: font_addr <= 8'd65+((vcount[9:0]-244)>>2);
 				8'd1: font_addr <= 8'd70+((vcount[9:0]-244)>>2);
@@ -993,6 +993,8 @@ module vga_ball(input logic 		clk,
 		end
 		else
 			msg_display_ingame_confirm[2] <= 0;
+	end
+
 
 
 
