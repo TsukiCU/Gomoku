@@ -33,3 +33,6 @@ vga_gomoku*
 alphaBetaGomoku
 store
 tcp
+
+# MacOS shit
+.DS_Store
