@@ -190,7 +190,7 @@ module vga_ball(input logic 		clk,
 		msg_visible_ingame_confirm <= -1;
 		//msg_display_menu <= 0;
 		//msg_display_ingame <= 0;
-		msg_selected = 9; // P1 selected
+		// msg_selected = 9; // P1 selected
 		//msg_visible_ingame_players[1] <= 0;
 		//msg_visible_ingame_message[0] <= 1;
 		black_on_top <= 0;
@@ -316,11 +316,11 @@ module vga_ball(input logic 		clk,
 
 	/************* Win, loss message *************/
 		// Message
-		logic is_p1_win; // "P1 WIN" = h[150,], v[187(164+23),]
-		logic is_p2_win; // "P2 WIN" = h[150,], v[187(164+23),]
-		logic is_pve_win; // "YOU WIN!" = h[129(121+8)], v[187(164+23),227(187+40(height))]
-		logic is_pve_loss; // "YOU LOSS" = h[125(121+4),], v[187(164+23),]
-		logic are_you_sure; // "Are You Sure?" = h[150(24+126),358(150+208(total width))], v[164(148+16),184(164+20(height))]
+		//logic is_p1_win; // "P1 WIN" = h[150,], v[187(164+23),]
+		//logic is_p2_win; // "P2 WIN" = h[150,], v[187(164+23),]
+		//logic is_pve_win; // "YOU WIN!" = h[129(121+8)], v[187(164+23),227(187+40(height))]
+		//logic is_pve_loss; // "YOU LOSS" = h[125(121+4),], v[187(164+23),]
+		//logic are_you_sure; // "Are You Sure?" = h[150(24+126),358(150+208(total width))], v[164(148+16),184(164+20(height))]
 		logic is_message;
 		logic is_message_area;
 		// Message Area: h[121(22+3*33),381(481-3*33)], v[179(24+31x5),270(179+31x3-2)]
@@ -330,6 +330,9 @@ module vga_ball(input logic 		clk,
 		logic is_exit; // h[220,], v[241,] , click 'exit' from in-game options on the lower right corner
 		logic is_exit_yes; // h[164,], v[244,]
 		logic is_exit_no;  // h[311(164+48+33*3),], v[244,]
+	/************* Win, loss message END *************/
+
+
 
 
 	/************* Other UI ************/
@@ -339,6 +342,7 @@ module vga_ball(input logic 		clk,
 		logic	is_player2_area; 	// Player 2 UI area
 		logic	is_option_area; 	// Board option area
 		logic	division_line;		// Division Line
+		logic	is_scan_area;
 
 		// player 1 - top area: h=[500,680],v=[0,170)
 		assign is_player1_area = (hcount[10:1]>=10'd500) && (hcount[10:1]<=10'd680) && (vcount[9:0]>=10'd0) && (vcount[9:0]<=10'd170);
@@ -348,6 +352,8 @@ module vga_ball(input logic 		clk,
 		assign is_option_area = (hcount[10:1]>=10'd500) && (hcount[10:1]<=10'd680) && (vcount[9:0]>=10'd340) && (vcount[9:0]<=10'd480);
 		// division line
 		assign division_line = (vcount[9:0] == 10'd170) && (hcount[10:1] >= 10'd500) && (hcount[10:1] < 10'd680);
+		// Scan Area: h[190,451], v[195,286]
+		assign is_scan_area = (hcount[10:1]>=10'd190) && (hcount[10:1]<=10'd451) && (vcount[9:0]>=10'd195) && (vcount[9:0]<=10'd286);
 
 	/*********** Other UI End ***********/
 
@@ -368,8 +374,8 @@ module vga_ball(input logic 		clk,
 	logic [2:0] msg_visible_ingame_players;
 	logic [2:0] msg_display_ingame_players;
     // Message visibility and display signal of group ingame_message
-	logic [4:0] msg_visible_ingame_message;
-	logic [4:0] msg_display_ingame_message;
+	logic [5:0] msg_visible_ingame_message;
+	logic [5:0] msg_display_ingame_message;
     // Message visibility and display signal of group ingame_confirm
 	logic [2:0] msg_visible_ingame_confirm;
 	logic [2:0] msg_display_ingame_confirm;
@@ -664,6 +670,7 @@ module vga_ball(input logic 		clk,
 		else
 			msg_display_ingame_options[3] <= 0;
 
+
 		/**
 		* message: P1
 		* group 3: ingame_players
@@ -884,6 +891,37 @@ module vga_ball(input logic 		clk,
 		else
 			msg_display_ingame_message[4] <= 0;
 
+		/**
+		* message: Scanning...
+		* group 4: ingame_message
+		* group_index: 5
+		* select_index: 19
+		* h_start: 240
+		* v_start: 230
+		* font_width: 16
+		* font_height: 20
+		*/
+		if((hcount[10:1] >= 10'd240) && (hcount[10:1] < 10'd416) && (vcount >= 10'd230) && (vcount < 10'd250) && msg_visible_ingame_message[5]) begin
+			msg_display_ingame_message[5] <= 1;
+			cur_msg_selected <= (msg_selected==19);
+			case((hcount[10:1]-240)>>4)
+				8'd0: font_addr <= 8'd90+((vcount[9:0]-230)>>2);
+				8'd1: font_addr <= 8'd10+((vcount[9:0]-230)>>2);
+				8'd2: font_addr <= 8'd0+((vcount[9:0]-230)>>2);
+				8'd3: font_addr <= 8'd65+((vcount[9:0]-230)>>2);
+				8'd4: font_addr <= 8'd65+((vcount[9:0]-230)>>2);
+				8'd5: font_addr <= 8'd40+((vcount[9:0]-230)>>2);
+				8'd6: font_addr <= 8'd65+((vcount[9:0]-230)>>2);
+				8'd7: font_addr <= 8'd30+((vcount[9:0]-230)>>2);
+				8'd8: font_addr <= 8'd200+((vcount[9:0]-230)>>2);
+				8'd9: font_addr <= 8'd200+((vcount[9:0]-230)>>2);
+				8'd10: font_addr <= 8'd200+((vcount[9:0]-230)>>2);
+				default:;
+			endcase
+			font_pix_idx <= (hcount[10:1]-240)>>1;
+		end
+		else
+			msg_display_ingame_message[5] <= 0;
 
 		/**
 		* message: EXIT
@@ -975,16 +1013,17 @@ module vga_ball(input logic 		clk,
 	always_ff @(posedge clk)
 		/************ Initial **************/
 		if (reset) begin
-			is_menu <= 0; 	// Show Menu on boot
-			is_board <= 1; 	// Show Board on boot
+			is_menu <= 1; 	// Show Menu on boot
+			is_board <= 0; 	// Show Board on boot
 			is_message<= 1; // Show Message on boot
 			
+			
 			// show message 
-			is_p1_win <= 0;
-			is_p2_win <= 0;
-			is_pve_win <= 1;
-			is_pve_loss <= 0;
-			are_you_sure <= 0;
+			//is_p1_win <= 0;
+			//is_p2_win <= 0;
+			//is_pve_win <= 1;
+			//is_pve_loss <= 0;
+			//are_you_sure <= 0;
 
 			// Clear board
 			for(int i=0;i<15;i++) begin
@@ -996,11 +1035,12 @@ module vga_ball(input logic 		clk,
 			//selected_x = 4'h7;
 			//last_piece_x = 4'hf;
 			//last_piece_y = 4'hf;
-			//msg_visible_ingame_options <= -1;
-			//msg_selected = 9; // P1 selected
-			msg_visible_ingame_players <= 3'b101;
-			msg_visible_ingame_message <= 5'b10000;
-			msg_visible_ingame_confirm <= 3'b110;
+			msg_visible_ingame_options <= 4'b0000;
+			msg_selected = 5; // Join LAN selected
+			msg_visible_menu <= 6'b111111;
+			msg_visible_ingame_players <= 3'b000;
+			msg_visible_ingame_message <= 6'b100000;
+			msg_visible_ingame_confirm <= 3'b000;
 			black_on_top <= 0;
 		end 
 		/*********** Initial end ************/
@@ -1032,7 +1072,7 @@ module vga_ball(input logic 		clk,
 						6'h1:msg_visible_menu <= writedata[5:0];
 						6'h2:msg_visible_ingame_options <= writedata[3:0];
 						6'h3:msg_visible_ingame_players <= writedata[2:0];
-						6'h4:msg_visible_ingame_message <= writedata[4:0];
+						6'h4:msg_visible_ingame_message <= writedata[5:0];
 						6'h5:msg_visible_ingame_confirm <= writedata[2:0];
 						default:;
 					endcase
@@ -1086,8 +1126,19 @@ module vga_ball(input logic 		clk,
 			/************** Menu Page *************/
 			else if (is_menu) begin //draw menu 菜单
 				{VGA_R, VGA_G, VGA_B} = 24'h00DDAA; //菜单背景颜色
+				// Draw scanning message
+				if (is_scan_area) begin
+					if(is_message)begin
+						{VGA_R, VGA_G, VGA_B} = 24'he4e6ed;  // message background: light grey
+						// Draw scanning message on menu
+						if(msg_display_ingame_message && font_val[font_pix_idx]) begin			
+							{VGA_R, VGA_G, VGA_B} = 24'h000000;
+						end
+					end
+					
+				end
 				// Draw menu message
-				if(msg_display_menu && font_val[font_pix_idx]) begin
+				else if(msg_display_menu && font_val[font_pix_idx]) begin
 					// Font selected			
 					if(cur_msg_selected)
 						{VGA_R, VGA_G, VGA_B} = 24'h00ffff;
