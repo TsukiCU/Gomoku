@@ -18,6 +18,7 @@ public:
     int regretTimes;                        // Times user has regreted. Used only when online gaming and playing with AI.
     vector<vector<int>> board;              // The board.
     vector<pair<int, int>> record;          // Game record.
+    vector<pair<int, int>> winArray;        // For End of game animation.
 
     Gomoku(int mode) : state(0), board_size(15), current_player(1),
     WIN_LENGTH(5), mode(mode), regretTimes(0), board(board_size, vector<int>(board_size, 0)) {}
@@ -51,9 +52,12 @@ public:
                 cumulative_stone = 0;
             else cumulative_stone++;
 
-            /* TODO: Rigorously, six (or more) in a row is forbidden. */
-            if (cumulative_stone == WIN_LENGTH)
+            /* Fill in winArray for animation */
+            if (cumulative_stone == WIN_LENGTH) {
+                for (int j=WIN_LENGTH-1; j>=0; j--)
+                    winArray.push_back(make_pair(cur_x-j*x_step, cur_y-j*y_step));
                 return true;
+            }
             cur_x += x_step;
             cur_y += y_step;
         }

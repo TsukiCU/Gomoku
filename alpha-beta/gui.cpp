@@ -62,6 +62,11 @@ int main(int argc, char **argv) {
     black.setFillColor(sf::Color::Black);
     white.setFillColor(sf::Color::White);
 
+    // different color for win animation
+    sf::CircleShape winAnimation(20, 100);
+    sf::Color lightRed(255, 182, 193);
+    winAnimation.setFillColor(lightRed);
+
     sf::Font font;
     if (!font.loadFromFile(fontPath)) {
         cout << "Unable to load font file." << endl;
@@ -142,6 +147,13 @@ int main(int argc, char **argv) {
                         cout << "you made a move at " << game.record.back().first << " , " << game.record.back().second << endl;
 
                         if (game.state == 1) {
+                            // end of game animation
+                            for (auto p: game.winArray) {
+                                winAnimation.setPosition(p.second * pieceWidth, p.first * pieceWidth);
+                                window.draw(winAnimation);
+                                window.display();
+                                sf::sleep(sf::milliseconds(200));
+                            }
                             message = "Lucked out, huh?";
                             if (recordGame)
                                 game.recordGame();
@@ -175,6 +187,13 @@ int main(int argc, char **argv) {
                     window.draw(aiColor);
 
                     if (game.state == 1) {
+                        // end of game animation
+                        for (auto p: game.winArray) {
+                            winAnimation.setPosition(p.second * pieceWidth, p.first * pieceWidth);
+                            window.draw(winAnimation);
+                            window.display();
+                            sf::sleep(sf::milliseconds(200));
+                        }
                         message = "Suckkkkkker!!!!";
                         if (recordGame)
                             game.recordGame();
