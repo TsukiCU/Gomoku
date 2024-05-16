@@ -24,7 +24,6 @@ int Gomoku::make_move(pair<int, int> move)
     if (check_win(x, y)) {
         winner = current_player;
         state = 1;
-        cout << "Player " << current_player << " wins!" << endl;
         return 0;
     }
 
