@@ -147,8 +147,10 @@ int main(int argc, char **argv) {
                         cout << "you made a move at " << game.record.back().first << " , " << game.record.back().second << endl;
 
                         if (game.state == 1) {
+                            int count = game.WIN_LENGTH;
                             // end of game animation
                             for (auto p: game.winArray) {
+                                if (count == 0) break;
                                 winAnimation.setPosition(p.second * pieceWidth, p.first * pieceWidth);
                                 window.draw(winAnimation);
                                 window.display();
@@ -188,7 +190,9 @@ int main(int argc, char **argv) {
 
                     if (game.state == 1) {
                         // end of game animation
+                        int count = game.WIN_LENGTH;
                         for (auto p: game.winArray) {
+                            if (count == 0) break;
                             winAnimation.setPosition(p.second * pieceWidth, p.first * pieceWidth);
                             window.draw(winAnimation);
                             window.display();

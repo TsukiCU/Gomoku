@@ -54,8 +54,9 @@ public:
 
             /* Fill in winArray for animation */
             if (cumulative_stone == WIN_LENGTH) {
-                for (int j=WIN_LENGTH-1; j>=0; j--)
+                for (int j=WIN_LENGTH-1; j>=0; j--) {
                     winArray.push_back(make_pair(cur_x-j*x_step, cur_y-j*y_step));
+                }
                 return true;
             }
             cur_x += x_step;
