@@ -9,7 +9,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "display.h"
+#include "../display/display.h"
 #include "input.h"
 
 #define CONTROLLER_VENDOR_ID 0x045e

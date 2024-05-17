@@ -1,4 +1,5 @@
 #include "display.h"
+#include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <sys/ioctl.h>
@@ -7,7 +8,7 @@
 #include <iostream>
 #include <stdint.h>
 
-#include "../kmod/vga_gomoku.h"
+#include "../vga_kmod/vga_gomoku.h"
 
 bool BBOX::in(uint16_t x, uint16_t y)
 {
@@ -35,7 +36,7 @@ BBOX BBOX::expand_by(BBOX &bbox)
 
 uint16_t GMKDisplayMessageGroup::message_select_by_vga_xy(uint16_t vga_x, uint16_t vga_y)
 {
-	if(messages[0].visible && vga_x>=4 && vga_x<499 && vga_y >=7 && vga_y<472){
+	if(messages[0].visible && !messages[0].disabled && vga_x>=4 && vga_x<499 && vga_y >=7 && vga_y<472){
 		uint16_t piece_x, piece_y;
 		piece_x=(vga_x-4)/33;
 		piece_y=(vga_y-7)/31;
@@ -55,9 +56,10 @@ void GMKDisplayMessageGroup::update_selectable_cache()
 	selectable.clear();
 	selected_area_.reset();
 	for(GMKDisplayMessageInfo &msg: messages){
-		if(msg.selectable && msg.visible){
+		if(msg.selectable && msg.visible && !msg.disabled){
 			selectable.push_back(msg);
 			selected_area_ = selected_area_.expand_by(msg.bounding_box);
+			printf("%s selectable\n",msg.content.c_str());
 		}
 	}
 }
@@ -104,12 +106,12 @@ uint16_t GMKDisplayMessageGroup::next_message_by_direction(uint16_t current_mess
 		next = messages[current_message].up;
 		while(next!=0xffff){ // 0xffff - no next message
 			if(is_board_selected(next)){
-				if(messages[0].selectable && messages[0].visible)
+				if(messages[0].selectable && messages[0].visible && !messages[0].disabled)
 					// Return Piece board
 					return next;
 				return current_message;
 			}
-			if(messages[next].selectable && messages[next].visible)
+			if(messages[next].selectable && messages[next].visible && !messages[next].disabled)
 				// Return Selectable message
 				return next;
 			next = messages[current_message].up;
@@ -120,12 +122,12 @@ uint16_t GMKDisplayMessageGroup::next_message_by_direction(uint16_t current_mess
 		next = messages[current_message].down;
 		while(next!=0xffff){ // 0xffff - no next message
 			if(is_board_selected(next)){
-				if(messages[0].selectable && messages[0].visible)
+				if(messages[0].selectable && messages[0].visible && !messages[0].disabled)
 					// Return Piece board
 					return next;
 				return current_message;
 			}
-			if(messages[next].selectable && messages[next].visible)
+			if(messages[next].selectable && messages[next].visible && !messages[next].disabled)
 				// Return Selectable message
 				return next;
 			next = messages[current_message].down;
@@ -136,12 +138,12 @@ uint16_t GMKDisplayMessageGroup::next_message_by_direction(uint16_t current_mess
 		next = messages[current_message].left;
 		while(next!=0xffff){ // 0xffff - no next message
 			if(is_board_selected(next)){
-				if(messages[0].selectable && messages[0].visible)
+				if(messages[0].selectable && messages[0].visible && !messages[0].disabled)
 					// Return Piece board
 					return next;
 				return current_message;
 			}
-			if(messages[next].selectable && messages[next].visible)
+			if(messages[next].selectable && messages[next].visible && !messages[next].disabled)
 				// Return Selectable message
 				return next;
 			next = messages[current_message].left;
@@ -152,12 +154,12 @@ uint16_t GMKDisplayMessageGroup::next_message_by_direction(uint16_t current_mess
 		next = messages[current_message].right;
 		while(next!=0xffff){ // 0xffff - no next message
 			if(is_board_selected(next)){
-				if(messages[0].selectable && messages[0].visible)
+				if(messages[0].selectable && messages[0].visible && !messages[0].disabled)
 					// Return Piece board
 					return next;
 				return current_message;
 			}
-			if(messages[next].selectable && messages[next].visible)
+			if(messages[next].selectable && messages[next].visible && !messages[next].disabled)
 				// Return Selectable message
 				return next;
 			next = messages[current_message].right;
@@ -233,6 +235,27 @@ bool GMKDisplay::update_register(unsigned int index,uint16_t val, bool sync)
 	return true;
 }
 
+bool GMKDisplay::update_p2_profile(int profile, bool sync)
+{
+	if(profile==0){	// AI Profile
+		printf("AI profile\n");
+		update_group_visibility(3,(uint16_t)0b101,false);
+		params_[0]&=~(1<<4);
+	}else if(profile==1){ // P2 Profile
+		printf("P2 profile\n");
+		update_group_visibility(3,(uint16_t)0b011,false);
+		params_[0]|=(1<<4);
+	}
+	else if(profile==2){  // No player
+		printf("No Player\n");
+		update_group_visibility(3,(uint16_t)0b001,false);
+		params_[0]|=(1<<4);
+	}
+	if(sync)
+		return this->sync();
+	return true;
+}
+
 bool GMKDisplay::update_message_visibility(uint16_t index, bool visible, bool sync)
 {
 	GMKDisplayMessageInfo &msg = msg_group_->messages[index];
@@ -251,13 +274,32 @@ bool GMKDisplay::update_message_visibility(uint16_t index, bool visible, bool sy
 	return true;
 }
 
+bool GMKDisplay::update_group_visibility(uint16_t group, uint16_t val, bool sync)
+{
+	bool visible[10];
+	for(size_t i=0;i<10;++i)
+		visible[i]=(val>>i)&1;
+	val = (val & 0x03FF) | (group << 10);
+	msg_group_->group_visibility[group] = val;
+	for(GMKDisplayMessageInfo &msg:msg_group_->messages){
+		if(msg.group==group)
+			msg.visible=visible[msg.group_idx];
+	}
+
+	params_[3] = val;
+	printf("%s by val:%04x\n",__func__,params_[3]);
+	if(sync)
+		return this->sync();
+	return true;
+}
+
 bool GMKDisplay::update_group_visibility(uint16_t group, bool visible, bool sync)
 {
 	msg_group_->update_group_visibility(group, visible);
 
 	params_[3] = msg_group_->group_visibility[group];
 	printf("Visibility\n");
-	for(int i=0;i<msg_group_->group_visibility.size();++i){
+	for(size_t i=0;i<msg_group_->group_visibility.size();++i){
 		printf("0x%04x ",msg_group_->group_visibility[i]);
 	}
 	printf("\n\n");
@@ -287,12 +329,15 @@ bool GMKDisplay::update_touchpad_cursor(uint16_t vga_x, uint16_t vga_y,bool visi
 
 bool GMKDisplay::show_menu()
 {
+	play_sound(2);
 	// Dialog set to 1
 	params_[0]|=1;
 	update_group_visibility(0, false);
 	update_group_visibility(1, true);
 	update_group_visibility(2, false);
-	return update_group_visibility(3, false);
+	update_group_visibility(3, false);
+	update_group_visibility(4, false);
+	return update_group_visibility(5, false);
 }
 bool GMKDisplay::show_board(bool clear)
 {
@@ -303,6 +348,8 @@ bool GMKDisplay::show_board(bool clear)
 	update_group_visibility(1, false);
 	update_group_visibility(2, true);
 	update_group_visibility(3, true);
+	update_group_visibility(4, false);
+	update_group_visibility(5, false);
 	// Select board center
 	ret = update_select(7, 7,false);
 	if(clear)
@@ -324,7 +371,18 @@ bool GMKDisplay::open_display()
 
 bool GMKDisplay::update_piece_info(int x,int y, int piece, int current, bool sync)
 {
-	params_[1] = y|(x<<4)|(piece<<9);
+	if(hint_.first!=15&&hint_.second!=15){
+		// Hide hint
+		params_[1] = hint_.second|(hint_.first<<4);
+		hint_.first=15;
+		hint_.second=15;
+		this->sync();
+		return update_piece_info(x, y, piece,sync);
+	}
+	if(piece==3) // Highlighted mark
+		params_[1] = y|(x<<4)|(1<<8);
+	else
+		params_[1] = y|(x<<4)|(piece<<9);
 	if(current)
 		params_[2] = (params_[2]&0xff00)|(y|(x<<4));
 	printf("piece_info3:0x%04x\n",params_[1]);
@@ -405,4 +463,98 @@ bool GMKDisplay::switch_turn_mark(bool sync)
 	if(sync)
 		return this->sync();
 	return true;	
+}
+
+// 0 - YOU WIN
+// 1 - YOU LOSE
+// 2 - P1 WIN
+// 3 - P2 WIN
+void GMKDisplay::show_game_result(int result, bool show)
+{
+	if(!show){
+		for(GMKDisplayMessageInfo &msg:msg_group_->messages){
+			msg.disabled=false;
+		}
+		msg_group_->update_selectable_cache();
+		update_register(0, get_register(0)&~(1<<5));
+		return;
+	}
+	update_group_visibility(4,(uint16_t)(1<<result));
+	update_group_visibility(5,(uint16_t)(1));
+	for(GMKDisplayMessageInfo &msg:msg_group_->messages){
+		msg.disabled=true;
+	}
+	msg_group_->messages[20].disabled=false;
+	GMKDisplayMessageInfo &msg = msg_group_->messages[20];
+	printf("%s:selectable %d, visible %d, disabled %d\n",msg.content.c_str(),msg.selectable,msg.visible,msg.disabled);
+	msg_group_->update_selectable_cache();
+	update_register(0, get_register(0)|(1<<5));
+	if(result==1)
+		play_sound(1);
+	else
+	 	play_sound(0);
+}
+
+void GMKDisplay::show_confirm_message(bool show)
+{
+	if(!show){
+		for(GMKDisplayMessageInfo &msg:msg_group_->messages){
+			msg.disabled=false;
+		}
+		msg_group_->update_selectable_cache();
+		update_register(0, get_register(0)&~(1<<5));
+		return ;
+	}
+	update_group_visibility(4,(uint16_t)(1<<4));
+	update_group_visibility(5,(uint16_t)(0b110));
+	for(GMKDisplayMessageInfo &msg:msg_group_->messages){
+		msg.disabled=true;
+	}
+	msg_group_->messages[21].disabled=false;
+	msg_group_->messages[22].disabled=false;
+	GMKDisplayMessageInfo &msg = msg_group_->messages[20];
+	printf("%s:selectable %d, visible %d, disabled %d\n",msg.content.c_str(),msg.selectable,msg.visible,msg.disabled);
+	msg_group_->update_selectable_cache();
+	update_register(0, get_register(0)|(1<<5));
+}
+
+void GMKDisplay::show_scanning_message(bool show)
+{
+	if(!show){
+		for(GMKDisplayMessageInfo &msg:msg_group_->messages){
+			msg.disabled=false;
+		}
+		msg_group_->update_selectable_cache();
+		update_register(0, get_register(0)&~(1<<5));
+		return;
+	}
+	update_group_visibility(4,(uint16_t)(1<<5));
+	update_group_visibility(5,(uint16_t)(0b000));
+	for(GMKDisplayMessageInfo &msg:msg_group_->messages){
+		msg.disabled=true;
+	}
+	// EXIT
+	msg_group_->messages[20].disabled=false;
+	msg_group_->update_selectable_cache();
+	// Enable message box
+	update_register(0, get_register(0)|(1<<5));
+}
+
+void GMKDisplay::show_hint(int x_index,int y_index)
+{
+	hint_.first = x_index;
+	hint_.second = y_index;
+	params_[1] = y_index|(x_index<<4)|(1<<8);
+	this->sync();
+}
+
+void GMKDisplay::play_sound(int index)
+{
+	params_[0] &= 0x00FF;
+	this->sync();
+	params_[0] |= (1<<(index+8));
+	this->sync();
+	usleep(50000);
+	params_[0] &= 0x00FF;
+	this->sync();
 }

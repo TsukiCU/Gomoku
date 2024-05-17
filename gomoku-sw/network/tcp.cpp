@@ -1,5 +1,4 @@
 #include "tcp.h"
-#include "players.h"
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
@@ -15,12 +14,14 @@
 #include <arpa/inet.h>
 #include <sys/poll.h>
 #include <vector>
+#include <fcntl.h>
 
 using namespace std;
 
 bool GMKNetBase::send_player_info(const PlayerInfo &info)
 {
 	GMKNetMessage msg;
+	msg.magic = 0x474D4B4D;
 	msg.type = GMK_MSG_PLAYER_INFO;
 	memcpy(msg.msg, &info, sizeof(info));
 	write(remote_fd_, &msg, sizeof(msg));
@@ -36,6 +37,16 @@ void GMKNetBase::reset_board()
 void GMKNetBase::create_receive_thread()
 {
 	recv_thread_=std::thread(&GMKNetBase::receive_thread_func,this);
+}
+
+void GMKNetBase::receive_thread_callback()
+{
+	// Notify the event_handler
+	if(handler_){
+		InputEvent event;
+		event.type = NONE;
+		handler_->handle_input_press(event);
+	}
 }
 
 void GMKNetBase::receive_thread_func()
@@ -60,9 +71,9 @@ void GMKNetBase::receive_thread_func()
 		}
 		handle_message(msg);
 	}
-	printf("connect_toion closed!\n");
+	printf("connection closed!\n");
 	connected_ = false;
-	// TODO: Do some work after thread exits
+	// Do some work after thread exits
 	receive_thread_callback();
 	return;
 }
@@ -76,6 +87,9 @@ bool GMKNetBase::create_udp_socket()
         perror("UDP Socket");
 		udp_fd_=-1;
         return false;
+    }
+	if (fcntl(udp_fd_, F_SETFL, O_NONBLOCK) < 0) {
+        perror("server create fcntl");
     }
     if (setsockopt(udp_fd_, SOL_SOCKET, SO_REUSEPORT, &reuse_port_val, sizeof(reuse_port_val)) < 0) {
         perror("UDP setsockopt(SO_REUSEPORT) failed");
@@ -119,12 +133,20 @@ void GMKNetBase::udp_receive_thread_func()
 
 	memset(&srcAddr, 0, sizeof(srcAddr));
 	bzero(&msg, sizeof(msg));
-	while((ret=recvfrom(udp_fd_, 
+	while(true){
+		ret=recvfrom(udp_fd_, 
 					   &msg, 
 						 sizeof(GMKNetMessage),
 					 0,
 					  (struct sockaddr *)&srcAddr,
-				  &addrLen))>=0){
+				  &addrLen);
+		if(ret<0){
+			if (errno == EWOULDBLOCK || errno == EAGAIN){
+				usleep(1000); // Sleep briefly to prevent high CPU usage
+                continue;
+			}
+			break;
+		}
 		// Drop non GMK message
 		if(ret!=sizeof(GMKNetMessage))
 			continue;
@@ -144,7 +166,6 @@ void GMKNetBase::udp_receive_thread_func()
 	if(ret<0){
 		perror("UDP Recv:");
 	}
-	// TODO: Do some work after thread exits
 	receive_thread_callback();
 	return;
 }
@@ -206,6 +227,7 @@ bool GMKNetBase::make_move(int x, int y)
 	++piece_count_;
 	// Send move message
 	GMKNetMessage msg;
+	msg.magic = 0x474D4B4D;
 	msg.type = GMK_MSG_MOVE_INFO;
 	memcpy(msg.msg, &info, sizeof(info));
 	write(remote_fd_, &msg, sizeof(msg));
@@ -230,6 +252,7 @@ bool GMKNetBase::regret_move()
 
 	// Send move message
 	GMKNetMessage msg;
+	msg.magic = 0x474D4B4D;
 	msg.type = GMK_MSG_MOVE_REGRET;
 	write(remote_fd_, &msg, sizeof(msg));
 	
@@ -247,6 +270,7 @@ bool GMKNetBase::resign()
 
 	// Send move message
 	GMKNetMessage msg;
+	msg.magic = 0x474D4B4D;
 	msg.type = GMK_MSG_GAME_RESIGN;
 	write(remote_fd_, &msg, sizeof(msg));
 
@@ -270,7 +294,7 @@ int GMKNetBase::check_game_result()
 void GMKNetBase::handle_remote_move(const GMKMoveInfo &info)
 {
 	if(!is_move_valid(info, remote_player_)){
-		// TODO:Remote move not valid
+		// FIXME:Remote move not valid
 		return ;
 	}
 	// Remote player takes move
@@ -281,6 +305,12 @@ void GMKNetBase::handle_remote_move(const GMKMoveInfo &info)
 		info.x,info.y
 	);
 	game_->displayBoard();
+
+	if(handler_){
+		InputEvent event;
+		event.type = NONE;
+		handler_->handle_input_press(event);
+	}
 }
 
 void GMKNetBase::handle_remote_regret()
@@ -297,16 +327,26 @@ void GMKNetBase::handle_remote_regret()
 		   remote_player_.black?"Black":"White"
 	);
 	game_->displayBoard();
+	if(handler_){
+		InputEvent event;
+		event.type = NONE;
+		handler_->handle_input_press(event);
+	}
 }
 
 void GMKNetBase::handle_remote_resign()
 {
-	// TODO: NOTIFY MAIN THREAD
 	remote_player_.resign();
 	printf("%d:%s resigns!\n", piece_count_,
 		   remote_player_.black?"Black":"White"
 	);
 	game_->displayBoard();
+	// Notify the main thread
+	if(handler_){
+		InputEvent event;
+		event.type = NONE;
+		handler_->handle_input_press(event);
+	}
 }
 
 void GMKServer::handle_message(const GMKNetMessage &msg)
@@ -355,6 +395,9 @@ bool GMKServer::create()
         printf("Gomoku Server: Socket creation failed...\n"); 
         return false;
     } 
+	if (fcntl(local_fd_, F_SETFL, O_NONBLOCK) < 0) {
+        perror("server create fcntl");
+    }
     printf("Gomoku Server: Socket successfully created..\n");
 	bzero(&servaddr, sizeof(servaddr));
 
@@ -389,21 +432,51 @@ bool GMKServer::create()
 	create_udp_socket();
 	return true;
 }
+GMKServer::~GMKServer()
+{
+	printf("close(remote_fd_);\n");
+	if(remote_fd_>0)
+		close(remote_fd_);
+	printf("close(local_fd_);\n");
+	if(local_fd_>0)
+		close(local_fd_);
+	printf("close(udp_fd_);\n");
+	if(udp_fd_>0)
+		close(udp_fd_);
+	printf("udp_recv_thread_.join();\n");
+	if(udp_recv_thread_.joinable())
+		udp_recv_thread_.join();
+	printf("recv_thread_.join();\n");
+	if(recv_thread_.joinable())
+		recv_thread_.join();
+}
 
 bool GMKServer::wait_for_player()
 {
 	struct sockaddr_in client;
 	uint len;
-	len = sizeof(client); 
+	len = sizeof(client);
 
 	if(recv_thread_.joinable())
 		recv_thread_.join();
+	printf("Gomoku Server: Waiting for player to join...\n");
+	if(cancel_)
+		*cancel_=false;
 	// Wait a player to join
 	while(true){
-		printf("Gomoku Server: Waiting for player to join...\n");
 		// Accept the data packet from client and verification 
 		remote_fd_ = accept(local_fd_, (struct sockaddr*)&client, &len); 
-		if (remote_fd_ < 0) { 
+		if (remote_fd_ < 0) {
+			if (errno == EWOULDBLOCK || errno == EAGAIN) {
+				if(cancel_)
+					if(*cancel_){
+						printf("Gomoku Server: Wait for player cancelled!\n");
+						return false;
+					}
+                // No pending connections, continue to next iteration
+                usleep(1000); // Sleep briefly to prevent high CPU usage
+                continue;
+            }
 			printf("Gomoku Server: Server accept failed...\n"); 
 			return false;
 		} 
@@ -432,6 +505,7 @@ bool GMKServer::wait_for_player()
 void GMKServer::request_player_info()
 {
 	GMKNetMessage msg;
+	msg.magic = 0x474D4B4D;
 	msg.type = GMK_MSG_REQ_PLAYER_INFO;
 	write(remote_fd_, &msg, sizeof(msg));
 }
@@ -439,8 +513,13 @@ void GMKServer::request_player_info()
 bool GMKServer::wait_for_player_info()
 {
 	printf("Gomoku Server: Waiting for remote player info...\n");
+	if(cancel_)
+		*cancel_=false;
 	for(int i=0;i<100;++i){
 		usleep(50000);
+		if(cancel_)
+			if(*cancel_)
+				break;
 		if(is_player_joined_){
 			printf("Gomoku Server: Player info received!\n");
 			// Send server player info
@@ -458,6 +537,7 @@ bool GMKServer::send_game_info()
 {
 	GMKNetMessage msg;
 	bzero(&msg, sizeof(msg));
+	msg.magic = 0x474D4B4D;
 	msg.type = GMK_MSG_GAME_INFO;
 
 	GMKGameInfo info;
@@ -475,6 +555,7 @@ bool GMKServer::start_game()
 	// Send start signal
 	GMKNetMessage msg;
 	bzero(&msg, sizeof(msg));
+	msg.magic = 0x474D4B4D;
 	msg.type = GMK_MSG_GAME_START;
 	msg.msg[0]=	local_player_.black;
 	msg.msg[1] = remote_player_.black;
@@ -561,6 +642,7 @@ bool GMKClient::send_server_discover()
 	broadcastAddr.sin_family = AF_INET;
 	broadcastAddr.sin_addr.s_addr = htonl(INADDR_BROADCAST);
 	bzero(&msg, sizeof(msg));
+	msg.magic = 0x474D4B4D;
 	msg.type = GMK_MSG_UDP_DISCOVER;
 	for(int i=0;i<GMK_SERVER_PORT_MAX_OFFSET;++i){
 		broadcastAddr.sin_port = htons(GMK_UDP_PORT+i);
@@ -579,8 +661,6 @@ void GMKClient::update_server_list(const GMKServerInfo & info)
 		}
 	}
 	server_list_.push_back(info);
-
-	// TODO: probably call some notify function here.
 }
 
 
@@ -643,5 +723,34 @@ void GMKClient::handle_message(const GMKNetMessage &msg)
 		update_server_list(info);
 	}
 }
+GMKClient::~GMKClient()
+{
+	if(remote_fd_>0)
+		close(remote_fd_);
+	if(udp_fd_>0)
+		close(udp_fd_);
+	if(udp_recv_thread_.joinable())
+		udp_recv_thread_.join();
+	if(recv_thread_.joinable())
+		recv_thread_.join();
+}
 
-
+bool GMKClient::wait_for_scan()
+{
+	if(cancel_)
+		*cancel_ = false;
+	for(size_t i=0;i<50;++i){
+		if(cancel_)
+			if(*cancel_)
+				break;
+		usleep(100000);
+		for(auto server:get_server_list()){
+			if(server.status==2){
+				return true;
+			}
+		}
+	}
+	if(server_list_.empty())
+		return false;
+	return true;
+}

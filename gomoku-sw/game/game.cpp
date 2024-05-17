@@ -5,6 +5,7 @@
 #include <string>
 #include <type_traits>
 #include <unistd.h>
+#include "../network/tcp.h"
 
 void* findPlayersWait(void *arg)
 {
@@ -21,8 +22,10 @@ void GameMenu::setDisplay(GMKDisplay *display)
 
 void GameMenu::showMenu()
 {
-	if(display)
+	if(display){
+		display->show_game_result(0,false);
 		display->show_menu();
+	}
 	else{
 		msg_group->update_group_visibility(0, false);
 		msg_group->update_group_visibility(1, true);
@@ -38,6 +41,8 @@ void GameMenu::showMenu()
 void GameMenu::showBoard(bool top_first)
 {
 	if(display){
+		display->show_game_result(0,false);
+		display->show_confirm_message(false);
 		display->clear_board();
 		display->set_player_piece(top_first,false);
 		display->set_turn_mark(top_first,false);
@@ -117,6 +122,8 @@ void GameMenu::PvEMode(int player)
     pair<int, int> aiMove = make_pair(-1, -1);  // ai moves
 
 	showBoard(!aiFirst);
+	if(display)
+		display->update_p2_profile(0);
     std::cout << "\n\nGame started. You Play as " << playerColor << endl;
     std::cout << "\nType in (board_x, board_y) to make a move. (0, 0) to regret a move.\
     (-1, -1) to return to main menu. " << playerColor << endl;
@@ -131,10 +138,16 @@ void GameMenu::PvEMode(int player)
         uint16_t command = wait_for_command();
 		switch (command) {
 		case 10: // Quit
-			// TODO: Confirm message?
-			// should add display message
-			// if(!wait_for_confirm())
-			// 	continue;
+			// should add display message			// 	continue;
+			if(display)
+				display->show_confirm_message();
+			selected_msg_index=msg_group->first_selectable_message();
+			if(!wait_for_confirm()){
+				if(display)
+					display->show_confirm_message(false);
+				selected_msg_index=msg_group->first_selectable_message();
+				continue;
+			}
 			std::cout << "Returning to main menu ..." << std::endl;
             game->resetGame();  // NOTE: modified from clearBoard method in class Gomoku.
             return;
@@ -149,9 +162,11 @@ void GameMenu::PvEMode(int player)
 		case 9:
 			// Resign without confirm
 			game->displayBoard();
-			// TODO: POPUP MESSAGE
             std::cout << "You lose!" << endl;
 			game->end_game(!(player==1));
+			if(display)
+				display->show_game_result(1);
+			selected_msg_index = msg_group->first_selectable_message();
 			// Wait for confirm command, quit to main menu.
 			while(wait_for_confirm()){
 				game->resetGame();
@@ -159,10 +174,10 @@ void GameMenu::PvEMode(int player)
 			}
 			continue;
 		case 8:{
-			// TODO: HINT
 			std::pair<int, int> ai_hint = ai.findBestMove();
+			if(display)
+				display->show_hint(ai_hint.first, ai_hint.second);
 			// std::cout << "Hint: " << hint.first + 1 << ", " << hint.second + 1 << endl;
-			// TODO: display hint on the board
 			continue;
 		}
 		default:
@@ -180,9 +195,13 @@ void GameMenu::PvEMode(int player)
 
         if (game->state == 1) {
             game->displayBoard();
+			playAnime();
             std::cout << "You win!" << endl;
+			if(display)
+				display->show_game_result(0);
+			selected_msg_index = msg_group->first_selectable_message();
 			// Wait for confirm command, quit to main menu.
-			while(!wait_for_confirm()){
+			while(wait_for_confirm()){
 				game->resetGame();
 				return;
 			}
@@ -199,7 +218,11 @@ void GameMenu::PvEMode(int player)
 
         if (game->state == 1) {
             game->displayBoard();
+			playAnime();
             std::cout << "You lose!" << endl;
+			if(display)
+				display->show_game_result(1);
+			selected_msg_index = msg_group->first_selectable_message();
 			// Wait for confirm command, quit to main menu.
 			bool confirm = wait_for_confirm();
 			if(confirm){
@@ -218,6 +241,8 @@ void GameMenu::PvPMode()
     Player p2(game, 2);
 
 	showBoard();
+	if(display)
+		display->update_p2_profile(1);
     cout << "\n\nGame started. " << endl;
     game->displayBoard();
 
@@ -240,8 +265,6 @@ void GameMenu::PvPMode()
 			// HINT. There should not be a hint in PVP mode.
 			printf("Tip not implemented.\n");
 			continue;
-		case 5:
-			// TODO: restart?
 		default:
 			printf("Invalid command!\n");
 			continue;
@@ -263,6 +286,12 @@ void GameMenu::PvPMode()
 
         if (game->state == 1) {
             game->displayBoard();
+			playAnime();
+			if(display)
+				// current_player=1 -> black -> p1 -> result=2
+				// current_player=2 -> white -> p2 -> result=3
+				display->show_game_result(game->current_player+1);
+			selected_msg_index=msg_group->first_selectable_message();
             cout << str_player << "wins! Returning to main menu. " << endl;
 			// Wait for confirm command, quit to main menu.
 			bool confirm = wait_for_confirm();
@@ -279,52 +308,72 @@ void GameMenu::networkMode(bool server)
 {
     GomokuAI ai(game, 1); // AI is here to provide hints.
 	std::pair<int, int> ai_hint;
+	game->mode=1;
 
     if (server) {
 		GMKServer server(game);
+		server.set_cancel(&cancel);
+		server.set_event_handler(this);
+
 		if(!server.create())
 			return;
 		showBoard();
+		if(display)
+			display->update_p2_profile(2);
+		waiting = true;
 		if(!server.wait_for_player()){
 			printf("Wait for player failed.\n");
+			game->resetGame();
+			waiting = false;
+			command_type_=0;
 			return;
 		}
 		bool top_first = server.start_game();
 		showBoard(top_first);
+		if(display)
+			display->update_p2_profile(1);
 		while(server.check_game_result()<0){
 			uint16_t command = wait_for_command();
 			switch (command) {
 			case 10: // Quit
-				// TODO: Confirm message?
-				// should add display message
-				// if(!wait_for_confirm())
-				// 	continue;
+				if(display)
+					display->show_confirm_message();
+				selected_msg_index=msg_group->first_selectable_message();
+				if(!wait_for_confirm())
+					continue;
 				server.resign();
 				std::cout << "Returning to main menu ..." << std::endl;
 				game->resetGame();  // NOTE: modified from clearBoard method in class Gomoku.
 				return;
-			case 0: // Move or remote resigns
+			case 0: // Move
+				// Make move
+				if (!server.make_move(board_x - 1, board_y- 1)){
+					printf("Invalid move!\n");
+				}
+				board_x=-1;
+				board_y=-1;
 				break;
 			case 7: // Regret
-				if (!game->regret_move()) {
-					std::cout << ((game->current_player == 2) ? "Black" : "White") <<" regrets a move, please continue" << endl;
-					game->displayBoard();
-				}
-				continue;
+				// if (!game->regret_move()) {
+				// 	std::cout << ((game->current_player == 2) ? "Black" : "White") <<" regrets a move, please continue" << endl;
+				// 	game->displayBoard();
+				// }
+				printf("Regret disabled in net work mode.\n");
+				break;
 			case 9:
 				// Resign without confirm
-				if(server.resign())
-					break;
-				else
-					continue;
+				server.resign();
+				break;
 			case 8:
 				// HINT
 				ai_hint = ai.findBestMove();
 				// std::cout << "Hint: " << hint.first + 1 << ", " << hint.second + 1 << endl;
-				printf("HINT disabled in PVP.\n");
+				if(display)
+					display->show_hint(ai_hint.first, ai_hint.second);
+				break;
 			default:
 				printf("Invalid command!\n");
-				continue;
+				break;
 			}
 
 			/*if (board_x == -1 && board_y == -1) {
@@ -346,26 +395,29 @@ void GameMenu::networkMode(bool server)
 			// Remote player resign check, end the loop
 			if(game->state==1)
 				break;
-
-			// Make move
-			if (!server.make_move(board_x - 1, board_y- 1)){
-				printf("Invalid move!\n");
-			}
-			board_x=-1;
-			board_y=-1;
 		}
 
 		// Connection closed
 		if(server.check_game_result()==3){
-			server.wait_for_player();
 			printf("Connection lost!\n");
 			// Probably print you win.
+			if(display)
+				display->show_game_result(0);
+			selected_msg_index=msg_group->first_selectable_message();
 		}
 		else if(server.check_game_result()==1) {
 			printf("You win!\n");
+			playAnime();
+			if(display)
+				display->show_game_result(0);
+			selected_msg_index=msg_group->first_selectable_message();
 		}
 		else{
 			printf("You lose!\n");
+			playAnime();
+			if(display)
+				display->show_game_result(1);
+			selected_msg_index=msg_group->first_selectable_message();
 		}
 
 		// Wait for confirm command, quit to main menu.
@@ -377,22 +429,22 @@ void GameMenu::networkMode(bool server)
     }
     else {
 		GMKClient client(game);
+		client.set_event_handler(this);
+		client.set_cancel(&cancel);
 		client.send_server_discover();
+		
 		string null;
 		string server_status[3] = {"Down","Gaming","Ready"};
 		GMKServerInfo info;
 		bool found=false;
 
-		// TODO : Display some message on display
 		printf("Discovering server...\n");
-		
+		if(display)
+			display->show_scanning_message();
 		// Wait for 3 seconds but without blocking the main thread.
-		pthread_t waitThread;
-		pthread_create(&waitThread, NULL, findPlayersWait, NULL);
-		pthread_join(waitThread, NULL);
-		// sleep(3);
+		client.wait_for_scan();
+		display->show_scanning_message(false);
 
-		// TODO: should input command to cancel discover
 		if(client.get_server_list().empty()){
 			printf("No server discovered!\n");
 			return;
@@ -412,59 +464,79 @@ void GameMenu::networkMode(bool server)
 		printf("Connecting %s:%u\n",info.address.c_str(),info.port);
 		if(!client.connect_to(info))
 			return;
+		//client.connect_to("128.59.65.165");
 
 		/* Connected. Show board page. */
 		showBoard();
+		if(display)
+			display->update_p2_profile(1);
 		while(client.check_game_result()<0){
 			uint16_t command = wait_for_command();
 			switch (command) {
-			case 10: // TODO: Quit confirm
-				std::cout << "Returning to main menu. Type \"yes\" to continue " << std::endl;
+			case 10: // Quit confirm
+				if(display)
+					display->show_confirm_message();
+				selected_msg_index=msg_group->first_selectable_message();
+				if(!wait_for_confirm())
+					continue;
 				std::cout << "Returning to main menu ..." << std::endl;
 				game->resetGame();  // NOTE: modified from clearBoard method in class Gomoku.
 				showMenu();
 				return;
 			case 0: // Move or remote resigns
+				if (!client.make_move(board_x - 1, board_y - 1)){
+				}
+				board_x=-1;
+				board_y=-1;
 				break;
 			case 7: // Regret
-				if (!game->regret_move()) {
-					std::cout << ((game->current_player == 2) ? "Black" : "White") <<" regrets a move, please continue" << endl;
-					game->displayBoard();
-				}
+				// if (!game->regret_move()) {
+				// 	std::cout << ((game->current_player == 2) ? "Black" : "White") <<" regrets a move, please continue" << endl;
+				// 	game->displayBoard();
+				// }
+				printf("Regret disabled in net work mode.\n");
 				continue;
 			case 9:
 				// Resign without confirm
-				if(client.resign())
-					break;
-				else
-					continue;
+				client.resign();
+				break;
 			case 8:
 				// HINT
-				printf("HINT disabled in PVP.\n");
+				ai_hint = ai.findBestMove();
+				// std::cout << "Hint: " << hint.first + 1 << ", " << hint.second + 1 << endl;
+				if(display)
+					display->show_hint(ai_hint.first, ai_hint.second);
+				continue;
 			default:
 				printf("Invalid command!\n");
-				continue;
+				break;
 			}
 			// Resign check, end the loop
 			if (game->state == 1)
 				break;
-			if (!client.make_move(board_x - 1, board_y - 1)){
-				//TODO: error handling
-			}
-			board_x=-1;
-			board_y=-1;
 		}
 
 		if(client.check_game_result()==3){ // Connection closed
 			printf("Connection lost!\n");
 			// Probably print you win.
 			printf("You win!\n");
+			if(display)
+				display->show_game_result(0);
+			selected_msg_index=msg_group->first_selectable_message();
 		}
 		else if(client.check_game_result()==1){
 			printf("You win!\n");
+			playAnime();
+			if(display)
+				display->show_game_result(0);
+			selected_msg_index=msg_group->first_selectable_message();
 		}
 		else{
 			printf("You lose!\n");
+			playAnime();
+			if(display)
+				display->show_game_result(1);
+			selected_msg_index=msg_group->first_selectable_message();
 		}
 
 		bool confirm = wait_for_confirm();
@@ -475,7 +547,27 @@ void GameMenu::networkMode(bool server)
     }
 }
 
+void GameMenu::playAnime()
+{
+	if(!display)
+		return;
+	block_input=true;
+	// Hide last mark
+	display->update_register(2, display->get_register(2)|0x00ff);
+	int count=0;
+	for(auto piece:game->winArray){
+		display->update_piece_info(piece.first, piece.second, 3,0);
+		usleep(500*1000);
+		++count;
+		if(count>=5)
+			break;
+	}
+	block_input=false;
+}
+
 void GameMenu::handle_input_press(InputEvent event){
+	if(block_input)
+		return;
 	uint16_t cursor;
 	switch (event.type) {
 	case XBOX_UP:
@@ -498,7 +590,10 @@ void GameMenu::handle_input_press(InputEvent event){
 		break;
 	case XBOX_A: // Confirm selection
 		command_type_ = msg_group->get_message_command(selected_msg_index);
-   		command_received_ = true;
+		if(command_type_==10 && waiting)
+			cancel = true;
+		else
+   			command_received_ = true;
 		printf("%s selected!\n",msg_group->messages[msg_group->get_message_command(selected_msg_index)].content.c_str());
 		break;
 	case XBOX_B: // TODO: Cancel buttion
@@ -522,10 +617,16 @@ void GameMenu::handle_input_press(InputEvent event){
 		else
 			printf("%s selected!\n",msg_group->messages[msg_group->get_message_command(cursor)].content.c_str());
 		command_type_ = msg_group->get_message_command(selected_msg_index);
-		command_received_ = true;
+		if(command_type_==10 && waiting)
+			cancel = true;
+		else
+			command_received_ = true;
 		break;
 	case PAD_MOUSE_RIGHT:
 	case PAD_MOUSE_MID:
+	case NONE:
+		command_type_ = 0xFF;
+		command_received_ = true;
 	default:
 		break;
     }
@@ -535,17 +636,18 @@ void GameMenu::handle_input_press(InputEvent event){
 bool GameMenu::wait_for_confirm()
 {
 	// Wait for confirm command, quit to main menu.
-	// TODO: Probably pop up a message on display
 	uint16_t command;
 	while(true){
 		command = wait_for_command();
 		switch (command) {
-		case 0: // TODO: set correct confirm index
+		case 20: // MESSAGE_BOX_EXIT
 			return true;
-		case 1: // TODO: set correct cancel index
+		case 21: // MESSAGE_YES
+			return true;
+		case 22: // MESSAGE_NO
 			return false;
 		default:
-			printf("Invalid command!\n");
+			printf("Invalid command! %d\n",command);
 			break;
 		};
 	}

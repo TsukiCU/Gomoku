@@ -5,7 +5,7 @@
 #include <libusb-1.0/libusb.h>
 #include <stdint.h>
 #include <thread>
-#include "display.h"
+#include "../display/display.h"
 
 #define INPUT_WAIT_INTERVAL_US 10000
 

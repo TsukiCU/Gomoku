@@ -186,13 +186,10 @@ module vga_ball(input logic 		clk,
 		last_piece_y = 4'hf;
 		msg_visible_ingame_options <= -1;
 		msg_visible_ingame_players <= -1;
-		msg_visible_ingame_message <= -1;
-		msg_visible_ingame_confirm <= -1;
 		//msg_display_menu <= 0;
 		//msg_display_ingame <= 0;
-		// msg_selected = 9; // P1 selected
-		//msg_visible_ingame_players[1] <= 0;
-		//msg_visible_ingame_message[0] <= 1;
+		msg_selected = 9; // P1 selected
+		msg_visible_ingame_players[1] <= 0;
 		black_on_top <= 0;
 	end
 
@@ -242,118 +239,94 @@ module vga_ball(input logic 		clk,
 	/*******************************************************/
 
 	/*********** Piece Icon **********/
-		logic[4:0] icon_v;			// Player piece icon image offset v
-		logic[5:0] icon_h;			// Player piece icon image offset h
-		logic	is_piece_top; 		// Piece for Player 1, top piece
-		logic	is_piece_bottom; 	// Piece for Player 1, bottom piece
-		logic	black_on_top;		// Whether Player 1 takes black piece
-		logic	is_black_icon_area;
-		logic	is_white_icon_area;
+	logic[4:0] icon_v;			// Player piece icon image offset v
+	logic[5:0] icon_h;			// Player piece icon image offset h
+	logic	is_piece_top; 		// Piece for Player 1, top piece
+	logic	is_piece_bottom; 	// Piece for Player 1, bottom piece
+	logic	black_on_top;		// Whether Player 1 takes black piece
+	logic	is_black_icon_area;
+	logic	is_white_icon_area;
 
-		assign is_black_icon_area = black_on_top?is_piece_top:is_piece_bottom;
-		assign is_white_icon_area = black_on_top?is_piece_bottom:is_piece_top;
+	assign is_black_icon_area = black_on_top?is_piece_top:is_piece_bottom;
+	assign is_white_icon_area = black_on_top?is_piece_bottom:is_piece_top;
 
-		// piece top area: h=[510,543],v=[137(0+3+128+6),165(137+31))
-		assign is_piece_top = (hcount[10:1]>=10'd510) && (hcount[10:1]<=10'd543) && (vcount[9:0]>=10'd137) && (vcount[9:0]<=10'd168);
-		// piece bottom area: h=[510,543],v=[304(170+3+128+3),335(304+31))
-		assign is_piece_bottom = (hcount[10:1]>=10'd510) && (hcount[10:1]<=10'd543) && (vcount[9:0]>=10'd304) && (vcount[9:0]<=10'd335);
+	// piece top area: h=[510,543],v=[134(0+3+128+3),165(0+3+128+3+31))
+	assign is_piece_top = (hcount[10:1]>=10'd510) && (hcount[10:1]<=10'd543) && (vcount[9:0]>=10'd134) && (vcount[9:0]<=10'd165);
+	// piece bottom area: h=[510,543],v=[304(170+3+128+3),335(170+3+128+3+31))
+	assign is_piece_bottom = (hcount[10:1]>=10'd510) && (hcount[10:1]<=10'd543) && (vcount[9:0]>=10'd304) && (vcount[9:0]<=10'd335);
 
 	/********* Piece Icon end ********/
 
 
 	/********* Player profile *********/
-		logic [12:0] p1_profile_addr;	// Player 1 profile Image ROM address
-		logic [4:0]  p1_profile_palette; // Player 1 profile Image palette value
-		logic [12:0] p2_profile_addr;	// Player 2 profile Image ROM address
-		logic [4:0]  p2_profile_palette; // Player 2 profile Image palette value
+	logic [12:0] p1_profile_addr;	// Player 1 profile Image ROM address
+	logic [4:0]  p1_profile_palette; // Player 1 profile Image palette value
+	logic [12:0] p2_profile_addr;	// Player 2 profile Image ROM address
+	logic [4:0]  p2_profile_palette; // Player 2 profile Image palette value
 
-		logic [7:0]  panda_rgb;			// Panda Image ROM output, contains 2 palette values
-		logic [7:0]  dog_rgb;			// Dog Image ROM output, contains 2 palette values
-		logic [7:0]  cat_rgb;			// Cat Image ROM output, contains 2 palette values
+	logic [7:0]  panda_rgb;			// Panda Image ROM output, contains 2 palette values
+	logic [7:0]  dog_rgb;			// Dog Image ROM output, contains 2 palette values
+	logic [7:0]  cat_rgb;			// Cat Image ROM output, contains 2 palette values
 
-		logic p2_profile_cat;			// Whether P2 profile is cat or dog
-		logic is_p1_profile_area;
-		logic is_p2_profile_area;
+	logic p2_profile_cat;			// Whether P2 profile is cat or dog
+	logic is_p1_profile_area;
+	logic is_p2_profile_area;
 
-		/* p2_profile_palette is assign in the always comb below. */
-		assign p1_profile_palette = hcount[1]?panda_rgb[7:4]:panda_rgb[3:0];
-		assign p1_profile_addr = is_p1_profile_area? ((((vcount[9:0] - 13'd3) << 7) + (hcount[10:1] - 13'd506)) >> 1):0;
-		assign p2_profile_addr = is_p2_profile_area? ((((vcount[9:0] - 13'd173) << 7) + (hcount[10:1] - 13'd506)) >> 1):0;
-		/* 
-			Player 1 Picture 128x128
-			Pic 1 Area: h[506,634] v[3,134] 
-		*/
-		assign is_p1_profile_area = (hcount[10:1]>=10'd506) && (hcount[10:1]<=10'd634) && (vcount[9:0]>=10'd3) && (vcount[9:0]<=10'd134);
-		/* 
-			Player 2 Picture 128x128
-			Pic 2 Area: h[506,634] v[174,302]
-		*/
-		assign is_p2_profile_area = (hcount[10:1]>=10'd506) && (hcount[10:1]<=10'd634) && (vcount[9:0]>=10'd174) && (vcount[9:0]<=10'd302);
+	/* p2_profile_palette is assign in the always comb below. */
+	assign p1_profile_palette = hcount[1]?panda_rgb[7:4]:panda_rgb[3:0];
+	assign p1_profile_addr = is_p1_profile_area? ((((vcount[9:0] - 13'd3) << 7) + (hcount[10:1] - 13'd526)) >> 1):0;
+	assign p2_profile_addr = is_p2_profile_area? ((((vcount[9:0] - 13'd173) << 7) + (hcount[10:1] - 13'd526)) >> 1):0;
+	/* 
+		Player 1 Picture 128x128
+		Pic 1 Area: h[526,654] v[3,134] 
+	*/
+	assign is_p1_profile_area = (hcount[10:1]>=10'd526) && (hcount[10:1]<=10'd654) && (vcount[9:0]>=10'd3) && (vcount[9:0]<=10'd134);
+	/* 
+		Player 2 Picture 128x128
+		Pic 2 Area: h[526,654] v[173,301]
+	*/
+	assign is_p2_profile_area = (hcount[10:1]>=10'd526) && (hcount[10:1]<=10'd654) && (vcount[9:0]>=10'd173) && (vcount[9:0]<=10'd301);
 
-		soc_system_panda_avatar panda(.address(p1_profile_addr),.clk(clk),.clken(1),.reset_req(0),.readdata(panda_rgb));
-		soc_system_dog_avatar dog(.address(p2_profile_addr),.clk(clk),.clken(1),.reset_req(0),.readdata(dog_rgb));
-		soc_system_cat_avatar cat(.address(p2_profile_addr),.clk(clk),.clken(1),.reset_req(0),.readdata(cat_rgb));
+	soc_system_panda_avatar panda(.address(p1_profile_addr),.clk(clk),.clken(1),.reset_req(0),.readdata(panda_rgb));
+	soc_system_dog_avatar dog(.address(p2_profile_addr),.clk(clk),.clken(1),.reset_req(0),.readdata(dog_rgb));
+	soc_system_cat_avatar cat(.address(p2_profile_addr),.clk(clk),.clken(1),.reset_req(0),.readdata(cat_rgb));
 
-		// draw player 1's profile photo
-		    // Include the image data
-		    //`include "panda110x110_data.v"
+	// draw player 1's profile photo
+	    // Include the image data
+	    //`include "panda110x110_data.v"
 
-		    // Coordinates for the top-left corner of the image
-		    //localparam IMAGE_X = 535;
-		    //localparam IMAGE_Y = 100;
+	    // Coordinates for the top-left corner of the image
+	    //localparam IMAGE_X = 535;
+	    //localparam IMAGE_Y = 100;
 
 	/******* Player profile end *********/
 
 	/************* Cursor *************/
-		logic is_cursor_visible;
-		logic [9:0] cursor_v;
-		logic [9:0] cursor_h;
-		logic is_cursor_area;
+	logic is_cursor_visible;
+	logic [9:0] cursor_v;
+	logic [9:0] cursor_h;
+	logic is_cursor_area;
 
-		assign is_cursor_area = (hcount[10:1]>=(cursor_h-2)) && (hcount[10:1]<=(cursor_h+2)) && (vcount[9:0]>=(cursor_v-2)) && (vcount[9:0]<=(cursor_v+2));
+	assign is_cursor_area = (hcount[10:1]>=(cursor_v-2)) && (hcount[10:1]<=(cursor_v+2)) && (vcount[9:0]>=(cursor_v-2)) && (vcount[9:0]<=(cursor_v+2));
 
 	/*********** Cursor End ***********/
 
-	/************* Win, loss message *************/
-		// Message
-		//logic is_p1_win; // "P1 WIN" = h[150,], v[187(164+23),]
-		//logic is_p2_win; // "P2 WIN" = h[150,], v[187(164+23),]
-		//logic is_pve_win; // "YOU WIN!" = h[129(121+8)], v[187(164+23),227(187+40(height))]
-		//logic is_pve_loss; // "YOU LOSS" = h[125(121+4),], v[187(164+23),]
-		//logic are_you_sure; // "Are You Sure?" = h[150(24+126),358(150+208(total width))], v[164(148+16),184(164+20(height))]
-		logic is_message;
-		logic is_message_area;
-		// Message Area: h[121(22+3*33),381(481-3*33)], v[179(24+31x5),270(179+31x3-2)]
-		assign is_message_area = (hcount[10:1]>=10'd121) && (hcount[10:1]<=10'd382) && (vcount[9:0]>=10'd179) && (vcount[9:0]<=10'd270);	
-
-		// confirmation
-		logic is_exit; // h[220,], v[241,] , click 'exit' from in-game options on the lower right corner
-		logic is_exit_yes; // h[164,], v[244,]
-		logic is_exit_no;  // h[311(164+48+33*3),], v[244,]
-	/************* Win, loss message END *************/
-
-
-
-
 	/************* Other UI ************/
-		logic	is_menu;      		// Whether current page is menu
-		logic	is_board; 			// Whether current page is board
-		logic	is_player1_area; 	// Player 1 UI area
-		logic	is_player2_area; 	// Player 2 UI area
-		logic	is_option_area; 	// Board option area
-		logic	division_line;		// Division Line
-		logic	is_scan_area;
+	logic	is_menu;      		// Whether current page is menu
+	logic	is_board; 			// Whether current page is board
+	logic	is_player1_area; 	// Player 1 UI area
+	logic	is_player2_area; 	// Player 2 UI area
+	logic	is_option_area; 	// Board option area
+	logic	division_line;		// Division Line
 
-		// player 1 - top area: h=[500,680],v=[0,170)
-		assign is_player1_area = (hcount[10:1]>=10'd500) && (hcount[10:1]<=10'd680) && (vcount[9:0]>=10'd0) && (vcount[9:0]<=10'd170);
-		// player 2 - bottom area: h=[500,680],v=[170,340)
-		assign is_player2_area = (hcount[10:1]>=10'd500) && (hcount[10:1]<=10'd680) && (vcount[9:0]>=10'd170) && (vcount[9:0]<=10'd340);
-		// option area: h=[500,680],v=[340,480]
-		assign is_option_area = (hcount[10:1]>=10'd500) && (hcount[10:1]<=10'd680) && (vcount[9:0]>=10'd340) && (vcount[9:0]<=10'd480);
-		// division line
-		assign division_line = (vcount[9:0] == 10'd170) && (hcount[10:1] >= 10'd500) && (hcount[10:1] < 10'd680);
-		// Scan Area: h[190,451], v[195,286]
-		assign is_scan_area = (hcount[10:1]>=10'd190) && (hcount[10:1]<=10'd451) && (vcount[9:0]>=10'd195) && (vcount[9:0]<=10'd286);
+	// player 1 - top area: h=[500,680],v=[0,170)
+	assign is_player1_area = (hcount[10:1]>=10'd500) && (hcount[10:1]<=10'd680) && (vcount[9:0]>=10'd0) && (vcount[9:0]<=10'd170);
+	// player 2 - bottom area: h=[500,680],v=[170,340)
+	assign is_player2_area = (hcount[10:1]>=10'd500) && (hcount[10:1]<=10'd680) && (vcount[9:0]>=10'd170) && (vcount[9:0]<=10'd340);
+	// option area: h=[500,680],v=[340,480]
+	assign is_option_area = (hcount[10:1]>=10'd500) && (hcount[10:1]<=10'd680) && (vcount[9:0]>=10'd340) && (vcount[9:0]<=10'd480);
+	// division line
+	assign division_line = (vcount[9:0] == 10'd170) && (hcount[10:1] >= 10'd500) && (hcount[10:1] < 10'd680);
 
 	/*********** Other UI End ***********/
 
@@ -373,18 +346,9 @@ module vga_ball(input logic 		clk,
     // Message visibility and display signal of group ingame_players
 	logic [2:0] msg_visible_ingame_players;
 	logic [2:0] msg_display_ingame_players;
-    // Message visibility and display signal of group ingame_message
-	logic [5:0] msg_visible_ingame_message;
-	logic [5:0] msg_display_ingame_message;
-    // Message visibility and display signal of group ingame_confirm
-	logic [2:0] msg_visible_ingame_confirm;
-	logic [2:0] msg_display_ingame_confirm;
-
-
-
 
 	// Selected message index, 0 means none is selected
-	logic [5:0] msg_selected;
+	logic [4:0] msg_selected;
 	// Whether the current message is selected
 	logic cur_msg_selected;
 	// Font pixel index of a line, [0,8)
@@ -670,26 +634,25 @@ module vga_ball(input logic 		clk,
 		else
 			msg_display_ingame_options[3] <= 0;
 
-
 		/**
 		* message: P1
 		* group 3: ingame_players
 		* group_index: 0
 		* select_index: 11
-		* h_start: 573
-		* v_start: 142
+		* h_start: 583
+		* v_start: 139
 		* font_width: 16
 		* font_height: 20
 		*/
-		if((hcount[10:1] >= 10'd573) && (hcount[10:1] < 10'd605) && (vcount >= 10'd142) && (vcount < 10'd162) && msg_visible_ingame_players[0]) begin
+		if((hcount[10:1] >= 10'd583) && (hcount[10:1] < 10'd615) && (vcount >= 10'd139) && (vcount < 10'd159) && msg_visible_ingame_players[0]) begin
 			msg_display_ingame_players[0] <= 1;
 			cur_msg_selected <= (msg_selected==11);
-			case((hcount[10:1]-573)>>4)
-				8'd0: font_addr <= 8'd75+((vcount[9:0]-142)>>2);
-				8'd1: font_addr <= 8'd135+((vcount[9:0]-142)>>2);
+			case((hcount[10:1]-583)>>4)
+				8'd0: font_addr <= 8'd75+((vcount[9:0]-139)>>2);
+				8'd1: font_addr <= 8'd135+((vcount[9:0]-139)>>2);
 				default:;
 			endcase
-			font_pix_idx <= (hcount[10:1]-573)>>1;
+			font_pix_idx <= (hcount[10:1]-583)>>1;
 		end
 		else
 			msg_display_ingame_players[0] <= 0;
@@ -699,20 +662,20 @@ module vga_ball(input logic 		clk,
 		* group 3: ingame_players
 		* group_index: 1
 		* select_index: 12
-		* h_start: 573
+		* h_start: 583
 		* v_start: 309
 		* font_width: 16
 		* font_height: 20
 		*/
-		if((hcount[10:1] >= 10'd573) && (hcount[10:1] < 10'd605) && (vcount >= 10'd309) && (vcount < 10'd329) && msg_visible_ingame_players[1]) begin
+		if((hcount[10:1] >= 10'd583) && (hcount[10:1] < 10'd615) && (vcount >= 10'd309) && (vcount < 10'd329) && msg_visible_ingame_players[1]) begin
 			msg_display_ingame_players[1] <= 1;
 			cur_msg_selected <= (msg_selected==12);
-			case((hcount[10:1]-573)>>4)
+			case((hcount[10:1]-583)>>4)
 				8'd0: font_addr <= 8'd75+((vcount[9:0]-309)>>2);
 				8'd1: font_addr <= 8'd140+((vcount[9:0]-309)>>2);
 				default:;
 			endcase
-			font_pix_idx <= (hcount[10:1]-573)>>1;
+			font_pix_idx <= (hcount[10:1]-583)>>1;
 		end
 		else
 			msg_display_ingame_players[1] <= 0;
@@ -722,284 +685,23 @@ module vga_ball(input logic 		clk,
 		* group 3: ingame_players
 		* group_index: 2
 		* select_index: 13
-		* h_start: 573
+		* h_start: 583
 		* v_start: 309
 		* font_width: 16
 		* font_height: 20
 		*/
-		if((hcount[10:1] >= 10'd573) && (hcount[10:1] < 10'd605) && (vcount >= 10'd309) && (vcount < 10'd329) && msg_visible_ingame_players[2]) begin
+		if((hcount[10:1] >= 10'd583) && (hcount[10:1] < 10'd615) && (vcount >= 10'd309) && (vcount < 10'd329) && msg_visible_ingame_players[2]) begin
 			msg_display_ingame_players[2] <= 1;
 			cur_msg_selected <= (msg_selected==13);
-			case((hcount[10:1]-573)>>4)
+			case((hcount[10:1]-583)>>4)
 				8'd0: font_addr <= 8'd0+((vcount[9:0]-309)>>2);
 				8'd1: font_addr <= 8'd40+((vcount[9:0]-309)>>2);
 				default:;
 			endcase
-			font_pix_idx <= (hcount[10:1]-573)>>1;
+			font_pix_idx <= (hcount[10:1]-583)>>1;
 		end
 		else
 			msg_display_ingame_players[2] <= 0;
-
-		/**
-		* message: You Win!
-		* group 4: ingame_message
-		* group_index: 0
-		* select_index: 14
-		* h_start: 129
-		* v_start: 187
-		* font_width: 32
-		* font_height: 40
-		*/
-		if((hcount[10:1] >= 10'd129) && (hcount[10:1] < 10'd385) && (vcount >= 10'd187) && (vcount < 10'd227) && msg_visible_ingame_message[0]) begin
-			msg_display_ingame_message[0] <= 1;
-			cur_msg_selected <= (msg_selected==14);
-			case((hcount[10:1]-129)>>5)
-				8'd0: font_addr <= 8'd120+((vcount[9:0]-187)>>3);
-				8'd1: font_addr <= 8'd70+((vcount[9:0]-187)>>3);
-				8'd2: font_addr <= 8'd100+((vcount[9:0]-187)>>3);
-				8'd3: font_addr <= 8'd180+((vcount[9:0]-187)>>3);
-				8'd4: font_addr <= 8'd110+((vcount[9:0]-187)>>3);
-				8'd5: font_addr <= 8'd40+((vcount[9:0]-187)>>3);
-				8'd6: font_addr <= 8'd65+((vcount[9:0]-187)>>3);
-				8'd7: font_addr <= 8'd185+((vcount[9:0]-187)>>3);
-				default:;
-			endcase
-			font_pix_idx <= (hcount[10:1]-129)>>2;
-		end
-		else
-			msg_display_ingame_message[0] <= 0;
-
-		/**
-		* message: You Lose
-		* group 4: ingame_message
-		* group_index: 1
-		* select_index: 15
-		* h_start: 125
-		* v_start: 187
-		* font_width: 32
-		* font_height: 40
-		*/
-		if((hcount[10:1] >= 10'd125) && (hcount[10:1] < 10'd381) && (vcount >= 10'd187) && (vcount < 10'd227) && msg_visible_ingame_message[1]) begin
-			msg_display_ingame_message[1] <= 1;
-			cur_msg_selected <= (msg_selected==15);
-			case((hcount[10:1]-125)>>5)
-				8'd0: font_addr <= 8'd120+((vcount[9:0]-187)>>3);
-				8'd1: font_addr <= 8'd70+((vcount[9:0]-187)>>3);
-				8'd2: font_addr <= 8'd100+((vcount[9:0]-187)>>3);
-				8'd3: font_addr <= 8'd180+((vcount[9:0]-187)>>3);
-				8'd4: font_addr <= 8'd55+((vcount[9:0]-187)>>3);
-				8'd5: font_addr <= 8'd70+((vcount[9:0]-187)>>3);
-				8'd6: font_addr <= 8'd90+((vcount[9:0]-187)>>3);
-				8'd7: font_addr <= 8'd20+((vcount[9:0]-187)>>3);
-				default:;
-			endcase
-			font_pix_idx <= (hcount[10:1]-125)>>2;
-		end
-		else
-			msg_display_ingame_message[1] <= 0;
-
-
-		/**
-		* message: P1 Win!
-		* group 4: ingame_message
-		* group_index: 2
-		* select_index: 16
-		* h_start: 150
-		* v_start: 187
-		* font_width: 32
-		* font_height: 40
-		*/
-		if((hcount[10:1] >= 10'd150) && (hcount[10:1] < 10'd374) && (vcount >= 10'd187) && (vcount < 10'd227) && msg_visible_ingame_message[2]) begin
-			msg_display_ingame_message[2] <= 1;
-			cur_msg_selected <= (msg_selected==16);
-			case((hcount[10:1]-150)>>5)
-				8'd0: font_addr <= 8'd75+((vcount[9:0]-187)>>3);
-				8'd1: font_addr <= 8'd135+((vcount[9:0]-187)>>3);
-				8'd2: font_addr <= 8'd180+((vcount[9:0]-187)>>3);
-				8'd3: font_addr <= 8'd110+((vcount[9:0]-187)>>3);
-				8'd4: font_addr <= 8'd40+((vcount[9:0]-187)>>3);
-				8'd5: font_addr <= 8'd65+((vcount[9:0]-187)>>3);
-				8'd6: font_addr <= 8'd185+((vcount[9:0]-187)>>3);
-				default:;
-			endcase
-			font_pix_idx <= (hcount[10:1]-150)>>2;
-		end
-		else
-			msg_display_ingame_message[2] <= 0;
-
-		/**
-		* message: P2 Win!
-		* group 4: ingame_message
-		* group_index: 3
-		* select_index: 17
-		* h_start: 150
-		* v_start: 187
-		* font_width: 32
-		* font_height: 40
-		*/
-		if((hcount[10:1] >= 10'd150) && (hcount[10:1] < 10'd374) && (vcount >= 10'd187) && (vcount < 10'd227) && msg_visible_ingame_message[3]) begin
-			msg_display_ingame_message[3] <= 1;
-			cur_msg_selected <= (msg_selected==17);
-			case((hcount[10:1]-150)>>5)
-				8'd0: font_addr <= 8'd75+((vcount[9:0]-187)>>3);
-				8'd1: font_addr <= 8'd140+((vcount[9:0]-187)>>3);
-				8'd2: font_addr <= 8'd180+((vcount[9:0]-187)>>3);
-				8'd3: font_addr <= 8'd110+((vcount[9:0]-187)>>3);
-				8'd4: font_addr <= 8'd40+((vcount[9:0]-187)>>3);
-				8'd5: font_addr <= 8'd65+((vcount[9:0]-187)>>3);
-				8'd6: font_addr <= 8'd185+((vcount[9:0]-187)>>3);
-				default:;
-			endcase
-			font_pix_idx <= (hcount[10:1]-150)>>2;
-		end
-		else
-			msg_display_ingame_message[3] <= 0;
-
-
-		/**
-		* message: Are You Sure?
-		* group 4: ingame_message
-		* group_index: 4
-		* select_index: 18
-		* h_start: 150
-		* v_start: 190
-		* font_width: 16
-		* font_height: 20
-		*/
-		if((hcount[10:1] >= 10'd150) && (hcount[10:1] < 10'd358) && (vcount >= 10'd190) && (vcount < 10'd210) && msg_visible_ingame_message[4]) begin
-			msg_display_ingame_message[4] <= 1;
-			cur_msg_selected <= (msg_selected==18);
-			case((hcount[10:1]-150)>>4)
-				8'd0: font_addr <= 8'd0+((vcount[9:0]-190)>>2);
-				8'd1: font_addr <= 8'd85+((vcount[9:0]-190)>>2);
-				8'd2: font_addr <= 8'd20+((vcount[9:0]-190)>>2);
-				8'd3: font_addr <= 8'd180+((vcount[9:0]-190)>>2);
-				8'd4: font_addr <= 8'd120+((vcount[9:0]-190)>>2);
-				8'd5: font_addr <= 8'd70+((vcount[9:0]-190)>>2);
-				8'd6: font_addr <= 8'd100+((vcount[9:0]-190)>>2);
-				8'd7: font_addr <= 8'd180+((vcount[9:0]-190)>>2);
-				8'd8: font_addr <= 8'd90+((vcount[9:0]-190)>>2);
-				8'd9: font_addr <= 8'd100+((vcount[9:0]-190)>>2);
-				8'd10: font_addr <= 8'd85+((vcount[9:0]-190)>>2);
-				8'd11: font_addr <= 8'd20+((vcount[9:0]-190)>>2);
-				8'd12: font_addr <= 8'd190+((vcount[9:0]-190)>>2);
-				default:;
-			endcase
-			font_pix_idx <= (hcount[10:1]-150)>>1;
-		end
-		else
-			msg_display_ingame_message[4] <= 0;
-
-		/**
-		* message: Scanning...
-		* group 4: ingame_message
-		* group_index: 5
-		* select_index: 19
-		* h_start: 240
-		* v_start: 230
-		* font_width: 16
-		* font_height: 20
-		*/
-		if((hcount[10:1] >= 10'd240) && (hcount[10:1] < 10'd416) && (vcount >= 10'd230) && (vcount < 10'd250) && msg_visible_ingame_message[5]) begin
-			msg_display_ingame_message[5] <= 1;
-			cur_msg_selected <= (msg_selected==19);
-			case((hcount[10:1]-240)>>4)
-				8'd0: font_addr <= 8'd90+((vcount[9:0]-230)>>2);
-				8'd1: font_addr <= 8'd10+((vcount[9:0]-230)>>2);
-				8'd2: font_addr <= 8'd0+((vcount[9:0]-230)>>2);
-				8'd3: font_addr <= 8'd65+((vcount[9:0]-230)>>2);
-				8'd4: font_addr <= 8'd65+((vcount[9:0]-230)>>2);
-				8'd5: font_addr <= 8'd40+((vcount[9:0]-230)>>2);
-				8'd6: font_addr <= 8'd65+((vcount[9:0]-230)>>2);
-				8'd7: font_addr <= 8'd30+((vcount[9:0]-230)>>2);
-				8'd8: font_addr <= 8'd200+((vcount[9:0]-230)>>2);
-				8'd9: font_addr <= 8'd200+((vcount[9:0]-230)>>2);
-				8'd10: font_addr <= 8'd200+((vcount[9:0]-230)>>2);
-				default:;
-			endcase
-			font_pix_idx <= (hcount[10:1]-240)>>1;
-		end
-		else
-			msg_display_ingame_message[5] <= 0;
-
-		/**
-		* message: EXIT
-		* group 5: ingame_confirm
-		* group_index: 0
-		* select_index: 20
-		* h_start: 220
-		* v_start: 241
-		* font_width: 16
-		* font_height: 20
-		*/
-		if((hcount[10:1] >= 10'd220) && (hcount[10:1] < 10'd284) && (vcount >= 10'd241) && (vcount < 10'd261) && msg_visible_ingame_confirm[0]) begin
-			msg_display_ingame_confirm[0] <= 1;
-			cur_msg_selected <= (msg_selected==20);
-			case((hcount[10:1]-220)>>4)
-				8'd0: font_addr <= 8'd20+((vcount[9:0]-241)>>2);
-				8'd1: font_addr <= 8'd115+((vcount[9:0]-241)>>2);
-				8'd2: font_addr <= 8'd40+((vcount[9:0]-241)>>2);
-				8'd3: font_addr <= 8'd95+((vcount[9:0]-241)>>2);
-				default:;
-			endcase
-			font_pix_idx <= (hcount[10:1]-220)>>1;
-		end
-		else
-			msg_display_ingame_confirm[0] <= 0;
-
-		/**
-		* message: yes
-		* group 5: ingame_confirm
-		* group_index: 1
-		* select_index: 21
-		* h_start: 164
-		* v_start: 244
-		* font_width: 16
-		* font_height: 20
-		*/
-		if((hcount[10:1] >= 10'd164) && (hcount[10:1] < 10'd212) && (vcount >= 10'd244) && (vcount < 10'd264) && msg_visible_ingame_confirm[1]) begin
-			msg_display_ingame_confirm[1] <= 1;
-			cur_msg_selected <= (msg_selected==21);
-			case((hcount[10:1]-164)>>4)
-				8'd0: font_addr <= 8'd120+((vcount[9:0]-244)>>2);
-				8'd1: font_addr <= 8'd20+((vcount[9:0]-244)>>2);
-				8'd2: font_addr <= 8'd90+((vcount[9:0]-244)>>2);
-				default:;
-			endcase
-			font_pix_idx <= (hcount[10:1]-164)>>1;
-		end
-		else
-			msg_display_ingame_confirm[1] <= 0;
-
-		/**
-		* message: no
-		* group 5: ingame_confirm
-		* group_index: 2
-		* select_index: 22
-		* h_start: 311
-		* v_start: 244
-		* font_width: 16
-		* font_height: 20
-		*/
-		if((hcount[10:1] >= 10'd311) && (hcount[10:1] < 10'd343) && (vcount >= 10'd244) && (vcount < 10'd264) && msg_visible_ingame_confirm[2]) begin
-			msg_display_ingame_confirm[2] <= 1;
-			cur_msg_selected <= (msg_selected==22);
-			case((hcount[10:1]-311)>>4)
-				8'd0: font_addr <= 8'd65+((vcount[9:0]-244)>>2);
-				8'd1: font_addr <= 8'd70+((vcount[9:0]-244)>>2);
-				default:;
-			endcase
-			font_pix_idx <= (hcount[10:1]-311)>>1;
-		end
-		else
-			msg_display_ingame_confirm[2] <= 0;
-	end
-
-
-
-
-
-
 	end
 
 	/*******************************************************/
@@ -1016,32 +718,19 @@ module vga_ball(input logic 		clk,
 		if (reset) begin
 			is_menu <= 0; 	// Show Menu on boot
 			is_board <= 1; 	// Show Board on boot
-			is_message<= 0; // Show Message on boot
-			
-			
-			// show message 
-			//is_p1_win <= 0;
-			//is_p2_win <= 0;
-			//is_pve_win <= 1;
-			//is_pve_loss <= 0;
-			//are_you_sure <= 0;
-
 			// Clear board
 			for(int i=0;i<15;i++) begin
 				for(int j=0;j<15;j++) begin
 					board[i][j] <= 3'b0;
 				end
 			end
-			//selected_y = 4'h7;
-			//selected_x = 4'h7;
-			//last_piece_x = 4'hf;
-			//last_piece_y = 4'hf;
-			msg_visible_ingame_options <= 4'b1111;
-			//msg_selected = 5; // Join LAN selected
-			msg_visible_menu <= 6'b111111;
-			msg_visible_ingame_players <= 3'b011;
-			msg_visible_ingame_message <= 6'b000000;
-			msg_visible_ingame_confirm <= 3'b000;
+			selected_y = 4'h7;
+			selected_x = 4'h7;
+			last_piece_x = 4'hf;
+			last_piece_y = 4'hf;
+			msg_visible_ingame_options <= -1;
+			msg_selected = 9; // P1 selected
+			msg_visible_ingame_players[1] <= 3'b101;
 			black_on_top <= 0;
 		end 
 		/*********** Initial end ************/
@@ -1073,8 +762,6 @@ module vga_ball(input logic 		clk,
 						6'h1:msg_visible_menu <= writedata[5:0];
 						6'h2:msg_visible_ingame_options <= writedata[3:0];
 						6'h3:msg_visible_ingame_players <= writedata[2:0];
-						6'h4:msg_visible_ingame_message <= writedata[5:0];
-						6'h5:msg_visible_ingame_confirm <= writedata[2:0];
 						default:;
 					endcase
 				end
@@ -1104,7 +791,7 @@ module vga_ball(input logic 		clk,
 		icon_v = 0;
 		if(is_piece_top) begin
 			icon_h = hcount[10:1] - 510;
-			icon_v = vcount[9:0] - 137;
+			icon_v = vcount[9:0] - 134;
 			piece_addr = icon_v*33+icon_h;
 		end
 		else if (is_piece_bottom) begin
@@ -1127,19 +814,8 @@ module vga_ball(input logic 		clk,
 			/************** Menu Page *************/
 			else if (is_menu) begin //draw menu 菜单
 				{VGA_R, VGA_G, VGA_B} = 24'h00DDAA; //菜单背景颜色
-				// Draw scanning message
-				if (is_message) begin
-					if(is_scan_area)begin
-						{VGA_R, VGA_G, VGA_B} = 24'he4e6ed;  // message background: light grey
-						// Draw scanning message on menu
-						if(msg_display_ingame_message && font_val[font_pix_idx]) begin			
-							{VGA_R, VGA_G, VGA_B} = 24'h000000;
-						end
-					end
-					
-				end
 				// Draw menu message
-				else if(msg_display_menu && font_val[font_pix_idx]) begin
+				if(msg_display_menu && font_val[font_pix_idx]) begin
 					// Font selected			
 					if(cur_msg_selected)
 						{VGA_R, VGA_G, VGA_B} = 24'h00ffff;
@@ -1149,30 +825,9 @@ module vga_ball(input logic 		clk,
 			end
 			/************** Board Page *************/
 			else if(is_board) begin
-				/************** Message Area *************/
-				if(is_message) begin
-					if (is_message_area) begin
-						{VGA_R, VGA_G, VGA_B} = 24'he4e6ed;  // message background: light grey
-
-						// Draw ingame_message
-						if(msg_display_ingame_message && font_val[font_pix_idx]) begin			
-							{VGA_R, VGA_G, VGA_B} = 24'h000000;
-						end
-						// Draw ingame_confirm message
-						else if(msg_display_ingame_confirm && font_val[font_pix_idx]) begin
-							// Font selected			
-							if(cur_msg_selected)
-								{VGA_R, VGA_G, VGA_B} = 24'h00ffff;
-							else
-								{VGA_R, VGA_G, VGA_B} = 24'h000000;
-						end
-
-					end
-					
-				end
 				/************** Board Area *************/
 				// Draw selected border
-				else if(is_selected_area && (piece_x==selected_x) && (piece_y==selected_y)) begin
+				if(is_selected_area && (piece_x==selected_x) && (piece_y==selected_y)) begin
 					{VGA_R, VGA_G, VGA_B} = 24'hffffff;
 				end
 				// Draw last piece mark
@@ -1579,13 +1234,17 @@ module vga_ball(input logic 		clk,
 				else if(is_player1_area || is_player2_area) begin
 					{VGA_R, VGA_G, VGA_B} = 24'h96968C; //菜单背景颜色
 					// Draw ingame_players message
-					if(msg_display_ingame_players && font_val[font_pix_idx]) begin			
-						{VGA_R, VGA_G, VGA_B} = 24'h000000;
+					if(msg_display_ingame_players && font_val[font_pix_idx]) begin
+						// Font selected			
+						if(cur_msg_selected)
+							{VGA_R, VGA_G, VGA_B} = 24'h00ffff;
+						else
+							{VGA_R, VGA_G, VGA_B} = 24'h000000;
 					end
 				end
 			end
-		     end
 		end
+	end
 endmodule
 
 module vga_counters(
