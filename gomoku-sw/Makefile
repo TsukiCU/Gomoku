@@ -20,6 +20,7 @@ kmod:
 
 clean:
 	rm -f $(TARGET) $(OBJECTS)
+	make clean -C vga_kmod
 
 $(TARGET): $(OBJECTS)
 	$(CXX) $(OBJECTS) $(CXXFLAGS) -o $@ $(LDFLAGS)
