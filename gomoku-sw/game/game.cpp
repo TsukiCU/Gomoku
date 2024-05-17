@@ -5,7 +5,7 @@
 #include <string>
 #include <type_traits>
 #include <unistd.h>
-#include "../network/tcp.h"
+#include "../network/network.h"
 
 void* findPlayersWait(void *arg)
 {
@@ -375,23 +375,6 @@ void GameMenu::networkMode(bool server)
 				printf("Invalid command!\n");
 				break;
 			}
-
-			/*if (board_x == -1 && board_y == -1) {
-				// FIXME: Need to send "resign" message to the other player, so that the other player can return to main menu.
-				string confirm;
-				std::cout << "Returning to main menu. Type \"yes\" to continue " << std::endl;
-				std::cin >> confirm;
-				if (confirm == "yes") {
-					// FIXME: This will throw an error. Need to make the threads in tcp.cpp join.
-					// Possibly set a gameEnd flag in GMKServer
-					std::cout << "You lose. Returning to main menu." << std::endl;
-					return;
-				}
-				else {
-					std::cout << "Continuing." << std::endl;
-					continue;
-				}
-			}*/
 			// Remote player resign check, end the loop
 			if(game->state==1)
 				break;
