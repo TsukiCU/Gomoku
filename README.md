@@ -10,6 +10,7 @@ This project is to create a Gomoku game. This includes the basic game logic, AI 
 ```
 cd gomoku-hw
 # Under gomoku-hw directory
+make dtb
 make rbf
 ```
 **To copy the generated files to your FPGA board:**
