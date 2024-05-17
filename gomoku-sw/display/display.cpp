@@ -8,7 +8,7 @@
 #include <iostream>
 #include <stdint.h>
 
-#include "../kmod/vga_gomoku.h"
+#include "../vga_kmod/vga_gomoku.h"
 
 bool BBOX::in(uint16_t x, uint16_t y)
 {
@@ -529,7 +529,6 @@ void GMKDisplay::show_scanning_message(bool show)
 		return;
 	}
 	update_group_visibility(4,(uint16_t)(1<<5));
-	// TODO:may change to 1 here
 	update_group_visibility(5,(uint16_t)(0b000));
 	for(GMKDisplayMessageInfo &msg:msg_group_->messages){
 		msg.disabled=true;

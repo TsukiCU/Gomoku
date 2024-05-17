@@ -5,6 +5,7 @@
 #include <string>
 #include <type_traits>
 #include <unistd.h>
+#include "../network/tcp.h"
 
 void* findPlayersWait(void *arg)
 {
@@ -161,7 +162,6 @@ void GameMenu::PvEMode(int player)
 		case 9:
 			// Resign without confirm
 			game->displayBoard();
-			// TODO: POPUP MESSAGE
             std::cout << "You lose!" << endl;
 			game->end_game(!(player==1));
 			if(display)
@@ -174,12 +174,10 @@ void GameMenu::PvEMode(int player)
 			}
 			continue;
 		case 8:{
-			// TODO: HINT
 			std::pair<int, int> ai_hint = ai.findBestMove();
 			if(display)
 				display->show_hint(ai_hint.first, ai_hint.second);
 			// std::cout << "Hint: " << hint.first + 1 << ", " << hint.second + 1 << endl;
-			// TODO: display hint on the board
 			continue;
 		}
 		default:
@@ -338,10 +336,6 @@ void GameMenu::networkMode(bool server)
 			uint16_t command = wait_for_command();
 			switch (command) {
 			case 10: // Quit
-				// TODO: Confirm message?
-				// should add display message
-				// if(!wait_for_confirm())
-				// 	continue;
 				if(display)
 					display->show_confirm_message();
 				selected_msg_index=msg_group->first_selectable_message();
@@ -444,17 +438,13 @@ void GameMenu::networkMode(bool server)
 		GMKServerInfo info;
 		bool found=false;
 
-		// TODO : Display some message on display
 		printf("Discovering server...\n");
-		
 		if(display)
 			display->show_scanning_message();
 		// Wait for 3 seconds but without blocking the main thread.
 		client.wait_for_scan();
 		display->show_scanning_message(false);
-		// sleep(3);
 
-		// TODO: should input command to cancel discover
 		if(client.get_server_list().empty()){
 			printf("No server discovered!\n");
 			return;
@@ -483,7 +473,7 @@ void GameMenu::networkMode(bool server)
 		while(client.check_game_result()<0){
 			uint16_t command = wait_for_command();
 			switch (command) {
-			case 10: // TODO: Quit confirm
+			case 10: // Quit confirm
 				if(display)
 					display->show_confirm_message();
 				selected_msg_index=msg_group->first_selectable_message();
@@ -495,7 +485,6 @@ void GameMenu::networkMode(bool server)
 				return;
 			case 0: // Move or remote resigns
 				if (!client.make_move(board_x - 1, board_y - 1)){
-					//TODO: error handling
 				}
 				board_x=-1;
 				board_y=-1;
@@ -647,7 +636,6 @@ void GameMenu::handle_input_press(InputEvent event){
 bool GameMenu::wait_for_confirm()
 {
 	// Wait for confirm command, quit to main menu.
-	// TODO: Probably pop up a message on display
 	uint16_t command;
 	while(true){
 		command = wait_for_command();

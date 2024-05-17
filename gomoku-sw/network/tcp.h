@@ -1,7 +1,7 @@
 #pragma once
 
-#include "gomoku.h"
-#include "players.h"
+#include "../game/gomoku.h"
+#include "../game/players.h"
 #include <cstdint>
 #include <netinet/in.h>
 #include <stdio.h>
@@ -12,8 +12,8 @@
 #include <unistd.h>
 #include <thread>
 #include <vector>
-#include "display.h"
-#include "input.h"
+#include "../display/display.h"
+#include "../input/input.h"
 
 #define GMK_UDP_PORT 33261
 #define GMK_SERVER_PORT 18253
@@ -88,7 +88,7 @@ protected:
 	
 	void create_receive_thread();
 	virtual void handle_message(const GMKNetMessage &msg) {};
-	virtual void receive_thread_callback(){};
+	void receive_thread_callback();
 	// TCP thread functions
 	void receive_thread_func();
 	// UDP thread functions

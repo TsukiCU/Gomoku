@@ -4,6 +4,55 @@ This is the project for CSEE 4840, Spring 2024.
 This project is to create a Gomoku game. This includes the basic game logic, AI algorithms, as well as a user-friendly interface that integrates with hardware components.
 
 ## How to Run
+
+### Run hardware and software Gomoku
+**To build hardware component:**
+```
+cd gomoku-hw
+# Under gomoku-hw directory
+make rbf
+```
+**To copy the generated files to your FPGA board:**
+
+On FPGA board, run
+```
+# If /mnt not created
+mkdir /mnt
+mount /dev/mmcblk0p1 /mnt
+# Set up network
+ifup eth0
+```
+
+On host machine, run
+```
+# Copy files, need sshd installed on FPGA board
+scp output/soc_system.rbf output/soc_system.sof soc_system.dtb <user>@<board_ip>:/mnt
+```
+You may need to reboot your FPGA after copy
+```
+# On FPGA board
+reboot
+```
+
+**To build software component**
+```
+cd gomoku-sw
+# Under gomoku-hw directory
+# To build game and kernel module
+make
+# To build only game
+make game
+```
+
+**To run Gomoku game on FPGA board**
+```
+# Under gomoku-hw directory
+# Install kernel module
+insmod vga_kmod/vga_gomoku.ko
+# Run the game
+./alphaBetaGomoku
+```
+### Run purely software Gomoku
 To simply test the **game logic** and **AI function**, switch to branch ```tsuki```
 
 To play ```in the terminal```

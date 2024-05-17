@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <iostream>
-#include "display.h"
+#include "../display/display.h"
 
 class Player;
 using namespace std;

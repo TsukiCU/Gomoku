@@ -1,6 +1,4 @@
 #include "tcp.h"
-#include "input.h"
-#include "players.h"
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
@@ -41,6 +39,16 @@ void GMKNetBase::create_receive_thread()
 	recv_thread_=std::thread(&GMKNetBase::receive_thread_func,this);
 }
 
+void GMKNetBase::receive_thread_callback()
+{
+	// Notify the event_handler
+	if(handler_){
+		InputEvent event;
+		event.type = NONE;
+		handler_->handle_input_press(event);
+	}
+}
+
 void GMKNetBase::receive_thread_func()
 {
 	GMKNetMessage msg;
@@ -65,12 +73,7 @@ void GMKNetBase::receive_thread_func()
 	}
 	printf("connection closed!\n");
 	connected_ = false;
-	// TODO: Do some work after thread exits
-	if(handler_){
-		InputEvent event;
-		event.type = NONE;
-		handler_->handle_input_press(event);
-	}
+	// Do some work after thread exits
 	receive_thread_callback();
 	return;
 }
@@ -163,7 +166,6 @@ void GMKNetBase::udp_receive_thread_func()
 	if(ret<0){
 		perror("UDP Recv:");
 	}
-	// TODO: Do some work after thread exits
 	receive_thread_callback();
 	return;
 }
@@ -292,7 +294,7 @@ int GMKNetBase::check_game_result()
 void GMKNetBase::handle_remote_move(const GMKMoveInfo &info)
 {
 	if(!is_move_valid(info, remote_player_)){
-		// TODO:Remote move not valid
+		// FIXME:Remote move not valid
 		return ;
 	}
 	// Remote player takes move
@@ -334,12 +336,12 @@ void GMKNetBase::handle_remote_regret()
 
 void GMKNetBase::handle_remote_resign()
 {
-	// TODO: NOTIFY MAIN THREAD
 	remote_player_.resign();
 	printf("%d:%s resigns!\n", piece_count_,
 		   remote_player_.black?"Black":"White"
 	);
 	game_->displayBoard();
+	// Notify the main thread
 	if(handler_){
 		InputEvent event;
 		event.type = NONE;
@@ -659,8 +661,6 @@ void GMKClient::update_server_list(const GMKServerInfo & info)
 		}
 	}
 	server_list_.push_back(info);
-
-	// TODO: probably call some notify function here.
 }
 
 

@@ -1,11 +1,11 @@
 #ifndef _MAIN_MENU_HH
 #define _MAIN_MENU_HH
 
-#include "../src/gomoku.h"
+#include "gomoku.h"
 #include "gomokuAI.h"
-#include "network.h"
-#include "../src/players.h"
-#include "../src/display.h"
+#include "players.h"
+#include "../display/display.h"
+#include "../input/input.h"
 #include <cstdint>
 
 class GameMenu : public InputEventHandler{

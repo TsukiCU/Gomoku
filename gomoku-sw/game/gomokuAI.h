@@ -1,7 +1,7 @@
 #ifndef __GOMOKUAI_HH
 #define __GOMOKUAI_HH
 
-#include "../src/gomoku.h"
+#include "gomoku.h"
 #include <climits>
 #include <map>
 #include <cassert>

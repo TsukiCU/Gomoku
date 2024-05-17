@@ -5,7 +5,6 @@
 #include <unistd.h>
 #include <vector>
 #include "gomoku.h"
-#include "../kmod/vga_gomoku.h"
 
 bool Gomoku::on_board(int x, int y)
 {
@@ -170,8 +169,9 @@ int Gomoku::regret_move()
         board[lastMove.first][lastMove.second] = 0;
 
         // clear the record.
-        if(record_game)
+        if(record_game){
        		record.erase(record.end());
+		}
 		
 		if(display){
 			display->update_piece_info(lastMove.first, lastMove.second, 0);
@@ -186,7 +186,6 @@ int Gomoku::regret_move()
 		}
 
 		switchPlayers();
-        /* TODO: Online gaming mode and Local pvp mode should be handled differently? */
     }
 
     // PvE

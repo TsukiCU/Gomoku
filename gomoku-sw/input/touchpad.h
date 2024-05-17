@@ -1,7 +1,7 @@
 #ifndef TOUCHPAD_HH
 #define TOUCHPAD_HH
 
-#include "display.h"
+#include "../display/display.h"
 #include <cstdint>
 #include <libusb-1.0/libusb.h>
 #include <stdint.h>
